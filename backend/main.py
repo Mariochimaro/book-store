@@ -21,7 +21,8 @@ MOCK_BOOKS = [
         "seller_info": {"name": "მარი", "email": "mari@example.com", "phone": "+995555123456"},
         "condition": "new",
         "description": "ორიგინალი გამოცემა, იდეალურ მდგომარეობაში. მხოლოდ ერთხელაა წაკითხული.",
-        "cover_url": "https://sulakauri.ge/uploads/2023/11/hari-poteri-da-philosophiuri-qva.webp"
+        "cover_url": "https://sulakauri.ge/uploads/2023/11/hari-poteri-da-philosophiuri-qva.webp",
+        "status": "active"
     },
     {
         "id": 2,
@@ -33,7 +34,8 @@ MOCK_BOOKS = [
         "seller_info": {"name": "მარი", "email": "mari@example.com", "phone": "+995555123456"},
         "condition": "good",
         "description": "მცირე ნაკაწრებით ყდაზე, მაგრამ შიგნიდან სუფთა ფურცლებით.",
-        "cover_url": "https://www.lit.ge//shop/uploads/shop_product_image_176427.jpg"
+        "cover_url": "https://www.lit.ge//shop/uploads/shop_product_image_176427.jpg",
+        "status": "active"
     },
     {
         "id": 3,
@@ -45,7 +47,8 @@ MOCK_BOOKS = [
         "seller_info": {"name": "მარი", "email": "mari@example.com", "phone": "+995555123456"},
         "condition": "average",
         "description": "ძველი გამოცემა, ფურცლები ოდნავ გაყვითლებულია, რაც დამატებით ხიბლს აძლევს.",
-        "cover_url": "https://sulakauri.ge/uploads/2023/11/sherlok-holmsis-thavgadasavali-dzveli.webp"
+        "cover_url": "https://sulakauri.ge/uploads/2023/11/sherlok-holmsis-thavgadasavali-dzveli.webp",
+        "status": "active"
     },
     {
         "id": 4, 
@@ -57,7 +60,8 @@ MOCK_BOOKS = [
         "seller_info": {"name": "მარი", "email": "mari@example.com", "phone": "+995555123456"},
         "condition": "average",
         "description": "ჯორჯ ორუელის კლასიკური ანტიუტოპია.",
-        "cover_url": "https://m.media-amazon.com/images/I/71wANojhEKL._AC_UF1000,1000_QL80_.jpg"
+        "cover_url": "https://m.media-amazon.com/images/I/71wANojhEKL._AC_UF1000,1000_QL80_.jpg",
+        "status": "active"
     },
     {
         "id": 5, 
@@ -69,7 +73,8 @@ MOCK_BOOKS = [
         "seller_info": {"name": "მარი", "email": "mari@example.com", "phone": "+995555123456"},
         "condition": "average",
         "description": "სასკოლო გამოცემა, ილუსტრაციებით.",
-        "cover_url": "https://i.ytimg.com/vi/Ei3mqO1g3P0/hqdefault.jpg"
+        "cover_url": "https://i.ytimg.com/vi/Ei3mqO1g3P0/hqdefault.jpg",
+        "status": "active"
     },
     {
         "id": 6, 
@@ -81,7 +86,8 @@ MOCK_BOOKS = [
         "seller_info": {"name": "მარი", "email": "mari@example.com", "phone": "+995555123456"},
         "condition": "good",
         "description": "წიგნი, რომელიც ყველა ასაკის ადამიანმა უნდა წაიკითხოს.",
-        "cover_url": "https://lh4.googleusercontent.com/proxy/cO4jCtyA7vdRywxHCllE4asYCy930kb_Z9auGZmRRHBS4v7Mderz72ZThcgddfc3SnyO5nzWQW51koXN5BWmC7jvBCrZulNQbywLt3BYQVvagagWUuwT_TMHKHagK3OyMKMwGXqk1WVQoLkXoXNiAf5dTOlyZEhVZF3N-6Rb2756fJHg0LDz"
+        "cover_url": "https://lh4.googleusercontent.com/proxy/cO4jCtyA7vdRywxHCllE4asYCy930kb_Z9auGZmRRHBS4v7Mderz72ZThcgddfc3SnyO5nzWQW51koXN5BWmC7jvBCrZulNQbywLt3BYQVvagagWUuwT_TMHKHagK3OyMKMwGXqk1WVQoLkXoXNiAf5dTOlyZEhVZF3N-6Rb2756fJHg0LDz",
+        "status": "active"
     },
     {
         "id": 7, 
@@ -93,7 +99,8 @@ MOCK_BOOKS = [
         "seller_info": {"name": "მარი", "email": "mari@example.com", "phone": "+995555123456"},
         "condition": "damaged",
         "description": "კაცობრიობის მოკლე ისტორია.",
-        "cover_url": "https://www.bradshawfoundation.com/books/books/sapiens.jpg"
+        "cover_url": "https://www.bradshawfoundation.com/books/books/sapiens.jpg",
+        "status": "active"
     }
 ]
 
