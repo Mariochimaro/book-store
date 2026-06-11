@@ -6,6 +6,7 @@ venv/
 
 #სატესტო
 index.html
+text.txt
 
 # Frontend
 frontend/node_modules/
