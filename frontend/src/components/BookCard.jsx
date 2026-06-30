@@ -11,7 +11,7 @@ function BookCard({ book }) {
       }}
     >
       <img
-        src={book.cover_url}
+        src={book.photos_urls[0]}
         alt={book.title}
         style={{
           width: "100%",
