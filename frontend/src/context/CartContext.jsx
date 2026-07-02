@@ -5,42 +5,29 @@ const CartContext = createContext(null);
 export function CartProvider({ children }) {
   const [items, setItems] = useState([]);
 
-  /** Add a book or increment its quantity if already in cart */
   function addToCart(book) {
     setItems((prev) => {
-      const existing = prev.find((i) => i.id === book.id);
-      if (existing) {
-        return prev.map((i) =>
-          i.id === book.id ? { ...i, qty: i.qty + 1 } : i
-        );
-      }
+      // მეორადი წიგნი უნიკალურია — ერთი ეგზემპლარი
+      if (prev.find((i) => i.id === book.id)) return prev;
       return [...prev, { ...book, qty: 1 }];
     });
   }
 
-  /** Remove a book from the cart entirely */
-  function removeFromCart(id) {
-    setItems((prev) => prev.filter((i) => i.id !== id));
+  function removeFromCart(bookId) {
+    setItems((prev) => prev.filter((i) => i.id !== bookId));
   }
 
-  /** Set exact quantity; removes the item if qty drops to 0 */
-  function updateQty(id, qty) {
-    if (qty < 1) { removeFromCart(id); return; }
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, qty } : i)));
+  // qty ყოველთვის 1-ია (მეორადი წიგნი), ვიზუალი უცვლელია
+  function updateQty(bookId, newQty) {
+    if (newQty < 1) removeFromCart(bookId);
+    // newQty > 1 → no-op: ერთი ეგზემპლარი
   }
 
-  function clearCart() { setItems([]); }
-
-  const totalItems = items.reduce((sum, i) => sum + i.qty, 0);
-  const totalPrice = items.reduce(
-    (sum, i) => sum + i.qty * parseFloat(i.price),
-    0
-  );
+  const totalItems = items.length;
+  const totalPrice = items.reduce((sum, item) => sum + parseFloat(item.price || 0), 0);
 
   return (
-    <CartContext.Provider
-      value={{ items, addToCart, removeFromCart, updateQty, clearCart, totalItems, totalPrice }}
-    >
+    <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQty, totalItems, totalPrice }}>
       {children}
     </CartContext.Provider>
   );

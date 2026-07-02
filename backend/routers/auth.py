@@ -1,11 +1,11 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends, Request
 from pydantic import BaseModel, EmailStr
 from passlib.context import CryptContext
 from database import supabase
 import traceback
 from datetime import datetime, timedelta
+import bcrypt
 import jwt
-from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from config import SECRET_KEY
 
@@ -14,23 +14,14 @@ router = APIRouter(
     tags=["Authentication"]
 )
 
-# JWT config
+# JWT კონფიგურაცია
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 1 day
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 1 დღე
 
-def create_access_token(data: dict):
-    to_encode = data.copy()
-
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
-# პაროლების დასაშიფრი კონტექსტი (bcrypt ალგორითმით)
+# პაროლების ჰეშირება
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Pydantic მოდელი რეგისტრაციის ფორმის ვალიდაციისთვის
+# Pydantic მოდელები
 class UserRegister(BaseModel):
     username: str
     email: EmailStr
@@ -40,122 +31,145 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-# დამხმარე ფუნქციები პაროლისთვის
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    # პაროლს ვაქცევთ ბაიტებად (utf-8) და ვუმატებთ "salt"-ს
+    pwd_bytes = password.encode('utf-8')
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(pwd_bytes, salt)
+    return hashed.decode('utf-8')
 
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+    pwd_bytes = plain_password.encode('utf-8')
+    hashed_bytes = hashed_password.encode('utf-8')
+    return bcrypt.checkpw(pwd_bytes, hashed_bytes)
 
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+# 1. რეგისტრაცია
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 def register_user(user_data: UserRegister):
-    # 1. ვამოწმებთ, ხომ არ არსებობს უკვე იუზერი ამ მეილით
     existing_user = supabase.table("users").select("id").eq("email", user_data.email).execute()
-    
     if existing_user.data:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="მომხმარებელი ამ მეილით უკვე არსებობს!"
-        )
+        raise HTTPException(status_code=400, detail="მომხმარებელი ამ მეილით უკვე არსებობს!")
         
-    # 2. ვაჰეშებთ პაროლს
     hashed_password = get_password_hash(user_data.password)
     
-    # 3. ვამზადებთ ახალ იუზერს ბაზაში ჩასაწერად
     new_user = {
         "username": user_data.username,
         "email": user_data.email,
         "password_hash": hashed_password
     }
     
-    # 4. ვწერთ მონაცემებს Supabase-ის 'users' ცხრილში
     try:
         response = supabase.table("users").insert(new_user).execute()
         created_user = response.data[0]
-
         return {
             "status": "success",
             "message": "რეგისტრაცია წარმატებულია!",
-            "user": {
-                "id": created_user["id"],
-                "username": created_user["username"],
-                "email": created_user["email"]
-            }
+            "user": {"id": created_user["id"], "username": created_user["username"], "email": created_user["email"]}
         }
-    
     except Exception as e:
-        print("========== ERROR ==========")
-        print(type(e))
-        print(e)
         traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"ბაზაში ჩაწერისას მოხდა შეცდომა: {str(e)}")
 
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"ბაზაში ჩაწერისას მოხდა შეცდომა: {str(e)}"
-        )
-    
+
+# 2. სესიის დაწყება (LOGIN) + AUDIT LOG
 @router.post("/login")
-def login_user(user_data: UserLogin):
-
-    user = supabase.table("users") \
-        .select("*") \
-        .eq("email", user_data.email) \
-        .execute()
-
+def login_user(user_data: UserLogin, request: Request):
+    client_ip = request.client.host
+    
+    user = supabase.table("users").select("*").eq("email", user_data.email).execute()
     if not user.data:
-        raise HTTPException(
-            status_code=400,
-            detail="მომხმარებელი ვერ მოიძებნა"
-        )
+        # Damage Control: ვლოგავთ არასწორ მცდელობას
+        supabase.table("audit_logs").insert({"action": "LOGIN_FAILED_NO_USER", "ip_address": client_ip, "metadata": {"email": user_data.email}}).execute()
+        raise HTTPException(status_code=400, detail="მომხმარებელი ვერ მოიძებნა")
 
     db_user = user.data[0]
 
     if not verify_password(user_data.password, db_user["password_hash"]):
-        raise HTTPException(
-            status_code=400,
-            detail="არასწორი პაროლი"
-        )
+        # Damage Control: ვლოგავთ პაროლის არასწორ ჩაწერას (Brute-force შეტევების დასაჭერად)
+        supabase.table("audit_logs").insert({"action": "LOGIN_FAILED_WRONG_PWD", "ip_address": client_ip, "metadata": {"email": user_data.email}}).execute()
+        raise HTTPException(status_code=400, detail="არასწორი პაროლი")
 
+    # წარმატებული სესია
     token = create_access_token({
         "user_id": db_user["id"],
         "email": db_user["email"],
         "username": db_user["username"]
     })
 
+    # ვლოგავთ წარმატებულ შესვლას
+    supabase.table("audit_logs").insert({
+        "user_id": db_user["id"],
+        "action": "USER_LOGIN_SUCCESS",
+        "ip_address": client_ip
+    }).execute()
+
     return {
         "access_token": token,
         "token_type": "bearer"
     }
 
+
+# 3. უსაფრთხოების ფილტრები (DEPENDENCIES)
+
 security = HTTPBearer()
 
+# ფილტრი ა: ამოწმებს ტოკენს და მომენტალურად ბლოკავს "ბანდადებულ" იუზერებს
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
-
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-
         user_id = payload.get("user_id")
 
         if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid token")
+            raise HTTPException(status_code=401, detail="არავალიდური ტოკენი")
 
-        user = supabase.table("users") \
-            .select("id, username, email") \
-            .eq("id", user_id) \
-            .execute()
-
+        # 1. სელექტში დავამატეთ 'is_banned' სვეტიც
+        user = supabase.table("users").select("id, username, email, is_admin, is_banned, location, phone_numbers").eq("id", user_id).execute()
         if not user.data:
-            raise HTTPException(status_code=401, detail="User not found")
+            raise HTTPException(status_code=401, detail="მომხმარებელი ვერ მოიძებნა")
 
-        return user.data[0]
+        user_dict = user.data[0]
+
+        # 2. Damage Control: ვამოწმებთ არის თუ არა იუზერი ბლოკირებული
+        if user_dict.get("is_banned"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="თქვენი ანგარიში დაბლოკილია უსაფრთხოების სისტემის მიერ!"
+            )
+
+        return user_dict # აბრუნებს იუზერის ლექსიკონს
 
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
-
+        raise HTTPException(status_code=401, detail="ტოკენს ვადა გაუვიდა")
     except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    
+        raise HTTPException(status_code=401, detail="არასწორი ტოკენი")
+
+# ფილტრი ბ: ამოწმებს ადმინის უფლებებს
+def require_admin(current_user = Depends(get_current_user)):
+    if not current_user.get("is_admin"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="წვდომა უარყოფილია: ეს ქმედება ნებადართულია მხოლოდ ადმინისტრატორისთვის!"
+        )
+    return current_user
+
+def ensure_profile_complete(user_dict: dict):
+    # ვამოწმებთ, არის თუ არა ველები ცარიელი ან None
+    if not user_dict.get("location") or not user_dict.get("phone_numbers"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="გთხოვთ, შეავსოთ პროფილის დეტალები (მისამართი და ტელეფონის ნომერი) წიგნის ატვირთვამდე!"
+        )
+    return True
+
+# 4. პროფილის ენდპოინტი
 @router.get("/me")
 def get_me(current_user=Depends(get_current_user)):
     return current_user

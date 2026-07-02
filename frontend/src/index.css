@@ -534,7 +534,7 @@ a { text-decoration: none; }
 .bs-arrow-r { right: 16px; }
 
 /* ============================================================
-   BOOK GRID CAROUSEL
+   BOOK GRID CAROUSEL (Fixed cover resizing on page swap)
    ============================================================ */
 .book-grid {
   display: grid;
@@ -549,6 +549,8 @@ a { text-decoration: none; }
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
   position: relative;
+  display: flex;         /* Added to keep card heights completely uniform */
+  flex-direction: column;/* stacked vertically */
 }
 
 .bc:hover {
@@ -557,8 +559,10 @@ a { text-decoration: none; }
 }
 
 .bc-img-wrap {
+  display: block;        /* CRITICAL FIX: Forces the anchor tag to behave like a rigid block */
+  width: 100%;           /* Takes up exactly 100% of the 1fr column width */
   position: relative;
-  aspect-ratio: 3/4;
+  aspect-ratio: 3/4;     /* Now perfectly stable and unbreakable */
   overflow: hidden;
   background: var(--bg-card-alt);
 }
@@ -582,13 +586,19 @@ a { text-decoration: none; }
   text-transform: uppercase;
   padding: 3px 9px;
   border-radius: 3px;
+  z-index: 1;
 }
 
 .bc-new     { background: var(--green);      color: #fff; }
 .bc-pending { background: var(--accent);     color: #fff; }
 .bc-ist     { background: var(--green-dark); color: #fff; }
 
-.bc-info { padding: 12px 14px 14px; }
+.bc-info { 
+  padding: 12px 14px 14px; 
+  display: flex;         /* Pushes the price and cart button cleanly to the bottom */
+  flex-direction: column;
+  flex: 1;
+}
 
 .bc-title {
   font-size: 12.5px;
@@ -614,12 +624,7 @@ a { text-decoration: none; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.bc-price {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text);
+  margin-top: auto;      /* Keeps footer elements horizontally aligned across cards */
 }
 
 .bc-cart {

@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LoginModal, RegisterModal } from "./AuthModals";
-import { CartSidebar } from "./CartSidebar";
-import { useCart } from "../context/CartContext";
+import { LoginModal }    from "./LoginModal";
+import { RegisterModal } from "./RegisterModal";
+import { CartSidebar }   from "./Cart";
+import { useCart }       from "../context/CartContext";
 
 function Navbar() {
-  const [query, setQuery]   = useState("");
-  const [modal, setModal]   = useState(null); // "login" | "register" | null
+  const [query, setQuery] = useState("");
+  const [modal, setModal] = useState(null); // "login" | "register" | null
   const [cartOpen, setCart] = useState(false);
-  const navigate            = useNavigate();
-  const { totalItems }      = useCart();
+  const navigate = useNavigate();
+  const { totalItems } = useCart();
 
   function handleSearch(e) {
     e.preventDefault();
@@ -39,7 +40,7 @@ function Navbar() {
             />
           </form>
 
-          {/* Actions — now buttons, not Links */}
+          {/* Actions */}
           <div className="nb-actions">
             <button className="nb-login"    onClick={() => setModal("login")}>Login</button>
             <button className="nb-register" onClick={() => setModal("register")}>Register</button>
@@ -55,7 +56,6 @@ function Navbar() {
         </div>
       </nav>
 
-      {/* Auth modals */}
       {modal === "login" && (
         <LoginModal
           onClose={() => setModal(null)}
@@ -69,7 +69,6 @@ function Navbar() {
         />
       )}
 
-      {/* Shopping cart sidebar */}
       <CartSidebar isOpen={cartOpen} onClose={() => setCart(false)} />
     </>
   );
