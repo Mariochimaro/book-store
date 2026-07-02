@@ -84,7 +84,6 @@ def soft_delete_my_account(
         deletion_time = datetime.utcnow().isoformat()
         
         supabase.table("users").update({
-            "is_deleted": True,
             "is_banned": True,
             "deleted_at": deletion_time
         }).eq("id", user_id).execute()

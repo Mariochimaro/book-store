@@ -58,6 +58,22 @@ def get_books(
 
     return filtered_books
 
+@router.get("/genres")
+def get_all_genres():
+    """ყველა უნიკალური ჟანრი active წიგნებიდან — FilterPanel-ისთვის"""
+    response = (
+        supabase.table("books")
+        .select("genres")
+        .eq("status", "active")
+        .execute()
+    )
+    genre_set = set()
+    for book in response.data:
+        for genre in (book.get("genres") or []):
+            if genre and genre.strip():
+                genre_set.add(genre.strip())
+
+    return sorted(genre_set)
 
 # 2. კონკრეტული ერთი წიგნის დეტალები
 @router.get("/{book_id}")
