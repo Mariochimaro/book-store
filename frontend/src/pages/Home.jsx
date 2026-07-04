@@ -81,46 +81,6 @@ function BookCarousel({ icon, title, subtitle, books }) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// FEATURED CAROUSEL
-// ─────────────────────────────────────────────────────────────
-const FEATURED_BADGE = ["გამორჩეული #1", "გამორჩეული #2", "გამორჩეული #3"];
-
-function FeaturedCarousel({ books }) {
-  const [idx, setIdx] = useState(0);
-  useEffect(() => { setIdx(0); }, [books]);
-  if (!books.length) return null;
-
-  const book  = books[idx];
-  const cover = book.photos_urls?.[0] ?? "/placeholder.jpg";
-
-  return (
-    <section className="sec">
-      <h2 className="sec-title" style={{ marginBottom: "28px" }}>
-        <span aria-hidden="true">⭐</span> გამორჩეული წიგნები
-      </h2>
-      <div className="bs-card">
-        <button className="bs-arrow bs-arrow-l" onClick={() => setIdx((i) => i - 1)} disabled={idx === 0} aria-label="Previous">‹</button>
-        <div className="bs-img-wrap">
-          <img src={cover} alt={book.title} className="bs-img" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          <span className="bs-badge">{FEATURED_BADGE[idx] ?? `გამორჩეული #${idx + 1}`}</span>
-        </div>
-        <div className="bs-content">
-          <p className="bs-label">ამ თვის საუკეთესოები</p>
-          <h3 className="bs-title">{book.title}</h3>
-          <p className="bs-author">{book.author ?? book.seller?.username ?? "—"}</p>
-          {book.description && <p className="bs-desc">{book.description}</p>}
-          <div className="bs-bottom">
-            <span className="bs-price">{book.price} ₾</span>
-            <Link to={`/book/${book.id}`} className="btn-view">View Book</Link>
-          </div>
-        </div>
-        <button className="bs-arrow bs-arrow-r" onClick={() => setIdx((i) => i + 1)} disabled={idx === books.length - 1} aria-label="Next">›</button>
-      </div>
-    </section>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
 // FILTER PANEL
 // ─────────────────────────────────────────────────────────────
 function FilterPanel({ isOpen, onClose, filters, onFilterChange, availableGenres, genresLoading }) {
@@ -358,9 +318,8 @@ function Home() {
               <h2 style={{ padding: "40px", textAlign: "center" }}>წიგნები ვერ მოიძებნა</h2>
             ) : (
               <>
-                <FeaturedCarousel books={featured} />
-                <BookCarousel icon="↗" title="Most Popular" subtitle="Beloved by readers across the archive" books={filteredBooks} />
-                <BookCarousel icon="✦" title="New Arrivals"  subtitle="Just added — fresh discoveries await"  books={newArrivals} />
+                <BookCarousel icon="↗" title="Popular & Bestsellers" subtitle="Beloved by readers across the archive" books={filteredBooks} />
+                <BookCarousel icon="✦" title="New Arrivals & Discoveries"  subtitle="Just added — fresh discoveries await"  books={newArrivals} />
               </>
             )}
           </div>
