@@ -11,7 +11,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         # ჯერ სესიაში ვსვამთ ტოკენს, რომ supabase-მა გაიგოს ვისზეა საუბარი
         supabase.auth.set_session(access_token=token, refresh_token=token)
         
-        # ახლა უკვე უპარამეტრrequest-ოდ ვითხოვთ იუზერს
+        # ახლა უკვე ვითხოვთ იუზერს
         user_response = supabase.auth.get_user()
         
         if not user_response or not user_response.user:
@@ -21,7 +21,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
             )
         return user_response.user
     except Exception as e:
-        # დებაგისთვის, რომ ტერმინალში დაინახო თუ სხვა რამე ფუჭდება
+        # დებაგისთვის, რომ ტერმინალში ჩანდეს სხვა რამე თუ ფუჭდება
         print(f"Auth Error: {str(e)}") 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

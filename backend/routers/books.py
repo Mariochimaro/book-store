@@ -179,8 +179,8 @@ async def upload_book(
         "price": price,
         "condition": condition,
         "description": description,
-        "photos_urls": uploaded_photos_urls,   # ჩვენი ახალი სვეტი ფოტოების სიისთვის!
-        "book_video_url": uploaded_video_url, # ვიდეოს ლინკი
+        "photos_urls": uploaded_photos_urls,
+        "book_video_url": uploaded_video_url,
         "seller_id": supabase_user_id,
         "status": "pending",
         "is_approved": False
@@ -222,7 +222,7 @@ def edit_my_book(book_id: int, edit_data: BookEdit, current_user = Depends(get_c
     update_dict = {}
     needs_admin_review = False
 
-    # 3. ფასის შეცვლა (არ საჭიროებს ადმინს შენი ლოგიკით)
+    # 3. ფასის შეცვლა (არ საჭიროებს ადმინს)
     if edit_data.price is not None and edit_data.price != old_book["price"]:
         update_dict["price"] = edit_data.price
 

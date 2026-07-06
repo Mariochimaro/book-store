@@ -13,19 +13,25 @@ router = APIRouter(
 
 # --- PYDANTIC მოდელები ---
 
+class BankAccount(BaseModel):
+    bank_name: str
+    account_number: str
+
 class UserOnboarding(BaseModel):
     location: str
     phone_numbers: List[str]
-    account_numbers: List[str]
+    bank_accounts: List[BankAccount]
     birth_year: int
+    selling_method: List[str]
 
-# მოდელი პროფილის განახლებისთვის (ყველა ველი ნებაყოფლობითია - Optional)
+# მოდელი პროფილის განახლებისთვის
 class UserProfileUpdate(BaseModel):
     username: Optional[str] = None
     location: Optional[str] = None
     phone_numbers: Optional[List[str]] = None
-    account_numbers: Optional[List[str]] = None
+    bank_accounts: Optional[List[BankAccount]] = None  # <-- account_numbers-ის ნაცვლად
     birth_year: Optional[int] = None
+    selling_method: Optional[List[str]] = None
 
 # --- ენდპოინტები ---
 
@@ -34,7 +40,6 @@ class UserProfileUpdate(BaseModel):
 def get_user_profile(current_user = Depends(get_current_user)):
     user_id = current_user["id"]
     
-    # წამოვიღოთ იუზერის სრული ინფო ბაზიდან
     response = supabase.table("users").select("*").eq("id", user_id).execute()
     
     if not response.data:
@@ -45,7 +50,6 @@ def get_user_profile(current_user = Depends(get_current_user)):
         
     user_info = response.data[0]
     
-    # უსაფრთხოებისთვის პაროლის ჰეშს ფრონტზე არ ვატანთ
     if "password" in user_info:
         del user_info["password"]
         
@@ -59,7 +63,7 @@ def update_user_profile(
 ):
     user_id = current_user["id"]
     
-    # გამოვრიცხოთ ის ველები, რომლებიც იუზერმა არ გამოაგზავნა (None-ები)
+    # გამოვრიცხოთ ის ველები, რომლებიც იუზერმა არ გამოაგზავნა
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     
     if not update_data:
@@ -100,8 +104,10 @@ def onboard_user(
     update_data = {
         "location": data.location,
         "phone_numbers": data.phone_numbers,
-        "account_numbers": data.account_numbers,
-        "birth_year": data.birth_year
+        # აქ დაგჭირდება Pydantic ობიექტების ლისტად/დიქტად გადაქცევა ბაზისთვის
+        "bank_accounts": [acc.model_dump() for acc in data.bank_accounts], 
+        "birth_year": data.birth_year,
+        "selling_method": data.selling_method
     }
     
     response = supabase.table("users").update(update_data).eq("id", user_id).execute()
