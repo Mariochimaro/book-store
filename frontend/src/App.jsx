@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { CartProvider } from "./context/CartContext.jsx";
+import { AuthProvider } from "./context/AuthContext.jsx";
 
 import Home from "./pages/Home.jsx";
 import BookDetail from "./pages/BookDetail.jsx";
@@ -12,6 +13,7 @@ import Cart from "./components/Cart.jsx";
 
 function App() {
   return (
+    <AuthProvider>
     <CartProvider>
       <BrowserRouter>
         <Routes>
@@ -24,6 +26,7 @@ function App() {
         </Routes>
       </BrowserRouter>
     </CartProvider>
+    </AuthProvider>
   );
 }
 

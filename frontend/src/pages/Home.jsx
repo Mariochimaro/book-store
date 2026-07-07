@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { useCart } from "../context/CartContext";
@@ -72,6 +72,30 @@ const NEW_ARRIVALS = [
   { id: 20, title: "The Runed Gate",                author: "Elliot Asher",    price: "20.99", badge: "new", cover: "https://picsum.photos/seed/runedgate/400/560" },
 ];
 
+// Additional per-book details (description, tags, ISBN) keyed by book id
+const BOOK_DETAILS = {
+  1:  { description: "Set in Victorian London, this tale follows a mysterious woman who arrives at a grand estate, harboring secrets that could unravel the entire aristocracy.", tags: ["Victorian Gothic", "Dark Romance", "English"], isbn: "978-1-234567-91-3", year: "2023" },
+  2:  { description: "In the witching hours of a cursed town, Morgana must outwit the coven elders before the next blood moon rises and the ancient spell is unleashed.", tags: ["Dark Fantasy", "Supernatural", "English"], isbn: "978-1-234567-92-0", year: "2022" },
+  3:  { description: "A solitary amber witch living in the forest must decide whether to trust the stranger who arrives with a century-old curse etched into his palm.", tags: ["Gothic Horror", "Folklore", "English"], isbn: "978-1-234567-93-7", year: "2023" },
+  4:  { description: "An apothecary's apprentice discovers the midnight remedies she brews are being stolen by shadowy forces who need them to reanimate the dead.", tags: ["Dark Fantasy", "Paranormal", "English"], isbn: "978-1-234567-94-4", year: "2024" },
+  5:  { description: "Imprisoned in a gilded cage for crimes she did not commit, Lyra must outwit her captor before the next harvest moon condemns her soul forever.", tags: ["Gothic Horror", "Mystery", "English"], isbn: "978-1-234567-95-1", year: "2022" },
+  6:  { description: "When the stars themselves go dark, the last seer must traverse a veil of starless nights to recover the stolen light before all hope fades.", tags: ["Dark Fantasy", "Supernatural", "English"], isbn: "978-1-234567-96-8", year: "2023" },
+  7:  { description: "Deep beneath an ancient cemetery, a bone garden blooms anew every century—and the gardener is always someone who never wanted to die.", tags: ["Gothic Horror", "Supernatural", "English"], isbn: "978-1-234567-97-5", year: "2024" },
+  8:  { description: "The ocean-born daughters of a tide goddess must choose between the sea and the shore when a siren's curse threatens to pull both worlds apart.", tags: ["Mythology", "Dark Romance", "English"], isbn: "978-1-234567-98-2", year: "2023" },
+  9:  { description: "When the oracle falls silent, the only way to restore her voice is to journey through the graveyard of forgotten prophecies — alone.", tags: ["Dark Fantasy", "Mystery", "English"], isbn: "978-1-234567-99-9", year: "2024" },
+  10: { description: "Every word inked by the cursed scribe turns into an omen. Now she must unwrite them all before the world bends to her worst fears.", tags: ["Gothic Horror", "Thriller", "English"], isbn: "978-1-234568-00-1", year: "2023" },
+  11: { description: "The daughter of the star-weaver must mend the fraying threads of the night sky before the universe unravels into eternal darkness.", tags: ["Cozy Fantasy", "Fairy Tale", "English"], isbn: "978-1-234568-01-8", year: "2024" },
+  12: { description: "An inn nestled between moonpetal meadows holds a peculiar guest registry — every name inside belongs to someone who has not yet arrived.", tags: ["Cozy Fantasy", "Mystery", "English"], isbn: "978-1-234568-02-5", year: "2024" },
+  13: { description: "Foxfire leads the way through a forest of lost names, where the forgotten must reclaim their identities before the next dawn swallows them whole.", tags: ["Urban Fantasy", "Fairy Tale", "English"], isbn: "978-1-234568-03-2", year: "2024" },
+  14: { description: "A young botanist finds that every broken spell leaves behind a flower — and someone has been collecting her failures for a very long time.", tags: ["Cozy Fantasy", "Dark Romance", "English"], isbn: "978-1-234568-04-9", year: "2024" },
+  15: { description: "The royal cartographer maps the borders of nightmares to prevent them from bleeding into the waking world — until one dream refuses to be contained.", tags: ["Dark Fantasy", "Thriller", "English"], isbn: "978-1-234568-05-6", year: "2024" },
+  16: { description: "In a hollow forest where sunlight never penetrates, a girl searches for the source of the whispers that have guided her since childhood.", tags: ["Gothic Horror", "Supernatural", "English"], isbn: "978-1-234568-06-3", year: "2024" },
+  17: { description: "Elemental alchemists of glass and ether must forge the world's last lantern from grief and starlight before the abyss claims the final city.", tags: ["Dark Fantasy", "Historical", "English"], isbn: "978-1-234568-07-0", year: "2024" },
+  18: { description: "The last oracle speaks only in riddles that begin to come true — and the latest one points unmistakably toward her own disappearance.", tags: ["Mystery", "Supernatural", "English"], isbn: "978-1-234568-08-7", year: "2024" },
+  19: { description: "Ancient mirrors pulled from the ocean floor reflect not the present but the last moment their owner wished had never happened.", tags: ["Paranormal", "Dark Romance", "English"], isbn: "978-1-234568-09-4", year: "2024" },
+  20: { description: "The runed gate opens only once per age — and the one chosen to pass through must leave everything they love behind on the other side.", tags: ["Dark Fantasy", "Historical", "English"], isbn: "978-1-234568-10-0", year: "2024" },
+};
+
 // ─────────────────────────────────────────────────────────────
 // SMALL COMPONENTS
 // ─────────────────────────────────────────────────────────────
@@ -90,21 +114,26 @@ function StarRating({ rating }) {
   );
 }
 
-function BookCard({ book }) {
+function BookCard({ book, onOpenDetail }) {
   const { addToCart } = useCart();
   const [added, setAdded] = useState(false);
 
   const badgeMap   = { new: "bc-new", pending: "bc-pending", ist: "bc-ist" };
   const badgeLabel = { new: "New",    pending: "Pending",    ist: "1 IST New" };
 
-  function handleAdd() {
+  function handleAdd(e) {
+    e.stopPropagation();
     addToCart(book);
     setAdded(true);
     setTimeout(() => setAdded(false), 1100);
   }
 
   return (
-    <article className="bc">
+    <article
+      className="bc"
+      onClick={() => onOpenDetail && onOpenDetail(book)}
+      style={{ cursor: "pointer" }}
+    >
       <div className="bc-img-wrap">
         <img src={book.cover} alt={book.title} className="bc-img" loading="lazy" />
         {book.badge && (
@@ -137,13 +166,13 @@ function BookCard({ book }) {
 
 const PER_PAGE = 5;
 
-function BookCarousel({ icon, title, subtitle, books }) {
+function BookCarousel({ icon, title, subtitle, books, onOpenDetail, id }) {
   const [page, setPage] = useState(0);
   const total = Math.ceil(books.length / PER_PAGE);
   const visible = books.slice(page * PER_PAGE, (page + 1) * PER_PAGE);
 
   return (
-    <section className="sec">
+    <section className="sec" id={id}>
       <div className="sec-head">
         <div>
           <h2 className="sec-title">
@@ -175,7 +204,7 @@ function BookCarousel({ icon, title, subtitle, books }) {
 
       <div className="book-grid">
         {visible.map((book) => (
-          <BookCard key={book.id} book={book} />
+          <BookCard key={book.id} book={book} onOpenDetail={onOpenDetail} />
         ))}
       </div>
 
@@ -199,7 +228,7 @@ function BookCarousel({ icon, title, subtitle, books }) {
 // BESTSELLER CAROUSEL
 // ─────────────────────────────────────────────────────────────
 
-function BestsellerCarousel({ books }) {
+function BestsellerCarousel({ books, onOpenDetail }) {
   const [idx, setIdx] = useState(0);
   const book = books[idx];
 
@@ -235,9 +264,12 @@ function BestsellerCarousel({ books }) {
           <p className="bs-desc">{book.description}</p>
           <div className="bs-bottom">
             <span className="bs-price">${book.price}</span>
-            <Link to={`/book/${book.id}`} className="btn-view">
+            <button
+              className="btn-view"
+              onClick={() => onOpenDetail && onOpenDetail(book)}
+            >
               View Book
-            </Link>
+            </button>
           </div>
         </div>
 
@@ -252,6 +284,171 @@ function BestsellerCarousel({ books }) {
         </button>
       </div>
     </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// BOOK DETAIL MODAL
+// ─────────────────────────────────────────────────────────────
+
+function BookDetailModal({ book, onClose }) {
+  const { addToCart } = useCart();
+  const [added, setAdded]       = useState(false);
+  const [activeImg, setActiveImg] = useState(0);
+  const [wishlisted, setWishlisted] = useState(false);
+
+  // Body scroll lock + Escape key
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    function onKey(e) { if (e.key === "Escape") onClose(); }
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [onClose]);
+
+  function handleAddToCart() {
+    addToCart(book);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1300);
+  }
+
+  const details = BOOK_DETAILS[book.id] ?? {
+    description: "A captivating tale of mystery and intrigue in a world unlike any other.",
+    tags: ["Fiction", "Dark Fiction"],
+    isbn: "978-0-000000-00-0",
+    year: "2023",
+  };
+
+  const conditionMap = {
+    new:     { label: "NEW — Unused, pristine condition",     cls: "bdm-cond-new" },
+    pending: { label: "LIKE-NEW — Excellent, minimal use",    cls: "bdm-cond-used" },
+    ist:     { label: "GOOD — Some wear, fully readable",     cls: "bdm-cond-good" },
+  };
+  const cond = conditionMap[book.badge] ?? conditionMap.new;
+
+  // Gallery: main cover + 2 alternate seeds for visual variety
+  const images = [
+    book.cover,
+    `https://picsum.photos/seed/${book.id}_int/400/560`,
+    `https://picsum.photos/seed/${book.id}_alt/400/560`,
+  ];
+
+  return (
+    <div
+      className="modal-backdrop"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+      role="presentation"
+    >
+      <div className="bdm-card" role="dialog" aria-modal="true" aria-labelledby="bdm-heading">
+        {/* Close */}
+        <button className="modal-x bdm-close" onClick={onClose} aria-label="Close details">✕</button>
+
+        {/* ── Left: image gallery ───────────────────────── */}
+        <div className="bdm-gallery">
+          <button
+            className={`bdm-bookmark-btn${wishlisted ? " active" : ""}`}
+            onClick={() => setWishlisted((w) => !w)}
+            aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill={wishlisted ? "currentColor" : "none"}
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+          </button>
+
+          <div className="bdm-main-img-wrap">
+            <img src={images[activeImg]} alt={book.title} className="bdm-main-img" />
+          </div>
+
+          <div className="bdm-thumbs">
+            {images.map((img, i) => (
+              <button
+                key={i}
+                className={`bdm-thumb${activeImg === i ? " active" : ""}`}
+                onClick={() => setActiveImg(i)}
+                aria-label={`View image ${i + 1}`}
+              >
+                <img src={img} alt={`View ${i + 1}`} />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Right: details ────────────────────────────── */}
+        <div className="bdm-details">
+          <div>
+            <h2 className="bdm-title" id="bdm-heading">{book.title}</h2>
+            <p className="bdm-author">{book.author}</p>
+          </div>
+
+          <span className={`bdm-condition ${cond.cls}`}>{cond.label}</span>
+
+          <div className="bdm-stars-price">
+            <StarRating rating={book.rating ?? 4.9} />
+            <span className="bdm-price">${book.price}</span>
+          </div>
+
+          <div className="bdm-tags">
+            {details.tags.map((t) => (
+              <span key={t} className="bdm-tag">{t}</span>
+            ))}
+          </div>
+
+          <div>
+            <p className="bdm-desc-heading">Description</p>
+            <p className="bdm-desc-text">{details.description}</p>
+          </div>
+
+          <div className="bdm-meta">
+            <div>
+              <p className="bdm-meta-lbl">ISBN</p>
+              <p className="bdm-meta-val">{details.isbn}</p>
+            </div>
+            <div>
+              <p className="bdm-meta-lbl">Published</p>
+              <p className="bdm-meta-val">{details.year}</p>
+            </div>
+          </div>
+
+          <div className="bdm-rate-card">
+            <div className="bdm-rate-title">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style={{ color: "var(--accent)", marginRight: 6 }}>
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              Rate This Book
+            </div>
+            <p className="bdm-rate-note">Only buyers who purchased this book can rate it</p>
+          </div>
+
+          <div className="bdm-actions">
+            <button
+              className={`bdm-add-cart${added ? " added" : ""}`}
+              onClick={handleAddToCart}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+              </svg>
+              {added ? "Added to Cart!" : "Add to Cart"}
+            </button>
+            <button
+              className={`bdm-wishlist-action${wishlisted ? " active" : ""}`}
+              onClick={() => setWishlisted((w) => !w)}
+              aria-label="Wishlist"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={wishlisted ? "currentColor" : "none"}
+                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -448,7 +645,8 @@ function HeroSection({ onFilterToggle }) {
 // ─────────────────────────────────────────────────────────────
 
 function Home() {
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen]   = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null);
 
   return (
     <>
@@ -465,24 +663,35 @@ function Home() {
           />
 
           <div className="sections-area">
-            <BestsellerCarousel books={BESTSELLERS} />
+            <BestsellerCarousel books={BESTSELLERS} onOpenDetail={setSelectedBook} />
 
             <BookCarousel
+              id="popular-section"
               icon="↗"
               title="Most Popular"
               subtitle="Beloved by readers across the archive"
               books={POPULAR}
+              onOpenDetail={setSelectedBook}
             />
 
             <BookCarousel
+              id="new-arrivals-section"
               icon="✦"
               title="New Arrivals"
               subtitle="Just added — fresh discoveries await"
               books={NEW_ARRIVALS}
+              onOpenDetail={setSelectedBook}
             />
           </div>
         </div>
       </main>
+
+      {selectedBook && (
+        <BookDetailModal
+          book={selectedBook}
+          onClose={() => setSelectedBook(null)}
+        />
+      )}
     </>
   );
 }

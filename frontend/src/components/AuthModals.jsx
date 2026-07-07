@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 
 // ── shared: close on Escape + lock body scroll ──────────────
 function useModalBehavior(onClose) {
@@ -22,12 +23,24 @@ function useModalBehavior(onClose) {
 export function LoginModal({ onClose, onSwitchToRegister }) {
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError]       = useState("");
+  const [loading, setLoading]   = useState(false);
+  const { login }               = useAuth();
   useModalBehavior(onClose);
 
   function handleSubmit(e) {
     e.preventDefault();
-    // TODO: wire to auth API
-    onClose();
+    setError("");
+    setLoading(true);
+
+    const result = login(email, password);
+
+    setLoading(false);
+    if (result.success) {
+      onClose();
+    } else {
+      setError(result.error);
+    }
   }
 
   return (
@@ -74,7 +87,11 @@ export function LoginModal({ onClose, onSwitchToRegister }) {
 
           <p className="modal-hint">Admin demo: admin@darklibrary.com / admin</p>
 
-          <button type="submit" className="modal-btn">შესვლა — Enter</button>
+          {error && <p className="modal-error" role="alert">{error}</p>}
+
+          <button type="submit" className="modal-btn" disabled={loading}>
+            {loading ? "Signing in…" : "შესვლა — Enter"}
+          </button>
         </form>
 
         <p className="modal-footer">
@@ -93,12 +110,24 @@ export function RegisterModal({ onClose, onSwitchToLogin }) {
   const [name, setName]         = useState("");
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError]       = useState("");
+  const [loading, setLoading]   = useState(false);
+  const { register }            = useAuth();
   useModalBehavior(onClose);
 
   function handleSubmit(e) {
     e.preventDefault();
-    // TODO: wire to auth API
-    onClose();
+    setError("");
+    setLoading(true);
+
+    const result = register(name, email, password);
+
+    setLoading(false);
+    if (result.success) {
+      onClose();
+    } else {
+      setError(result.error);
+    }
   }
 
   return (
@@ -153,7 +182,11 @@ export function RegisterModal({ onClose, onSwitchToLogin }) {
             autoComplete="new-password"
           />
 
-          <button type="submit" className="modal-btn">რეგისტრაცია — Register</button>
+          {error && <p className="modal-error" role="alert">{error}</p>}
+
+          <button type="submit" className="modal-btn" disabled={loading}>
+            {loading ? "Creating account…" : "რეგისტრაცია — Register"}
+          </button>
         </form>
 
         <p className="modal-footer">
