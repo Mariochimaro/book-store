@@ -1,12 +1,8 @@
-<<<<<<< HEAD
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-=======
 import { useState, useEffect, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
->>>>>>> f6bb8b2a751d641de9dcbadd8183608efa713e04
 import Navbar from "../components/Navbar";
 import BookCard from "../components/BookCard";
+import { useCart } from "../context/CartContext";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -32,167 +28,6 @@ const LANGUAGES  = ["English", "Georgian", "French", "German", "Russian", "Japan
 // ─────────────────────────────────────────────────────────────
 // BOOK CAROUSEL (Fixed layout resizing on partial pages)
 // ─────────────────────────────────────────────────────────────
-<<<<<<< HEAD
-
-const BESTSELLERS = [
-  {
-    id: 1,
-    badge: "Bestseller #1",
-    label: "Most Loved This Month",
-    title: "The Shadow Codex",
-    author: "Eleanor Voss",
-    rating: 4.8,
-    description:
-      "An ancient grimoire surfaces in a modern city, and only one librarian can decode its deadly secrets before time runs out.",
-    price: "22.99",
-    cover: "https://picsum.photos/seed/shadowcodex/800/560",
-  },
-  {
-    id: 2,
-    badge: "Bestseller #2",
-    label: "Most Loved This Month",
-    title: "Witching Hour Chronicles",
-    author: "Morgana Blackthorn",
-    rating: 4.9,
-    description:
-      "A young witch discovers she's the last descendant of a powerful bloodline and must master her abilities before dark forces consume the world.",
-    price: "24.99",
-    cover: "https://picsum.photos/seed/witchinghour/800/560",
-  },
-  {
-    id: 3,
-    badge: "Bestseller #3",
-    label: "Most Loved This Month",
-    title: "The Ember Crown",
-    author: "Cassius Drake",
-    rating: 4.7,
-    description:
-      "A prince exiled from his burning kingdom must reclaim his throne before the eternal winter swallows the realm whole.",
-    price: "19.99",
-    cover: "https://picsum.photos/seed/embercrown/800/560",
-  },
-];
-
-const POPULAR = [
-  { id: 1,  title: "The Crimson Veil",           author: "Victoria Thornfield",  price: "22.99", badge: "new",     cover: "https://picsum.photos/seed/crimsonveil/400/560" },
-  { id: 2,  title: "Witching Hour Chronicles",   author: "Morgana Blackthorn",   price: "24.99", badge: "pending", cover: "https://picsum.photos/seed/witchinghour2/400/560" },
-  { id: 3,  title: "The Amber Witch",             author: "Philippa Sovencroft",  price: "27.99", badge: null,      cover: "https://picsum.photos/seed/amberwitch/400/560" },
-  { id: 4,  title: "Midnight Apothecary",         author: "Circe Arledenne",      price: "21.49", badge: "new",     cover: "https://picsum.photos/seed/midnightapo/400/560" },
-  { id: 5,  title: "The Gilded Cage of Sorrows",  author: "Endymion Graven",      price: "28.99", badge: "new",     cover: "https://picsum.photos/seed/gildedcage/400/560" },
-  { id: 6,  title: "Veil of Starless Nights",     author: "Seraphine Dusk",       price: "23.49", badge: null,      cover: "https://picsum.photos/seed/veilstarless/400/560" },
-  { id: 7,  title: "The Bone Garden",             author: "Lux Mortem",           price: "26.99", badge: "new",     cover: "https://picsum.photos/seed/bonegarden/400/560" },
-  { id: 8,  title: "Daughters of the Tide",       author: "Corinna Waveborn",     price: "20.99", badge: null,      cover: "https://picsum.photos/seed/tidedaughters/400/560" },
-  { id: 9,  title: "The Oracle's Lament",         author: "Zephyr Ashvale",       price: "24.99", badge: "new",     cover: "https://picsum.photos/seed/oraclelament/400/560" },
-  { id: 10, title: "Ink & Omen",                  author: "Thessaly Crane",       price: "18.99", badge: null,      cover: "https://picsum.photos/seed/inkomen/400/560" },
-];
-
-const NEW_ARRIVALS = [
-  { id: 11, title: "The Starweaver's Daughter",    author: "Isadora Vives",    price: "21.99", badge: "new", cover: "https://picsum.photos/seed/starweaver/400/560" },
-  { id: 12, title: "The Moonpetal Inn",             author: "Theodora Wren",   price: "18.99", badge: "new", cover: "https://picsum.photos/seed/moonpetal/400/560" },
-  { id: 13, title: "Foxfire and Forgotten Names",  author: "Sable Marquees",  price: "20.49", badge: "new", cover: "https://picsum.photos/seed/foxfire/400/560" },
-  { id: 14, title: "A Bouquet of Broken Spells",   author: "Isolde Fairleigh", price: "17.99", badge: "new", cover: "https://picsum.photos/seed/bouquetspells/400/560" },
-  { id: 15, title: "The Cartographer of Nightmares", author: "Declan Vex",    price: "25.49", badge: "new", cover: "https://picsum.photos/seed/cartographer/400/560" },
-  { id: 16, title: "The Hollow Forest",             author: "Sable Haze",      price: "22.99", badge: "new", cover: "https://picsum.photos/seed/hollowforest/400/560" },
-  { id: 17, title: "Glass and Ether",               author: "Niamh Vray",      price: "19.99", badge: "new", cover: "https://picsum.photos/seed/glassether/400/560" },
-  { id: 18, title: "The Last Oracle",               author: "Clio Pendrake",   price: "23.99", badge: "new", cover: "https://picsum.photos/seed/lastoracle/400/560" },
-  { id: 19, title: "Mirrors of the Deep",           author: "Seren Cross",     price: "21.49", badge: "new", cover: "https://picsum.photos/seed/mirrorsdeep/400/560" },
-  { id: 20, title: "The Runed Gate",                author: "Elliot Asher",    price: "20.99", badge: "new", cover: "https://picsum.photos/seed/runedgate/400/560" },
-];
-
-// Additional per-book details (description, tags, ISBN) keyed by book id
-const BOOK_DETAILS = {
-  1:  { description: "Set in Victorian London, this tale follows a mysterious woman who arrives at a grand estate, harboring secrets that could unravel the entire aristocracy.", tags: ["Victorian Gothic", "Dark Romance", "English"], isbn: "978-1-234567-91-3", year: "2023" },
-  2:  { description: "In the witching hours of a cursed town, Morgana must outwit the coven elders before the next blood moon rises and the ancient spell is unleashed.", tags: ["Dark Fantasy", "Supernatural", "English"], isbn: "978-1-234567-92-0", year: "2022" },
-  3:  { description: "A solitary amber witch living in the forest must decide whether to trust the stranger who arrives with a century-old curse etched into his palm.", tags: ["Gothic Horror", "Folklore", "English"], isbn: "978-1-234567-93-7", year: "2023" },
-  4:  { description: "An apothecary's apprentice discovers the midnight remedies she brews are being stolen by shadowy forces who need them to reanimate the dead.", tags: ["Dark Fantasy", "Paranormal", "English"], isbn: "978-1-234567-94-4", year: "2024" },
-  5:  { description: "Imprisoned in a gilded cage for crimes she did not commit, Lyra must outwit her captor before the next harvest moon condemns her soul forever.", tags: ["Gothic Horror", "Mystery", "English"], isbn: "978-1-234567-95-1", year: "2022" },
-  6:  { description: "When the stars themselves go dark, the last seer must traverse a veil of starless nights to recover the stolen light before all hope fades.", tags: ["Dark Fantasy", "Supernatural", "English"], isbn: "978-1-234567-96-8", year: "2023" },
-  7:  { description: "Deep beneath an ancient cemetery, a bone garden blooms anew every century—and the gardener is always someone who never wanted to die.", tags: ["Gothic Horror", "Supernatural", "English"], isbn: "978-1-234567-97-5", year: "2024" },
-  8:  { description: "The ocean-born daughters of a tide goddess must choose between the sea and the shore when a siren's curse threatens to pull both worlds apart.", tags: ["Mythology", "Dark Romance", "English"], isbn: "978-1-234567-98-2", year: "2023" },
-  9:  { description: "When the oracle falls silent, the only way to restore her voice is to journey through the graveyard of forgotten prophecies — alone.", tags: ["Dark Fantasy", "Mystery", "English"], isbn: "978-1-234567-99-9", year: "2024" },
-  10: { description: "Every word inked by the cursed scribe turns into an omen. Now she must unwrite them all before the world bends to her worst fears.", tags: ["Gothic Horror", "Thriller", "English"], isbn: "978-1-234568-00-1", year: "2023" },
-  11: { description: "The daughter of the star-weaver must mend the fraying threads of the night sky before the universe unravels into eternal darkness.", tags: ["Cozy Fantasy", "Fairy Tale", "English"], isbn: "978-1-234568-01-8", year: "2024" },
-  12: { description: "An inn nestled between moonpetal meadows holds a peculiar guest registry — every name inside belongs to someone who has not yet arrived.", tags: ["Cozy Fantasy", "Mystery", "English"], isbn: "978-1-234568-02-5", year: "2024" },
-  13: { description: "Foxfire leads the way through a forest of lost names, where the forgotten must reclaim their identities before the next dawn swallows them whole.", tags: ["Urban Fantasy", "Fairy Tale", "English"], isbn: "978-1-234568-03-2", year: "2024" },
-  14: { description: "A young botanist finds that every broken spell leaves behind a flower — and someone has been collecting her failures for a very long time.", tags: ["Cozy Fantasy", "Dark Romance", "English"], isbn: "978-1-234568-04-9", year: "2024" },
-  15: { description: "The royal cartographer maps the borders of nightmares to prevent them from bleeding into the waking world — until one dream refuses to be contained.", tags: ["Dark Fantasy", "Thriller", "English"], isbn: "978-1-234568-05-6", year: "2024" },
-  16: { description: "In a hollow forest where sunlight never penetrates, a girl searches for the source of the whispers that have guided her since childhood.", tags: ["Gothic Horror", "Supernatural", "English"], isbn: "978-1-234568-06-3", year: "2024" },
-  17: { description: "Elemental alchemists of glass and ether must forge the world's last lantern from grief and starlight before the abyss claims the final city.", tags: ["Dark Fantasy", "Historical", "English"], isbn: "978-1-234568-07-0", year: "2024" },
-  18: { description: "The last oracle speaks only in riddles that begin to come true — and the latest one points unmistakably toward her own disappearance.", tags: ["Mystery", "Supernatural", "English"], isbn: "978-1-234568-08-7", year: "2024" },
-  19: { description: "Ancient mirrors pulled from the ocean floor reflect not the present but the last moment their owner wished had never happened.", tags: ["Paranormal", "Dark Romance", "English"], isbn: "978-1-234568-09-4", year: "2024" },
-  20: { description: "The runed gate opens only once per age — and the one chosen to pass through must leave everything they love behind on the other side.", tags: ["Dark Fantasy", "Historical", "English"], isbn: "978-1-234568-10-0", year: "2024" },
-};
-
-// ─────────────────────────────────────────────────────────────
-// SMALL COMPONENTS
-// ─────────────────────────────────────────────────────────────
-
-function StarRating({ rating }) {
-  const full = Math.round(rating);
-  return (
-    <div className="stars-row" aria-label={`Rating: ${rating} out of 5`}>
-      {[1, 2, 3, 4, 5].map((n) => (
-        <span key={n} className={`star-icon ${n <= full ? "star-on" : "star-off"}`} aria-hidden="true">
-          ★
-        </span>
-      ))}
-      <span className="rating-val">({rating})</span>
-    </div>
-  );
-}
-
-function BookCard({ book, onOpenDetail }) {
-  const { addToCart } = useCart();
-  const [added, setAdded] = useState(false);
-
-  const badgeMap   = { new: "bc-new", pending: "bc-pending", ist: "bc-ist" };
-  const badgeLabel = { new: "New",    pending: "Pending",    ist: "1 IST New" };
-
-  function handleAdd(e) {
-    e.stopPropagation();
-    addToCart(book);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1100);
-  }
-
-  return (
-    <article
-      className="bc"
-      onClick={() => onOpenDetail && onOpenDetail(book)}
-      style={{ cursor: "pointer" }}
-    >
-      <div className="bc-img-wrap">
-        <img src={book.cover} alt={book.title} className="bc-img" loading="lazy" />
-        {book.badge && (
-          <span className={`bc-badge ${badgeMap[book.badge] ?? "bc-new"}`}>
-            {badgeLabel[book.badge] ?? "New"}
-          </span>
-        )}
-      </div>
-      <div className="bc-info">
-        <p className="bc-title">{book.title}</p>
-        <p className="bc-author">{book.author}</p>
-        <div className="bc-foot">
-          <span className="bc-price">${book.price}</span>
-          <button
-            className={`bc-cart${added ? " bc-cart-ok" : ""}`}
-            onClick={handleAdd}
-            aria-label={`Add ${book.title} to cart`}
-          >
-            {added ? "✓" : "🛒"}
-          </button>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
-// BOOK CAROUSEL  (Most Popular / New Arrivals)
-// ─────────────────────────────────────────────────────────────
-
-=======
->>>>>>> f6bb8b2a751d641de9dcbadd8183608efa713e04
 const PER_PAGE = 5;
 
 function BookCarousel({ icon, title, subtitle, books, onOpenDetail, id }) {
@@ -221,11 +56,6 @@ function BookCarousel({ icon, title, subtitle, books, onOpenDetail, id }) {
       </div>
 
       <div className="book-grid">
-<<<<<<< HEAD
-        {visible.map((book) => (
-          <BookCard key={book.id} book={book} onOpenDetail={onOpenDetail} />
-        ))}
-=======
         {Array.from({ length: PER_PAGE }).map((_, index) => {
           const book = visible[index];
           if (book) {
@@ -240,7 +70,6 @@ function BookCarousel({ icon, title, subtitle, books, onOpenDetail, id }) {
             />
           );
         })}
->>>>>>> f6bb8b2a751d641de9dcbadd8183608efa713e04
       </div>
 
       <div className="c-dots" role="tablist">
@@ -253,12 +82,14 @@ function BookCarousel({ icon, title, subtitle, books, onOpenDetail, id }) {
 }
 
 // ─────────────────────────────────────────────────────────────
-<<<<<<< HEAD
-// BESTSELLER CAROUSEL
+// BESTSELLER CAROUSEL (adapted to run off live "featured" books instead
+// of the hardcoded BESTSELLERS array)
 // ─────────────────────────────────────────────────────────────
-
 function BestsellerCarousel({ books, onOpenDetail }) {
   const [idx, setIdx] = useState(0);
+  useEffect(() => { setIdx(0); }, [books]);
+  if (!books.length) return null;
+
   const book = books[idx];
 
   return (
@@ -268,7 +99,6 @@ function BestsellerCarousel({ books, onOpenDetail }) {
       </h2>
 
       <div className="bs-card">
-        {/* Prev arrow */}
         <button
           className="bs-arrow bs-arrow-l"
           onClick={() => setIdx((i) => i - 1)}
@@ -278,31 +108,25 @@ function BestsellerCarousel({ books, onOpenDetail }) {
           ‹
         </button>
 
-        {/* Cover image */}
         <div className="bs-img-wrap">
           <img src={book.cover} alt={book.title} className="bs-img" />
-          <span className="bs-badge">{book.badge}</span>
+          <span className="bs-badge">Bestseller #{idx + 1}</span>
         </div>
 
-        {/* Details */}
         <div className="bs-content">
-          <p className="bs-label">{book.label}</p>
+          <p className="bs-label">Most Loved This Month</p>
           <h3 className="bs-title">{book.title}</h3>
           <p className="bs-author">{book.author}</p>
           <StarRating rating={book.rating} />
-          <p className="bs-desc">{book.description}</p>
+          <p className="bs-desc">{book.description ?? "No description available yet."}</p>
           <div className="bs-bottom">
             <span className="bs-price">${book.price}</span>
-            <button
-              className="btn-view"
-              onClick={() => onOpenDetail && onOpenDetail(book)}
-            >
+            <button className="btn-view" onClick={() => onOpenDetail && onOpenDetail(book)}>
               View Book
             </button>
           </div>
         </div>
 
-        {/* Next arrow */}
         <button
           className="bs-arrow bs-arrow-r"
           onClick={() => setIdx((i) => i + 1)}
@@ -317,16 +141,14 @@ function BestsellerCarousel({ books, onOpenDetail }) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// BOOK DETAIL MODAL
+// BOOK DETAIL MODAL (adapted to read from real book fields instead of
+// the static BOOK_DETAILS lookup table)
 // ─────────────────────────────────────────────────────────────
-
 function BookDetailModal({ book, onClose }) {
   const { addToCart } = useCart();
-  const [added, setAdded]       = useState(false);
-  const [activeImg, setActiveImg] = useState(0);
+  const [added, setAdded] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
 
-  // Body scroll lock + Escape key
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -344,27 +166,16 @@ function BookDetailModal({ book, onClose }) {
     setTimeout(() => setAdded(false), 1300);
   }
 
-  const details = BOOK_DETAILS[book.id] ?? {
-    description: "A captivating tale of mystery and intrigue in a world unlike any other.",
-    tags: ["Fiction", "Dark Fiction"],
-    isbn: "978-0-000000-00-0",
-    year: "2023",
-  };
-
   const conditionMap = {
-    new:     { label: "NEW — Unused, pristine condition",     cls: "bdm-cond-new" },
-    pending: { label: "LIKE-NEW — Excellent, minimal use",    cls: "bdm-cond-used" },
-    ist:     { label: "GOOD — Some wear, fully readable",     cls: "bdm-cond-good" },
+    new:     { label: "NEW — Unused, pristine condition",  cls: "bdm-cond-new" },
+    good:    { label: "GOOD — Some wear, fully readable",   cls: "bdm-cond-good" },
+    average: { label: "AVERAGE — Noticeable wear",          cls: "bdm-cond-used" },
+    damaged: { label: "DAMAGED — Heavily worn",             cls: "bdm-cond-used" },
   };
-  const cond = conditionMap[book.badge] ?? conditionMap.new;
+  const cond = conditionMap[book.condition] ?? conditionMap.good;
 
-  // Gallery: main cover + 2 alternate seeds for visual variety
-  const images = [
-    book.cover,
-    `https://picsum.photos/seed/${book.id}_int/400/560`,
-    `https://picsum.photos/seed/${book.id}_alt/400/560`,
-  ];
-
+  // Real data only gives us one cover image, so the multi-thumbnail gallery
+  // from the mock version is dropped rather than faked with repeated seeds.
   return (
     <div
       className="modal-backdrop"
@@ -372,10 +183,8 @@ function BookDetailModal({ book, onClose }) {
       role="presentation"
     >
       <div className="bdm-card" role="dialog" aria-modal="true" aria-labelledby="bdm-heading">
-        {/* Close */}
         <button className="modal-x bdm-close" onClick={onClose} aria-label="Close details">✕</button>
 
-        {/* ── Left: image gallery ───────────────────────── */}
         <div className="bdm-gallery">
           <button
             className={`bdm-bookmark-btn${wishlisted ? " active" : ""}`}
@@ -389,24 +198,10 @@ function BookDetailModal({ book, onClose }) {
           </button>
 
           <div className="bdm-main-img-wrap">
-            <img src={images[activeImg]} alt={book.title} className="bdm-main-img" />
-          </div>
-
-          <div className="bdm-thumbs">
-            {images.map((img, i) => (
-              <button
-                key={i}
-                className={`bdm-thumb${activeImg === i ? " active" : ""}`}
-                onClick={() => setActiveImg(i)}
-                aria-label={`View image ${i + 1}`}
-              >
-                <img src={img} alt={`View ${i + 1}`} />
-              </button>
-            ))}
+            <img src={book.cover} alt={book.title} className="bdm-main-img" />
           </div>
         </div>
 
-        {/* ── Right: details ────────────────────────────── */}
         <div className="bdm-details">
           <div>
             <h2 className="bdm-title" id="bdm-heading">{book.title}</h2>
@@ -416,29 +211,33 @@ function BookDetailModal({ book, onClose }) {
           <span className={`bdm-condition ${cond.cls}`}>{cond.label}</span>
 
           <div className="bdm-stars-price">
-            <StarRating rating={book.rating ?? 4.9} />
+            <StarRating rating={book.rating} />
             <span className="bdm-price">${book.price}</span>
           </div>
 
-          <div className="bdm-tags">
-            {details.tags.map((t) => (
-              <span key={t} className="bdm-tag">{t}</span>
-            ))}
-          </div>
+          {(book.genres ?? []).length > 0 && (
+            <div className="bdm-tags">
+              {book.genres.map((t) => (
+                <span key={t} className="bdm-tag">{t}</span>
+              ))}
+            </div>
+          )}
 
           <div>
             <p className="bdm-desc-heading">Description</p>
-            <p className="bdm-desc-text">{details.description}</p>
+            <p className="bdm-desc-text">{book.description ?? "No description available yet."}</p>
           </div>
 
           <div className="bdm-meta">
             <div>
               <p className="bdm-meta-lbl">ISBN</p>
-              <p className="bdm-meta-val">{details.isbn}</p>
+              <p className="bdm-meta-val">{book.isbn ?? "—"}</p>
             </div>
             <div>
               <p className="bdm-meta-lbl">Published</p>
-              <p className="bdm-meta-val">{details.year}</p>
+              <p className="bdm-meta-val">
+                {book.created_at ? new Date(book.created_at).getFullYear() : "—"}
+              </p>
             </div>
           </div>
 
@@ -453,10 +252,7 @@ function BookDetailModal({ book, onClose }) {
           </div>
 
           <div className="bdm-actions">
-            <button
-              className={`bdm-add-cart${added ? " added" : ""}`}
-              onClick={handleAddToCart}
-            >
+            <button className={`bdm-add-cart${added ? " added" : ""}`} onClick={handleAddToCart}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
@@ -482,8 +278,6 @@ function BookDetailModal({ book, onClose }) {
 }
 
 // ─────────────────────────────────────────────────────────────
-=======
->>>>>>> f6bb8b2a751d641de9dcbadd8183608efa713e04
 // FILTER PANEL
 // ─────────────────────────────────────────────────────────────
 function FilterPanel({ isOpen, onClose, filters, onFilterChange, availableGenres, genresLoading }) {
@@ -614,10 +408,6 @@ function HeroSection({ onFilterToggle, searchQuery, onSearchChange, onSearchSubm
 // HOME
 // ─────────────────────────────────────────────────────────────
 function Home() {
-<<<<<<< HEAD
-  const [filtersOpen, setFiltersOpen]   = useState(false);
-  const [selectedBook, setSelectedBook] = useState(null);
-=======
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") ?? "");
@@ -626,7 +416,7 @@ function Home() {
   const [allBooks, setAllBooks]       = useState([]);
   const [loading, setLoading]         = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
->>>>>>> f6bb8b2a751d641de9dcbadd8183608efa713e04
+  const [selectedBook, setSelectedBook] = useState(null);
 
   const [availableGenres, setAvailableGenres] = useState([]);
   const [genresLoading, setGenresLoading]     = useState(true);
@@ -720,27 +510,6 @@ function Home() {
           />
 
           <div className="sections-area">
-<<<<<<< HEAD
-            <BestsellerCarousel books={BESTSELLERS} onOpenDetail={setSelectedBook} />
-
-            <BookCarousel
-              id="popular-section"
-              icon="↗"
-              title="Most Popular"
-              subtitle="Beloved by readers across the archive"
-              books={POPULAR}
-              onOpenDetail={setSelectedBook}
-            />
-
-            <BookCarousel
-              id="new-arrivals-section"
-              icon="✦"
-              title="New Arrivals"
-              subtitle="Just added — fresh discoveries await"
-              books={NEW_ARRIVALS}
-              onOpenDetail={setSelectedBook}
-            />
-=======
             {loading ? (
               <h2 style={{ padding: "40px", textAlign: "center" }}>იტვირთება...</h2>
             ) : filteredBooks.length === 0 ? (
@@ -751,7 +520,6 @@ function Home() {
                 <BookCarousel icon="✦" title="New Arrivals & Discoveries"  subtitle="Just added — fresh discoveries await"  books={newArrivals} />
               </>
             )}
->>>>>>> f6bb8b2a751d641de9dcbadd8183608efa713e04
           </div>
         </div>
       </main>

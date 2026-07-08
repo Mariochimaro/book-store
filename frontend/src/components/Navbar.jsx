@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-<<<<<<< HEAD
-import { LoginModal, RegisterModal } from "./AuthModals";
-import { CartSidebar } from "./CartSidebar";
+import { LoginModal }    from "./LoginModal";
+import { RegisterModal } from "./RegisterModal";
+import { CartSidebar }   from "./Cart";
 import { GenreModal } from "./GenreModal";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
@@ -15,19 +15,6 @@ function Navbar() {
   const navigate            = useNavigate();
   const { totalItems }      = useCart();
   const { isLoggedIn, user, logout } = useAuth();
-=======
-import { LoginModal }    from "./LoginModal";
-import { RegisterModal } from "./RegisterModal";
-import { CartSidebar }   from "./Cart";
-import { useCart }       from "../context/CartContext";
-
-function Navbar() {
-  const [query, setQuery] = useState("");
-  const [modal, setModal] = useState(null); // "login" | "register" | null
-  const [cartOpen, setCart] = useState(false);
-  const navigate = useNavigate();
-  const { totalItems } = useCart();
->>>>>>> f6bb8b2a751d641de9dcbadd8183608efa713e04
 
   function handleSearch(e) {
     e.preventDefault();
@@ -149,13 +136,10 @@ function Navbar() {
         </div>
       </nav>
 
-<<<<<<< HEAD
       {/* Genre preferences modal */}
       {genreOpen && <GenreModal onClose={() => setGenreOpen(false)} />}
 
       {/* Auth modals */}
-=======
->>>>>>> f6bb8b2a751d641de9dcbadd8183608efa713e04
       {modal === "login" && (
         <LoginModal
           onClose={() => setModal(null)}
