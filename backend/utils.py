@@ -57,7 +57,7 @@ def sort_books_by_genres(books_list: list, query_genres_str: str) -> list:
         match_count = 0
         book_genres = book.get("genres", [])
         
-        # 1. ვითვლით რამდენი ჟანრი დაემთხვა (ვიყენებთ შენს საყვარელ search_match-ს ტრანსლიტერაციით!)
+        # 1. ვითვლით რამდენი ჟანრი დაემთხვა 
         for s_genre in selected_genres:
             if any(search_match(s_genre, b_genre) for b_genre in book_genres):
                 match_count += 1
@@ -66,7 +66,7 @@ def sort_books_by_genres(books_list: list, query_genres_str: str) -> list:
         if match_count == 0:
             continue
             
-        # 2. შენი ლოგიკა: "სულ ბოლოს ისინი, რომლებიც სხვა ჟანრებთანაა გარეული"
+        # 2. სულ ბოლოს ისინი, რომლებიც სხვა ჟანრებთანაა გარეული
         # ამისათვის ქულას ვაკლებთ ზედმეტი ჟანრების რაოდენობის მცირე პროცენტს (მაგალითად 0.01)
         # ასე 3 დამთხვევიანი წიგნი 2 ჟანრით უფრო წინ იქნება, ვიდრე 3 დამთხვევიანი წიგნი 5 ჟანრით.
         total_book_genres_count = len(book_genres)

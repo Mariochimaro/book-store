@@ -9,3 +9,5 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 if not SECRET_KEY:
     raise ValueError("SECRET_KEY is missing")
+
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")

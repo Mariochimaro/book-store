@@ -5,7 +5,7 @@ venv/
 .env
 
 #სატესტო
-index.html
+test_admin_private.py
 text.txt
 
 # Frontend
