@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import BookCard from "../components/BookCard";
+import { useCart } from "../context/CartContext";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -29,7 +30,7 @@ const LANGUAGES  = ["English", "Georgian", "French", "German", "Russian", "Japan
 // ─────────────────────────────────────────────────────────────
 const PER_PAGE = 5;
 
-function BookCarousel({ icon, title, subtitle, books }) {
+function BookCarousel({ icon, title, subtitle, books, onOpenDetail, id }) {
   const [page, setPage] = useState(0);
   useEffect(() => { setPage(0); }, [books]);
   if (!books.length) return null;
@@ -38,7 +39,7 @@ function BookCarousel({ icon, title, subtitle, books }) {
   const visible = books.slice(page * PER_PAGE, (page + 1) * PER_PAGE);
 
   return (
-    <section className="sec">
+    <section className="sec" id={id}>
       <div className="sec-head">
         <div>
           <h2 className="sec-title">
@@ -77,6 +78,202 @@ function BookCarousel({ icon, title, subtitle, books }) {
         ))}
       </div>
     </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// BESTSELLER CAROUSEL (adapted to run off live "featured" books instead
+// of the hardcoded BESTSELLERS array)
+// ─────────────────────────────────────────────────────────────
+function BestsellerCarousel({ books, onOpenDetail }) {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => { setIdx(0); }, [books]);
+  if (!books.length) return null;
+
+  const book = books[idx];
+
+  return (
+    <section className="sec">
+      <h2 className="sec-title" style={{ marginBottom: "28px" }}>
+        <span aria-hidden="true">⭐</span> Top Bestsellers
+      </h2>
+
+      <div className="bs-card">
+        <button
+          className="bs-arrow bs-arrow-l"
+          onClick={() => setIdx((i) => i - 1)}
+          disabled={idx === 0}
+          aria-label="Previous bestseller"
+        >
+          ‹
+        </button>
+
+        <div className="bs-img-wrap">
+          <img src={book.cover} alt={book.title} className="bs-img" />
+          <span className="bs-badge">Bestseller #{idx + 1}</span>
+        </div>
+
+        <div className="bs-content">
+          <p className="bs-label">Most Loved This Month</p>
+          <h3 className="bs-title">{book.title}</h3>
+          <p className="bs-author">{book.author}</p>
+          <StarRating rating={book.rating} />
+          <p className="bs-desc">{book.description ?? "No description available yet."}</p>
+          <div className="bs-bottom">
+            <span className="bs-price">${book.price}</span>
+            <button className="btn-view" onClick={() => onOpenDetail && onOpenDetail(book)}>
+              View Book
+            </button>
+          </div>
+        </div>
+
+        <button
+          className="bs-arrow bs-arrow-r"
+          onClick={() => setIdx((i) => i + 1)}
+          disabled={idx === books.length - 1}
+          aria-label="Next bestseller"
+        >
+          ›
+        </button>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// BOOK DETAIL MODAL (adapted to read from real book fields instead of
+// the static BOOK_DETAILS lookup table)
+// ─────────────────────────────────────────────────────────────
+function BookDetailModal({ book, onClose }) {
+  const { addToCart } = useCart();
+  const [added, setAdded] = useState(false);
+  const [wishlisted, setWishlisted] = useState(false);
+
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    function onKey(e) { if (e.key === "Escape") onClose(); }
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [onClose]);
+
+  function handleAddToCart() {
+    addToCart(book);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1300);
+  }
+
+  const conditionMap = {
+    new:     { label: "NEW — Unused, pristine condition",  cls: "bdm-cond-new" },
+    good:    { label: "GOOD — Some wear, fully readable",   cls: "bdm-cond-good" },
+    average: { label: "AVERAGE — Noticeable wear",          cls: "bdm-cond-used" },
+    damaged: { label: "DAMAGED — Heavily worn",             cls: "bdm-cond-used" },
+  };
+  const cond = conditionMap[book.condition] ?? conditionMap.good;
+
+  // Real data only gives us one cover image, so the multi-thumbnail gallery
+  // from the mock version is dropped rather than faked with repeated seeds.
+  return (
+    <div
+      className="modal-backdrop"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+      role="presentation"
+    >
+      <div className="bdm-card" role="dialog" aria-modal="true" aria-labelledby="bdm-heading">
+        <button className="modal-x bdm-close" onClick={onClose} aria-label="Close details">✕</button>
+
+        <div className="bdm-gallery">
+          <button
+            className={`bdm-bookmark-btn${wishlisted ? " active" : ""}`}
+            onClick={() => setWishlisted((w) => !w)}
+            aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill={wishlisted ? "currentColor" : "none"}
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+          </button>
+
+          <div className="bdm-main-img-wrap">
+            <img src={book.cover} alt={book.title} className="bdm-main-img" />
+          </div>
+        </div>
+
+        <div className="bdm-details">
+          <div>
+            <h2 className="bdm-title" id="bdm-heading">{book.title}</h2>
+            <p className="bdm-author">{book.author}</p>
+          </div>
+
+          <span className={`bdm-condition ${cond.cls}`}>{cond.label}</span>
+
+          <div className="bdm-stars-price">
+            <StarRating rating={book.rating} />
+            <span className="bdm-price">${book.price}</span>
+          </div>
+
+          {(book.genres ?? []).length > 0 && (
+            <div className="bdm-tags">
+              {book.genres.map((t) => (
+                <span key={t} className="bdm-tag">{t}</span>
+              ))}
+            </div>
+          )}
+
+          <div>
+            <p className="bdm-desc-heading">Description</p>
+            <p className="bdm-desc-text">{book.description ?? "No description available yet."}</p>
+          </div>
+
+          <div className="bdm-meta">
+            <div>
+              <p className="bdm-meta-lbl">ISBN</p>
+              <p className="bdm-meta-val">{book.isbn ?? "—"}</p>
+            </div>
+            <div>
+              <p className="bdm-meta-lbl">Published</p>
+              <p className="bdm-meta-val">
+                {book.created_at ? new Date(book.created_at).getFullYear() : "—"}
+              </p>
+            </div>
+          </div>
+
+          <div className="bdm-rate-card">
+            <div className="bdm-rate-title">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style={{ color: "var(--accent)", marginRight: 6 }}>
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              Rate This Book
+            </div>
+            <p className="bdm-rate-note">Only buyers who purchased this book can rate it</p>
+          </div>
+
+          <div className="bdm-actions">
+            <button className={`bdm-add-cart${added ? " added" : ""}`} onClick={handleAddToCart}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+              </svg>
+              {added ? "Added to Cart!" : "Add to Cart"}
+            </button>
+            <button
+              className={`bdm-wishlist-action${wishlisted ? " active" : ""}`}
+              onClick={() => setWishlisted((w) => !w)}
+              aria-label="Wishlist"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={wishlisted ? "currentColor" : "none"}
+                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -219,6 +416,7 @@ function Home() {
   const [allBooks, setAllBooks]       = useState([]);
   const [loading, setLoading]         = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null);
 
   const [availableGenres, setAvailableGenres] = useState([]);
   const [genresLoading, setGenresLoading]     = useState(true);
@@ -325,6 +523,13 @@ function Home() {
           </div>
         </div>
       </main>
+
+      {selectedBook && (
+        <BookDetailModal
+          book={selectedBook}
+          onClose={() => setSelectedBook(null)}
+        />
+      )}
     </>
   );
 }

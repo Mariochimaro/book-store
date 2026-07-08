@@ -76,7 +76,15 @@ a { text-decoration: none; }
   padding: 0 28px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 14px;
+}
+
+/* Logo + page-nav left cluster */
+.nb-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
 .nb-logo {
@@ -99,6 +107,8 @@ a { text-decoration: none; }
 
 .nb-search {
   flex: 1;
+  min-width: 0;
+  max-width: 480px;
   display: flex;
   align-items: center;
   background: rgba(255,255,255,0.05);
@@ -106,7 +116,7 @@ a { text-decoration: none; }
   border-radius: var(--r-sm);
   padding: 0 13px;
   gap: 9px;
-  height: 38px;
+  height: 36px;
   transition: border-color 0.15s;
 }
 
@@ -135,7 +145,7 @@ a { text-decoration: none; }
 .nb-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 5px;
   flex-shrink: 0;
 }
 
@@ -1162,6 +1172,137 @@ a { text-decoration: none; }
   vertical-align: middle;
 }
 
+/* ── Logged-in icon buttons ── */
+.nb-icon-btn {
+  width: 36px;
+  height: 36px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.nb-icon-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--text);
+}
+
+.nb-genre-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 13px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.nb-genre-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--text);
+}
+
+/* Avatar circle — amber background with person icon */
+.nb-avatar-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.15s;
+  flex-shrink: 0;
+}
+
+.nb-avatar-btn:hover {
+  background: var(--accent-h);
+  transform: scale(1.08);
+}
+
+/* ── Seller modal: icon + heading row ── */
+.seller-modal-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  color: var(--accent);
+}
+
+.seller-modal-title-row .modal-title { margin-bottom: 0; }
+
+/* ── "(optional)" muted label suffix ── */
+.modal-opt {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-3);
+  margin-left: 4px;
+}
+
+/* ── Textarea (extends .modal-inp) ── */
+.modal-textarea {
+  resize: vertical;
+  min-height: 84px;
+  line-height: 1.55;
+}
+
+/* ── Two-button row at the bottom of the seller form ── */
+.modal-btn-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+/* Ghost / Cancel button */
+.modal-btn-ghost {
+  flex: 0 0 auto;
+  padding: 13px 22px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+
+.modal-btn-ghost:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+}
+
+/* Activate button fills remaining space */
+.modal-btn-grow {
+  flex: 1;
+  padding: 13px;
+}
+
+/* ── Modal error message ── */
+.modal-error {
+  font-size: 12.5px;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: var(--r-sm);
+  padding: 8px 12px;
+  margin-bottom: 14px;
+}
+
 /* ── Navbar cart badge ── */
 .nb-cart {
   position: relative; /* needed for the badge */
@@ -1191,6 +1332,675 @@ a { text-decoration: none; }
   background: var(--green) !important;
   transform: scale(1.1);
   transition: background 0.2s, transform 0.15s !important;
+}
+
+/* ============================================================
+   PROFILE PAGE
+   ============================================================ */
+.pf-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 88px 28px 72px; /* clears fixed 60px navbar */
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+.pf-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-bottom: 28px;
+}
+
+.pf-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #2d1f0e;
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: var(--font-serif);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.pf-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+
+.pf-email {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+/* ── Tab bar ── */
+.pf-tabs {
+  display: flex;
+  position: relative;
+  margin-bottom: 28px;
+}
+
+.pf-tabs::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border);
+}
+
+.pf-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 18px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-3);
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  position: relative;
+  z-index: 1;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.pf-tab:hover  { color: var(--text-2); }
+
+.pf-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ── Stats grid (Orders tab) ── */
+.pf-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.pf-stat-card {
+  background: var(--bg-card);
+  border-radius: var(--r);
+  padding: 18px 20px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.pf-stat-icon {
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.pf-stat-label {
+  font-size: 11.5px;
+  color: var(--text-3);
+  margin-bottom: 5px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.pf-stat-val {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.pf-stat-val.accent { color: var(--accent); }
+
+.pf-stat-sub {
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+
+/* ── Section label ── */
+.pf-section-lbl {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 14px;
+}
+
+/* ── Reusable empty state ── */
+.pf-empty {
+  background: var(--bg-card);
+  border-radius: var(--r);
+  padding: 56px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.pf-empty-icon {
+  color: var(--text-3);
+  opacity: 0.45;
+  margin-bottom: 4px;
+}
+
+.pf-empty-title {
+  font-size: 14.5px;
+  color: var(--text-2);
+  font-weight: 500;
+}
+
+.pf-empty-sub {
+  font-size: 12.5px;
+  color: var(--text-3);
+  margin-top: -4px;
+}
+
+/* ── Bronze/amber action button ── */
+.btn-bronze {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: var(--r-sm);
+  margin-top: 8px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.btn-bronze:hover { background: var(--accent-h); }
+
+/* ── Preference / activity cards ── */
+.pf-card {
+  background: var(--bg-card);
+  border-radius: var(--r);
+  padding: 22px 24px;
+  margin-bottom: 16px;
+}
+
+.pf-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.pf-card-body {
+  font-size: 13px;
+  color: var(--text-3);
+  margin-bottom: 16px;
+}
+
+.pf-activity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 32px;
+}
+
+.pf-activity-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-2);
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.pf-activity-name {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.pf-activity-val {
+  font-weight: 600;
+  color: var(--text-3);
+}
+
+/* ── Sell Books promo ── */
+.pf-sell-promo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 60px 24px;
+  gap: 12px;
+}
+
+.pf-sell-icon {
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.pf-sell-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pf-sell-desc {
+  font-size: 13.5px;
+  color: var(--text-3);
+  max-width: 420px;
+  line-height: 1.7;
+}
+
+/* ============================================================
+   BOOK DETAIL MODAL  (.bdm-*)
+   ============================================================ */
+
+.bdm-card {
+  display: grid;
+  grid-template-columns: 42% 58%;
+  max-width: 680px;
+  width: 94vw;
+  max-height: 90vh;
+  background: #111827;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  position: relative;
+  animation: modal-in 0.22s ease;
+}
+
+/* Re-position the inherited close button */
+.bdm-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+}
+
+/* ── Left gallery panel ── */
+.bdm-gallery {
+  display: flex;
+  flex-direction: column;
+  background: #0c1120;
+  position: relative;
+  min-height: 0;
+}
+
+.bdm-bookmark-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, border-color 0.15s;
+}
+.bdm-bookmark-btn:hover,
+.bdm-bookmark-btn.active { color: var(--accent); border-color: var(--accent); }
+
+.bdm-main-img-wrap {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+.bdm-main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.bdm-thumbs {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.35);
+}
+.bdm-thumb {
+  width: 52px;
+  height: 68px;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1.5px solid transparent;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+}
+.bdm-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.bdm-thumb.active { border-color: var(--accent); }
+
+/* ── Right details panel ── */
+.bdm-details {
+  padding: 30px 26px 22px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.bdm-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.15;
+  margin: 0;
+}
+.bdm-author {
+  font-size: 13.5px;
+  color: var(--text-2);
+  margin: 4px 0 0;
+}
+
+/* Condition badge */
+.bdm-condition {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  padding: 5px 13px;
+  border-radius: 5px;
+  align-self: flex-start;
+}
+.bdm-cond-new  { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.28); }
+.bdm-cond-used { background: rgba(201,125,58,0.12);  color: var(--accent); border: 1px solid rgba(201,125,58,0.28); }
+.bdm-cond-good { background: rgba(59,130,246,0.12);  color: #60a5fa; border: 1px solid rgba(59,130,246,0.28); }
+
+/* Stars + price */
+.bdm-stars-price {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bdm-price {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-left: auto;
+}
+
+/* Genre tags */
+.bdm-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.bdm-tag {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 11.5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+/* Description */
+.bdm-desc-heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 6px;
+}
+.bdm-desc-text {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ISBN / Published */
+.bdm-meta { display: flex; gap: 24px; }
+.bdm-meta-lbl {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin: 0 0 3px;
+}
+.bdm-meta-val {
+  font-size: 12.5px;
+  color: var(--text-2);
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Rate This Book */
+.bdm-rate-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 12px 15px;
+}
+.bdm-rate-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+.bdm-rate-note {
+  font-size: 12px;
+  color: var(--text-3);
+  margin: 0;
+}
+
+/* Actions row */
+.bdm-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 4px;
+}
+.bdm-add-cart {
+  flex: 1;
+  padding: 13px 16px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--r-sm);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s;
+  cursor: pointer;
+}
+.bdm-add-cart:hover { background: var(--accent-h); }
+.bdm-add-cart.added { background: #10b981; }
+
+.bdm-wishlist-action {
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.15s, border-color 0.15s;
+}
+.bdm-wishlist-action:hover,
+.bdm-wishlist-action.active { color: var(--accent); border-color: var(--accent); }
+
+/* Responsive: stack on narrow viewports */
+@media (max-width: 540px) {
+  .bdm-card { grid-template-columns: 1fr; max-height: 96vh; }
+  .bdm-gallery { max-height: 240px; }
+}
+
+/* ============================================================
+   NAVBAR PAGE LINKS  (.nb-page-links / .nb-page-link)
+   ============================================================ */
+
+.nb-page-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.nb-page-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, background 0.15s;
+}
+
+.nb-page-link svg {
+  flex-shrink: 0;
+  opacity: 0.75;
+  transition: opacity 0.15s;
+}
+
+.nb-page-link:hover {
+  color: var(--accent);
+  background: rgba(201, 125, 58, 0.08);
+}
+
+.nb-page-link:hover svg {
+  opacity: 1;
+}
+
+/* Hide on very small screens to keep navbar uncluttered */
+@media (max-width: 600px) {
+  .nb-page-links { display: none; }
+}
+
+/* ============================================================
+   GENRE PREFERENCES MODAL  (.gm-*)
+   ============================================================ */
+
+/* Widen the shared modal-card for the 3-col grid */
+.gm-card {
+  max-width: 660px;
+  width: 92vw;
+}
+
+.gm-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.gm-sparkle { color: var(--accent); flex-shrink: 0; }
+
+/* 3-column genre grid */
+.gm-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 18px 0 22px;
+}
+
+@media (max-width: 520px) {
+  .gm-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Individual genre toggle button */
+.gm-genre-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: 13.5px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.gm-genre-btn:hover {
+  border-color: rgba(201, 125, 58, 0.4);
+  color: var(--text);
+}
+
+.gm-genre-btn.checked {
+  border-color: var(--accent);
+  background: rgba(201, 125, 58, 0.1);
+  color: var(--text);
+}
+
+/* Checkbox square */
+.gm-check {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.gm-check.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* Footer row */
+.gm-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.gm-count {
+  font-size: 13px;
+  color: var(--text-2);
 }
 
 /* ============================================================
