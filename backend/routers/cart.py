@@ -5,7 +5,7 @@ from routers.auth import get_current_user
 from datetime import datetime, timedelta, timezone
 from typing import List
 from fastapi import BackgroundTasks
-from services.email_service import send_purchase_instructions
+from services.emails.email_service import send_purchase_instructions
 
 router = APIRouter(
     prefix="/cart",

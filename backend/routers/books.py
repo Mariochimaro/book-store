@@ -1,10 +1,13 @@
 import uuid
-from fastapi import  APIRouter, HTTPException, status, File, UploadFile, Form, Depends
+from fastapi import  APIRouter, BackgroundTasks, HTTPException, status, File, UploadFile, Form, Depends
 from typing import Optional
 from database import supabase
 from routers.auth import get_current_user, require_admin, ensure_profile_complete
-from utils import search_match, sort_books_by_genres
-import difflib
+from dependencies import get_optional_current_user
+from utils import search_match, sort_books_by_genres, text_similarity, get_or_create_cluster
+from services.recommendations.manager import get_best_recommendations
+import services.recommendations.affinity as affinity
+from services.recommendations.content_related import get_content_based_related_books
 from pydantic import BaseModel
 from typing import Optional, List
 
@@ -18,6 +21,11 @@ class BookEdit(BaseModel):
     description: Optional[str] = None
     price: Optional[float] = None
     genres: Optional[List[str]] = None
+    publication_year: Optional[int] = None
+    condition: Optional[str] = None
+
+class RatingAction(BaseModel):
+    action: str # "like", "dislike", ან "remove"
 
 # 1. წიგნების სიის წამოღება
 @router.get("")
@@ -76,8 +84,17 @@ def get_all_genres():
     return sorted(genre_set)
 
 # 2. კონკრეტული ერთი წიგნის დეტალები
+def update_book_views(book_id: int, new_views: int):
+    try:
+        supabase.table("books").update({"views": new_views}).eq("id", book_id).execute()
+    except Exception as e:
+        print(f"ნახვების განახლება ვერ მოხერხდა: {e}")
+
 @router.get("/{book_id}")
-def get_book_by_id(book_id: int):
+def get_book_by_id(book_id: int, 
+                   background_tasks: BackgroundTasks,
+                   current_user: Optional[dict] = Depends(get_optional_current_user)):
+    # მოგვაქვს წიგნი და გამყიდველის ინფო
     response = supabase.table("books").select("""
         *,
         seller:users(id, username, location)
@@ -89,8 +106,36 @@ def get_book_by_id(book_id: int):
             detail="წიგნი მოცემული ID-ით ვერ მოიძებნა!"
         )
         
-    return response.data[0]
+    book = response.data[0]
+    
+    # ვიღებთ მიმდინარე ნახვების რაოდენობას (თუ None არის, ვთვლით 0-ად) და ვუმატებთ 1-ს
+    current_views = book.get("views") or 0
+    new_views = current_views + 1
+    
+    # 3. ვაძლევთ FastAPI-ს დავალებას, რომ პასუხის დაბრუნების შემდეგ ბაზაშიც განაახლოს
+    background_tasks.add_task(update_book_views, book_id, new_views)
+    
+    # 4. Affinity-ის განახლება
+    if current_user:
+        background_tasks.add_task(affinity.update_user_affinity, current_user["id"], book, "view")
 
+    # 5. მომხმარებელს (ფრონტენდს) პირდაპირ განახლებულ რიცხვს ვუბრუნებთ
+    book["views"] = new_views
+        
+    return book
+
+@router.get("/{book_id}/related")
+async def get_related_books(book_id: int):
+    # 1. ვცდილობთ კოლაბორაციით (ქცევაზე დაფუძნებული)
+    related = get_best_recommendations(user_id=None, user_has_history=False, target_book_id=book_id)
+    filtered_related = [b for b in related if b["id"] != book_id]
+    
+    # 2. FALLBACK: თუ კოლაბორაციამ ცარიელი სია დააბრუნა, ვრთავთ Content-Based ძრავს
+    if not filtered_related:
+        print(f"🧩 [FALLBACK] Collab failed for {book_id}. Using Genre/Author-based search.")
+        filtered_related = get_content_based_related_books(book_id, limit=5)
+    
+    return {"related_books": filtered_related}
 
 # 3. წიგნის ატვირთვა (Async დამატებული ფაილებისთვის)
 @router.post("/upload", status_code=status.HTTP_201_CREATED)
@@ -99,8 +144,11 @@ async def upload_book(
     genres: str = Form(..., description="ჟანრები, მძიმით გამოყოფილი, მაგ: 'Fantasy,Adventure'"),
     language: str = Form(..., description="ენა: მაგ. 'geo' ან 'eng'"),
     price: float = Form(..., description="ფასი ლარებში"),
+    publication_year: int = Form(..., description="წიგნის გამოშვების წელი"),
     condition: str = Form(..., description="მდგომარეობა: 'new', 'good', 'average', 'damaged'"),
     description: str = Form(..., description="წიგნის აღწერა"),
+    listing_type: str = Form("second-hand", description="ტიპი: 'second-hand' ან 'first-hand'"), 
+    stock_quantity: int = Form(1, description="მარაგში არსებული რაოდენობა"),
     photo1: UploadFile = File(..., description="ფოტო (5MB-მდე)"),
     photo2: Optional[UploadFile] = File(None),
     photo3: Optional[UploadFile] = File(None),
@@ -171,14 +219,22 @@ async def upload_book(
     # --- ჟანრების სტრინგის მასივად ქცევა ---
     genres_list = [g.strip() for g in genres.split(",")]
 
+    # --- კლასტერის განსაზღვრა/შექმნა ---
+    # ამას ვაკეთებთ ატვირთვის მომენტში
+    cluster_id = get_or_create_cluster(title)
+
     # --- მონაცემების მომზადება ბაზისთვის ---
     new_book = {
         "title": title,
+        "cluster_id": cluster_id,
         "genres": genres_list,
         "language": language,
         "price": price,
+        "publication_year": publication_year,
         "condition": condition,
         "description": description,
+        "listing_type": listing_type,
+        "stock_quantity": stock_quantity,
         "photos_urls": uploaded_photos_urls,
         "book_video_url": uploaded_video_url,
         "seller_id": supabase_user_id,
@@ -197,13 +253,6 @@ async def upload_book(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"ბაზაში შენახვა ვერ მოხერხდა: {str(e)}")
     
-
-def text_similarity(str1: str, str2: str) -> float:
-    """აბრუნებს მსგავსებას 0.0-დან 1.0-მდე"""
-    if not str1 or not str2:
-        return 0.0
-    return difflib.SequenceMatcher(None, str1, str2).ratio()
-
 @router.put("/{book_id}/edit")
 def edit_my_book(book_id: int, edit_data: BookEdit, current_user = Depends(get_current_user)):
     user_id = current_user["id"]
@@ -226,9 +275,18 @@ def edit_my_book(book_id: int, edit_data: BookEdit, current_user = Depends(get_c
     if edit_data.price is not None and edit_data.price != old_book["price"]:
         update_dict["price"] = edit_data.price
 
+    # 3.1 გამოშვების წლის შეცვლა (არ საჭიროებს ადმინს)
+    if edit_data.publication_year is not None and edit_data.publication_year != old_book["publication_year"]:
+        update_dict["publication_year"] = edit_data.publication_year
+
     # 4. ჟანრის შეცვლა (საჭიროებს ადმინს)
     if edit_data.genres is not None and set(edit_data.genres) != set(old_book["genres"]):
         update_dict["genres"] = edit_data.genres
+        needs_admin_review = True
+
+    # 4.1 მდგომარეობის შეცვლა (საჭიროებს ადმინს)
+    if edit_data.condition is not None and edit_data.condition != old_book["condition"]:
+        update_dict["condition"] = edit_data.condition
         needs_admin_review = True
 
     # 5. სახელის და აღწერის შემოწმება (90% წესი)
@@ -250,7 +308,7 @@ def edit_my_book(book_id: int, edit_data: BookEdit, current_user = Depends(get_c
         update_dict["is_approved"] = False
         message = "ცვლილებები მნიშვნელოვანია და გაიგზავნა ადმინთან დასადასტურებლად."
     else:
-        message = "ცვლილებები ავტომატურად აისახა (ტიპოები/ფასი)."
+        message = "ცვლილებები ავტომატურად აისახა (ტიპოები/ფასი/გამოშვების წელი)."
 
     # 7. ბაზაში გაგზავნა (თუ რამე შეიცვალა საერთოდ)
     if update_dict:
@@ -320,7 +378,7 @@ async def edit_book_photos(
         "status": "pending",        # ადმინმა უნდა შეამოწმოს ახალი ფოტოები
         "is_approved": False
     }
-
+ 
     try:
         supabase.table("books").update(update_data).eq("id", book_id).execute()
     except Exception as e:
@@ -331,7 +389,64 @@ async def edit_book_photos(
         "message": "ფოტოები წარმატებით შეიცვალა. წიგნი გაიგზავნა ადმინთან გადასახედად.",
         "new_photos": new_photos_urls
     }
+
+@router.put("/{book_id}/edit-video")
+async def edit_book_video(
+    book_id: int,
+    video: UploadFile = File(..., description="ახალი ვიდეო (მაქს. 50MB)"),
+    current_user = Depends(get_current_user)
+):
+    user_id = current_user["id"]
     
+    # 1. მოგვაქვს წიგნი და ვამოწმებთ ავტორობას
+    book_res = supabase.table("books").select("*").eq("id", book_id).execute()
+    if not book_res.data:
+        raise HTTPException(status_code=404, detail="წიგნი ვერ მოიძებნა")
+        
+    old_book = book_res.data[0]
+    if old_book["seller_id"] != user_id:
+        raise HTTPException(status_code=403, detail="თქვენ არ გაქვთ ამ წიგნის რედაქტირების უფლება.")
+
+    # --- ვალიდაცია ---
+    video_size = len(await video.read())
+    await video.seek(0)
+    if video_size > 50 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="ვიდეოს ზომა არ უნდა აღემატებოდეს 50MB-ს!")
+
+    # --- ახალი ვიდეოს ატვირთვა Supabase Storage-ში ---
+    try:
+        file_ext = video.filename.split(".")[-1]
+        unique_name = f"{uuid.uuid4()}.{file_ext}"
+        file_bytes = await video.read()
+        
+        # ვტვირთავთ შესაბამის ბაკეტში (book-videos)
+        supabase.storage.from_("book-videos").upload(
+            path=unique_name,
+            file=file_bytes,
+            file_options={"content-type": video.content_type}
+        )
+        uploaded_video_url = supabase.storage.from_("book-videos").get_public_url(unique_name)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"ვიდეოს ატვირთვისას მოხდა შეცდომა: {str(e)}")
+
+    # 2. წიგნის განახლება ბაზაში და სტატუსის ჩამოყრა (რადგან მედია ფაილია, სჭირდება ადმინის რევიუ)
+    update_data = {
+        "book_video_url": uploaded_video_url,
+        "status": "pending",
+        "is_approved": False
+    }
+
+    try:
+        supabase.table("books").update(update_data).eq("id", book_id).execute()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"ბაზის განახლების შეცდომა: {str(e)}")
+
+    return {
+        "status": "success", 
+        "message": "ვიდეო წარმატებით შეიცვალა. წიგნი გაიგზავნა ადმინთან გადასახედად.",
+        "new_video_url": uploaded_video_url
+    }   
+
 @router.delete("/{book_id}/delete")
 def delete_my_book(book_id: int, current_user = Depends(get_current_user)):
     user_id = current_user["id"]
@@ -349,3 +464,87 @@ def delete_my_book(book_id: int, current_user = Depends(get_current_user)):
         return {"status": "success", "message": "წიგნი წაიშალა."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.post("/{book_id}/bookmark")
+async def toggle_bookmark(
+    book_id: int, 
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user)):
+
+    user_email = current_user["email"]
+    user_id = current_user["id"]
+
+    # გვჭირდება წიგნის მონაცემები affinity-ის დასათვლელად
+    book_res = supabase.table("books").select("title, genres").eq("id", book_id).execute()
+    if not book_res.data:
+        raise HTTPException(status_code=404, detail="წიგნი ვერ მოიძებნა")
+    book_data = book_res.data[0]
+
+    # ვამოწმებთ, უკვე ხომ არ აქვს შენახული
+    check = supabase.table("book_bookmarks").select("id").eq("user_email", user_email).eq("book_id", book_id).execute()
+
+    if check.data:
+        # თუ მოიძებნა, მოვხსნით (Unbookmark)
+        supabase.table("book_bookmarks").delete().eq("id", check.data[0]["id"]).execute()
+        # ვამატებთ ფონურ დავალებას ქულის შესამცირებლად
+        background_tasks.add_task(affinity.update_user_affinity, user_id, book_data, "unbookmark")
+        return {"message": "წიგნი ამოიშალა შენახულებიდან", "bookmarked": False}
+    else:
+        # თუ არ მოიძებნა, ვამატებთ
+        supabase.table("book_bookmarks").insert({"user_email": user_email, "book_id": book_id}).execute()
+        # ვამატებთ ფონურ დავალებას ქულის გასაზრდელად
+        background_tasks.add_task(affinity.update_user_affinity, user_id, book_data, "bookmark")
+        return {"message": "წიგნი შენახულია", "bookmarked": True}
+    
+@router.post("/{book_id}/rate")
+async def rate_book(
+    book_id: int, 
+    payload: RatingAction, 
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user)):
+
+    user_email = current_user["email"]
+    user_id = current_user["id"]
+    action = payload.action
+
+    if action not in ["like", "dislike", "remove"]:
+        raise HTTPException(status_code=400, detail="Invalid action")
+
+    # გვჭირდება წიგნის მონაცემები affinity-ის დასათვლელად
+    book_res = supabase.table("books").select("title, genres").eq("id", book_id).execute()
+    if not book_res.data:
+        raise HTTPException(status_code=404, detail="წიგნი ვერ მოიძებნა")
+    book_data = book_res.data[0]
+
+    # ჯერ ვამოწმებთ, აქვს თუ არა უკვე შეფასებული
+    check = supabase.table("book_ratings").select("id").eq("user_email", user_email).eq("book_id", book_id).execute()
+    existing_rating = check.data[0] if check.data else None
+
+    if action == "remove":
+        if existing_rating:
+            supabase.table("book_ratings").delete().eq("id", existing_rating["id"]).execute()
+            # ვაკლებთ ქულას რადგან წაშალა შეფასება (იყო ლაიქი ან დისლაიქი, აღარაა)
+            background_tasks.add_task(affinity.update_user_affinity, user_id, book_data, "remove_rating")
+        return {"message": "შეფასება წაიშალა"}
+
+    is_like = True if action == "like" else False
+
+    if existing_rating:
+        # თუ მომხმარებელი Like-ს Dislike-ით ცვლის (ან პირიქით)
+        if existing_rating["is_like"] != is_like:
+            supabase.table("book_ratings").update({"is_like": is_like}).eq("id", existing_rating["id"]).execute()
+            # ვაგზავნით ახალ ექშენს (აქ შეიძლება უფრო რთული ლოგიკა დაგჭირდეს, რომ 
+            # ძველი Like-ის ქულა გამოაკლო და ახალი Dislike-ის დაამატო, მაგრამ სიმარტივისთვის
+            # პირდაპირ ახალ ექშენს ვატანთ)
+            background_tasks.add_task(affinity.update_user_affinity, user_id, book_data, action)
+    else:
+        # ვამატებთ ახალს
+        supabase.table("book_ratings").insert({
+            "user_email": user_email, 
+            "book_id": book_id, 
+            "is_like": is_like
+        }).execute()
+        # ვამატებთ ქულას
+        background_tasks.add_task(affinity.update_user_affinity, user_id, book_data, action)
+
+    return {"message": f"წიგნი შეფასებულია როგორც {action}"}

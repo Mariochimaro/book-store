@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from database import supabase
 from routers.auth import get_current_user
-from services.email_service import send_purchase_success, send_purchase_failed, send_purchase_instructions
+from services.emails.email_service import send_purchase_success, send_purchase_failed, send_purchase_instructions
 from datetime import datetime, timedelta, timezone
 
 router = APIRouter(
