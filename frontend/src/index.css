@@ -76,14 +76,14 @@ a { text-decoration: none; }
   padding: 0 28px;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 20px;
 }
 
 /* Logo + page-nav left cluster */
 .nb-left {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 12px;
   flex-shrink: 0;
 }
 
@@ -107,7 +107,7 @@ a { text-decoration: none; }
 
 .nb-search {
   flex: 1;
-  min-width: 0;
+  min-width: 160px;
   max-width: 480px;
   display: flex;
   align-items: center;
@@ -1869,7 +1869,7 @@ a { text-decoration: none; }
 .nb-page-links {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
@@ -1908,6 +1908,35 @@ a { text-decoration: none; }
 /* Hide on very small screens to keep navbar uncluttered */
 @media (max-width: 600px) {
   .nb-page-links { display: none; }
+}
+
+/* ============================================================
+   ADMIN DASHBOARD LINK  (.nb-admin-link)
+   ============================================================ */
+
+.nb-admin-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 13px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  letter-spacing: 0.1px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.nb-admin-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
 /* ============================================================
@@ -2012,4 +2041,1167 @@ a { text-decoration: none; }
   overflow: hidden;
   clip: rect(0,0,0,0);
   white-space: nowrap;
+}
+
+/* ============================================================
+   ADMIN DASHBOARD
+   ============================================================ */
+
+.ad-page {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 92px 24px 80px; /* 60px fixed navbar + 32px breathing room */
+}
+
+/* ── Page header ──────────────────────────────────────────── */
+.ad-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.ad-title-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.ad-shield-svg {
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.ad-page-title {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 4px;
+  line-height: 1.2;
+}
+
+.ad-page-sub {
+  font-size: 0.85rem;
+  color: var(--text-2);
+  margin: 0;
+}
+
+.ad-admin-badge {
+  background: rgba(201, 125, 58, 0.14);
+  border: 1px solid rgba(201, 125, 58, 0.35);
+  color: var(--accent-h);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 13px;
+  border-radius: var(--r-sm);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Secondary tab navigation ─────────────────────────────── */
+.ad-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ad-tabs::-webkit-scrollbar { display: none; }
+
+.ad-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;          /* sit on the border-bottom */
+  color: var(--text-2);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.18s, border-color 0.18s;
+}
+
+.ad-tab:hover:not(.active) { color: var(--text); }
+
+.ad-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.ad-tab-badge {
+  background: var(--accent);
+  color: #1a0e04;
+  font-size: 0.68rem;
+  font-weight: 700;
+  min-width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  line-height: 1;
+}
+
+/* ── Content area ─────────────────────────────────────────── */
+.ad-content { }
+
+.ad-count-text {
+  font-size: 0.82rem;
+  color: var(--text-2);
+  margin-bottom: 16px;
+}
+
+/* ── Book review card ─────────────────────────────────────── */
+.ad-book-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+  margin-bottom: 14px;
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  transition: border-color 0.2s;
+}
+.ad-book-card:hover { border-color: rgba(201,125,58,0.25); }
+
+.ad-book-cover {
+  width: 68px;
+  height: 92px;
+  object-fit: cover;
+  border-radius: var(--r-sm);
+  flex-shrink: 0;
+}
+
+.ad-book-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ad-book-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.ad-book-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 2px;
+}
+
+.ad-book-author {
+  font-size: 0.8rem;
+  color: var(--text-2);
+  margin: 0 0 2px;
+}
+
+.ad-book-listed {
+  font-size: 0.78rem;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.ad-listed-name {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.ad-book-desc {
+  font-size: 0.8rem;
+  color: var(--text-2);
+  line-height: 1.55;
+  margin: 0 0 10px;
+}
+
+/* ── Tag pills ────────────────────────────────────────────── */
+.ad-book-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.ad-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+/* condition badges */
+.ad-cond-likenew {
+  background: rgba(99,179,237,0.12);
+  color: #63b3ed;
+  border: 1px solid rgba(99,179,237,0.28);
+}
+.ad-cond-new {
+  background: rgba(154,230,180,0.12);
+  color: #9ae6b4;
+  border: 1px solid rgba(154,230,180,0.28);
+}
+.ad-cond-good {
+  background: rgba(246,173,85,0.12);
+  color: #f6ad55;
+  border: 1px solid rgba(246,173,85,0.28);
+}
+.ad-cond-fair {
+  background: rgba(252,129,74,0.12);
+  color: #fc814a;
+  border: 1px solid rgba(252,129,74,0.28);
+}
+
+/* price, isbn, genre */
+.ad-price-tag {
+  background: rgba(201,125,58,0.18);
+  color: var(--accent-h);
+  border: 1px solid rgba(201,125,58,0.3);
+  font-weight: 600;
+}
+.ad-isbn-tag {
+  background: rgba(255,255,255,0.05);
+  color: var(--text-3);
+  border: 1px solid var(--border);
+}
+.ad-genre-tag {
+  background: rgba(147,51,234,0.12);
+  color: #c084fc;
+  border: 1px solid rgba(147,51,234,0.28);
+}
+
+/* ── Submission date ──────────────────────────────────────── */
+.ad-book-date {
+  font-size: 0.72rem;
+  color: var(--text-3);
+  margin: 0;
+}
+
+/* ── Approve / Reject buttons ─────────────────────────────── */
+.ad-book-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.ad-approve-btn,
+.ad-reject-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: var(--r-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.16s, transform 0.12s;
+  white-space: nowrap;
+}
+.ad-approve-btn:hover,
+.ad-reject-btn:hover  { opacity: 0.85; transform: translateY(-1px); }
+.ad-approve-btn:active,
+.ad-reject-btn:active  { transform: translateY(0); }
+
+.ad-approve-btn {
+  background: var(--accent);
+  color: #fff;
+}
+.ad-reject-btn {
+  background: rgba(220, 53, 69, 0.88);
+  color: #fff;
+}
+
+/* ── Empty states ─────────────────────────────────────────── */
+.ad-empty {
+  text-align: center;
+  padding: 64px 20px;
+  color: var(--text-2);
+}
+
+.ad-empty-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+  opacity: 0.35;
+  color: var(--text-2);
+}
+
+.ad-empty-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.ad-empty-sub {
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+
+/* ── All Books table ──────────────────────────────────────── */
+.ad-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+}
+
+.ad-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+  min-width: 640px;
+}
+
+.ad-th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-2);
+  background: var(--bg-card-alt);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.ad-th-cover  { width: 64px; }
+.ad-th-r      { text-align: right; }
+
+.ad-tr {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.ad-tr:last-child { border-bottom: none; }
+.ad-tr:hover      { background: rgba(255,255,255,0.025); }
+
+.ad-td {
+  padding: 10px 14px;
+  color: var(--text);
+  vertical-align: middle;
+}
+.ad-td-cover { width: 64px; }
+.ad-td-r     { text-align: right; }
+
+.ad-table-cover {
+  width: 42px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+}
+
+.ad-td-title {
+  font-weight: 600;
+  color: var(--text);
+  max-width: 200px;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ad-td-author { color: var(--text-2); font-size: 0.82rem; }
+
+.ad-td-price  { color: var(--accent); font-weight: 600; }
+
+.ad-td-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-weight: 500;
+}
+.ad-td-star { color: var(--star); font-size: 0.85rem; }
+
+.ad-popular-badge {
+  display: inline-block;
+  background: rgba(201,125,58,0.16);
+  color: var(--accent-h);
+  border: 1px solid rgba(201,125,58,0.28);
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+/* row action buttons */
+.ad-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.ad-action-btn + .ad-action-btn { margin-left: 5px; }
+
+.ad-edit-btn:hover {
+  color: var(--accent);
+  border-color: rgba(201,125,58,0.4);
+  background: rgba(201,125,58,0.08);
+}
+.ad-delete-btn:hover {
+  color: #fc8181;
+  border-color: rgba(252,129,129,0.4);
+  background: rgba(252,129,129,0.08);
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .ad-page { padding: 80px 16px 60px; } /* keep top clear of navbar on mobile */
+
+  .ad-header { flex-direction: column; gap: 10px; }
+
+  .ad-book-card { flex-wrap: wrap; }
+
+  .ad-book-top {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ad-book-actions {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .ad-approve-btn,
+  .ad-reject-btn { flex: 1; }
+}
+
+/* ============================================================
+   ADMIN DASHBOARD — NOTIFICATIONS PANEL
+   ============================================================ */
+
+.nf-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.nf-count {
+  font-size: 0.82rem;
+  color: var(--text-2);
+}
+
+.nf-pills { display: flex; gap: 8px; }
+
+.nf-pill {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.nf-pill-listing {
+  background: rgba(201,125,58,0.2);
+  color: var(--accent-h);
+  border: 1px solid rgba(201,125,58,0.35);
+}
+.nf-pill-flag {
+  background: rgba(245,101,101,0.18);
+  color: #fc8181;
+  border: 1px solid rgba(245,101,101,0.35);
+}
+
+/* card list */
+.nf-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nf-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  transition: background 0.15s;
+}
+.nf-card:hover { background: rgba(255,255,255,0.022); }
+
+/* colored left accent per notification type */
+.nf-card-listing { border-left: 3px solid rgba(104,211,145,0.55); }
+.nf-card-flag    { border-left: 3px solid rgba(246,173, 85,0.55); }
+.nf-card-sale    { border-left: 3px solid rgba(104,211,145,0.55); }
+
+/* icon square */
+.nf-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-sm);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.nf-icon-listing { background: rgba(104,211,145,0.14); color: #68d391; }
+.nf-icon-flag    { background: rgba(246,173, 85,0.14); color: #f6ad55; }
+.nf-icon-sale    { background: rgba(104,211,145,0.14); color: #68d391; }
+
+/* body text */
+.nf-body { flex: 1; min-width: 0; }
+
+.nf-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 3px;
+  line-height: 1.4;
+}
+.nf-sub  { font-size: 0.8rem;  color: var(--text-2); margin: 0 0 4px; }
+.nf-date { font-size: 0.72rem; color: var(--text-3); margin: 0; }
+
+/* action link */
+.nf-action {
+  background: none;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  padding: 0;
+  margin-top: 2px;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.nf-action:hover { opacity: 0.75; text-decoration: underline; }
+
+.nf-action-listing { color: var(--accent); }
+.nf-action-flag    { color: #fc8181; }
+.nf-action-sale    { color: var(--green); }
+
+/* ============================================================
+   ADMIN DASHBOARD — REPORTS PANEL
+   ============================================================ */
+
+/* Sub-filter row */
+.rp-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.rp-filter-btn {
+  padding: 5px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.rp-filter-btn:hover:not(.active) {
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+}
+.rp-filter-btn.active {
+  background: rgba(201,125,58,0.18);
+  border-color: rgba(201,125,58,0.4);
+  color: var(--accent-h);
+  font-weight: 600;
+}
+
+.rp-open-count {
+  font-size: 0.78rem;
+  color: var(--text-3);
+  margin-left: 4px;
+}
+
+/* Card list */
+.rp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rp-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  transition: background 0.15s;
+}
+.rp-card:hover { background: rgba(255,255,255,0.022); }
+
+/* Warning icon */
+.rp-alert-icon {
+  color: #f6ad55;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Body */
+.rp-body { flex: 1; min-width: 0; }
+
+.rp-top-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.rp-user-line {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.rp-username {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* Status badges */
+.rp-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+.rp-badge-open {
+  background: rgba(245,101,101,0.2);
+  color: #fc8181;
+  border: 1px solid rgba(245,101,101,0.35);
+}
+.rp-badge-blocked {
+  background: rgba(160,174,192,0.15);
+  color: #a0aec0;
+  border: 1px solid rgba(160,174,192,0.25);
+}
+.rp-badge-resolved {
+  background: rgba(201,125,58,0.16);
+  color: var(--accent-h);
+  border: 1px solid rgba(201,125,58,0.28);
+}
+
+.rp-flag-count {
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.rp-desc {
+  font-size: 0.82rem;
+  color: var(--text-2);
+  margin: 0 0 4px;
+  line-height: 1.4;
+}
+.rp-date {
+  font-size: 0.72rem;
+  color: var(--text-3);
+  margin: 0;
+}
+
+/* Action buttons (open reports only) */
+.rp-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.rp-logs-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.rp-logs-btn:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+}
+
+.rp-block-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  background: rgba(229,62,62,0.85);
+  border: none;
+  border-radius: var(--r-sm);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.rp-block-btn:hover  { opacity: 0.85; }
+.rp-block-btn:active { transform: scale(0.97); }
+
+.rp-dismiss-btn {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+}
+.rp-dismiss-btn:hover { color: var(--text-2); }
+
+/* ============================================================
+   ADMIN DASHBOARD — LOGS PANEL
+   ============================================================ */
+
+/* Search + count row */
+.lg-search-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.lg-search-input {
+  flex: 1;
+  padding: 8px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.18s;
+}
+.lg-search-input::placeholder { color: var(--text-3); }
+.lg-search-input:focus        { border-color: rgba(201,125,58,0.5); }
+
+.lg-entry-count {
+  font-size: 0.8rem;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+/* Table column sizing */
+.lg-table        { min-width: 560px; }
+.lg-th-action    { width: 200px; }
+.lg-th-admin     { width: 80px; }
+.lg-th-date      { width: 200px; white-space: nowrap; }
+
+/* Cell text */
+.lg-td-target { color: var(--text); font-size: 0.84rem; }
+.lg-td-muted  { color: var(--text-2); font-size: 0.82rem; }
+
+/* Empty filter row */
+.lg-empty-row {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 0.84rem;
+}
+
+/* Action badge pills — monospace, styled per type */
+.lg-badge {
+  display: inline-block;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 3px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.lg-badge-approve {
+  background: rgba(201,125,58,0.15);
+  color: var(--accent-h);
+  border: 1px solid rgba(201,125,58,0.3);
+}
+
+.lg-badge-reject {
+  background: rgba(245,101,101,0.14);
+  color: #fc8181;
+  border: 1px solid rgba(245,101,101,0.3);
+}
+
+.lg-badge-block {
+  background: rgba(197,48,48,0.75);
+  color: #fff;
+  border: 1px solid transparent;
+}
+
+.lg-badge-resolve {
+  background: rgba(160,174,192,0.1);
+  color: var(--text-3);
+  border: 1px solid rgba(160,174,192,0.2);
+}
+
+/* ============================================================
+   ADMIN DASHBOARD — FINANCE PANEL  (.fn-*)
+   ============================================================ */
+
+/* Root container */
+.fn-root {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Shared card shell */
+.fn-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+}
+
+/* ── Top grid: revenue chart + stat cards ────────────────── */
+.fn-top-grid {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* Platform Revenue card internals */
+.fn-revenue-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fn-rev-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fn-card-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.fn-card-sub {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  margin: 3px 0 0;
+}
+
+.fn-mom-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #34d399;
+  background: rgba(52,211,153,0.13);
+  border: 1px solid rgba(52,211,153,0.25);
+  border-radius: 4px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Bar chart */
+.fn-bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 130px;
+  flex: 1;
+}
+
+.fn-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+}
+
+.fn-bar-track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.fn-bar {
+  width: 100%;
+  background: rgba(201,125,58,0.28);
+  border-radius: 4px 4px 0 0;
+  min-height: 6px;
+  transition: height 0.4s ease;
+}
+
+.fn-bar.fn-bar-hi {
+  background: var(--accent);
+}
+
+.fn-bar-label {
+  font-size: 0.7rem;
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+
+/* Chart footer */
+.fn-chart-foot {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.fn-foot-txt {
+  font-size: 0.78rem;
+  color: var(--text-2);
+}
+
+.fn-foot-txt strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Right: stacked stat cards */
+.fn-stats-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fn-stat-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+}
+
+.fn-stat-green {
+  border-color: rgba(52,211,153,0.2);
+  background: linear-gradient(135deg, var(--bg-card) 60%, rgba(52,211,153,0.05));
+}
+
+.fn-stat-gold {
+  border-color: rgba(201,125,58,0.28);
+  background: linear-gradient(135deg, var(--bg-card) 60%, rgba(201,125,58,0.07));
+}
+
+.fn-stat-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.fn-stat-lbl {
+  font-size: 0.73rem;
+  color: var(--text-2);
+  margin: 0 0 5px;
+}
+
+.fn-stat-val {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+  margin: 0 0 3px;
+}
+
+.fn-val-gold {
+  color: var(--accent);
+}
+
+.fn-stat-sub {
+  font-size: 0.72rem;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.fn-stat-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.07);
+  color: var(--text-2);
+  flex-shrink: 0;
+}
+
+.fn-icon-green {
+  background: rgba(52,211,153,0.15);
+  color: #34d399;
+}
+
+.fn-icon-gold {
+  background: rgba(201,125,58,0.18);
+  color: var(--accent);
+}
+
+/* ── Bottom grid: genre bars + top books ─────────────────── */
+.fn-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* Genre Popularity */
+.fn-genre-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.fn-genre-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fn-genre-lbl {
+  font-size: 0.8rem;
+  color: var(--text-2);
+  width: 128px;
+  flex-shrink: 0;
+}
+
+.fn-prog-track {
+  flex: 1;
+  height: 5px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.fn-prog-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.fn-genre-pct {
+  font-size: 0.78rem;
+  color: var(--text-2);
+  width: 32px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Top Performing Books */
+.fn-book-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+
+.fn-book-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.fn-book-row:last-child {
+  border-bottom: none;
+}
+
+.fn-book-rank {
+  width: 18px;
+  font-size: 0.8rem;
+  color: var(--text-3);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.fn-book-cover {
+  width: 36px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.fn-book-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.fn-book-title {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0 0 2px;
+}
+
+.fn-book-author {
+  font-size: 0.74rem;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.fn-book-price {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .fn-top-grid    { grid-template-columns: 1fr; }
+  .fn-stats-col   { flex-direction: row; flex-wrap: wrap; }
+  .fn-stat-card   { flex: 1 1 calc(50% - 6px); }
+}
+
+@media (max-width: 680px) {
+  .fn-bottom-grid { grid-template-columns: 1fr; }
+  .fn-stat-card   { flex: 1 1 100%; }
+  .fn-genre-lbl   { width: 104px; }
 }

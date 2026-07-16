@@ -1,14 +1,11 @@
-<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-=======
-import { useState, useEffect, useMemo } from "react";
-import { Link, useSearchParams } from "react-router-dom";
->>>>>>> f6bb8b2a751d641de9dcbadd8183608efa713e04
 import Navbar from "../components/Navbar";
-import BookCard from "../components/BookCard";
+import { useCart } from "../context/CartContext";
 
-const API_URL = import.meta.env.VITE_API_URL;
+// ─────────────────────────────────────────────────────────────
+// CONSTANTS
+// ─────────────────────────────────────────────────────────────
 
 const LANGUAGE_MAP = {
   English:  "eng",
@@ -20,19 +17,24 @@ const LANGUAGE_MAP = {
 };
 
 const CONDITION_MAP = {
-  "New":      "new",
-  "Good": "good",
-  "Average":     "average",
-  "Damaged":     "damaged",
+  "New":     "new",
+  "Good":    "good",
+  "Average": "average",
+  "Damaged": "damaged",
 };
 
 const CONDITIONS = ["New", "Like-New", "Good", "Fair"];
 const LANGUAGES  = ["English", "Georgian", "French", "German", "Russian", "Japanese"];
 
+const GENRES = [
+  "Gothic Horror", "Dark Fantasy", "Mystery", "Victorian Gothic",
+  "Paranormal", "Dark Romance", "Supernatural", "Thriller",
+  "Cozy Fantasy", "Fairy Tale", "Urban Fantasy", "Historical",
+];
+
 // ─────────────────────────────────────────────────────────────
-// BOOK CAROUSEL (Fixed layout resizing on partial pages)
+// MOCK DATA  (swap for real API calls when backend is ready)
 // ─────────────────────────────────────────────────────────────
-<<<<<<< HEAD
 
 const BESTSELLERS = [
   {
@@ -74,32 +76,32 @@ const BESTSELLERS = [
 ];
 
 const POPULAR = [
-  { id: 1,  title: "The Crimson Veil",           author: "Victoria Thornfield",  price: "22.99", badge: "new",     cover: "https://picsum.photos/seed/crimsonveil/400/560" },
-  { id: 2,  title: "Witching Hour Chronicles",   author: "Morgana Blackthorn",   price: "24.99", badge: "pending", cover: "https://picsum.photos/seed/witchinghour2/400/560" },
-  { id: 3,  title: "The Amber Witch",             author: "Philippa Sovencroft",  price: "27.99", badge: null,      cover: "https://picsum.photos/seed/amberwitch/400/560" },
-  { id: 4,  title: "Midnight Apothecary",         author: "Circe Arledenne",      price: "21.49", badge: "new",     cover: "https://picsum.photos/seed/midnightapo/400/560" },
-  { id: 5,  title: "The Gilded Cage of Sorrows",  author: "Endymion Graven",      price: "28.99", badge: "new",     cover: "https://picsum.photos/seed/gildedcage/400/560" },
-  { id: 6,  title: "Veil of Starless Nights",     author: "Seraphine Dusk",       price: "23.49", badge: null,      cover: "https://picsum.photos/seed/veilstarless/400/560" },
-  { id: 7,  title: "The Bone Garden",             author: "Lux Mortem",           price: "26.99", badge: "new",     cover: "https://picsum.photos/seed/bonegarden/400/560" },
-  { id: 8,  title: "Daughters of the Tide",       author: "Corinna Waveborn",     price: "20.99", badge: null,      cover: "https://picsum.photos/seed/tidedaughters/400/560" },
-  { id: 9,  title: "The Oracle's Lament",         author: "Zephyr Ashvale",       price: "24.99", badge: "new",     cover: "https://picsum.photos/seed/oraclelament/400/560" },
-  { id: 10, title: "Ink & Omen",                  author: "Thessaly Crane",       price: "18.99", badge: null,      cover: "https://picsum.photos/seed/inkomen/400/560" },
+  { id: 1,  title: "The Crimson Veil",            author: "Victoria Thornfield",  price: "22.99", badge: "new",     cover: "https://picsum.photos/seed/crimsonveil/400/560" },
+  { id: 2,  title: "Witching Hour Chronicles",    author: "Morgana Blackthorn",   price: "24.99", badge: "pending", cover: "https://picsum.photos/seed/witchinghour2/400/560" },
+  { id: 3,  title: "The Amber Witch",              author: "Philippa Sovencroft",  price: "27.99", badge: null,      cover: "https://picsum.photos/seed/amberwitch/400/560" },
+  { id: 4,  title: "Midnight Apothecary",          author: "Circe Arledenne",      price: "21.49", badge: "new",     cover: "https://picsum.photos/seed/midnightapo/400/560" },
+  { id: 5,  title: "The Gilded Cage of Sorrows",   author: "Endymion Graven",      price: "28.99", badge: "new",     cover: "https://picsum.photos/seed/gildedcage/400/560" },
+  { id: 6,  title: "Veil of Starless Nights",      author: "Seraphine Dusk",       price: "23.49", badge: null,      cover: "https://picsum.photos/seed/veilstarless/400/560" },
+  { id: 7,  title: "The Bone Garden",              author: "Lux Mortem",           price: "26.99", badge: "new",     cover: "https://picsum.photos/seed/bonegarden/400/560" },
+  { id: 8,  title: "Daughters of the Tide",        author: "Corinna Waveborn",     price: "20.99", badge: null,      cover: "https://picsum.photos/seed/tidedaughters/400/560" },
+  { id: 9,  title: "The Oracle's Lament",          author: "Zephyr Ashvale",       price: "24.99", badge: "new",     cover: "https://picsum.photos/seed/oraclelament/400/560" },
+  { id: 10, title: "Ink & Omen",                   author: "Thessaly Crane",       price: "18.99", badge: null,      cover: "https://picsum.photos/seed/inkomen/400/560" },
 ];
 
 const NEW_ARRIVALS = [
-  { id: 11, title: "The Starweaver's Daughter",    author: "Isadora Vives",    price: "21.99", badge: "new", cover: "https://picsum.photos/seed/starweaver/400/560" },
-  { id: 12, title: "The Moonpetal Inn",             author: "Theodora Wren",   price: "18.99", badge: "new", cover: "https://picsum.photos/seed/moonpetal/400/560" },
-  { id: 13, title: "Foxfire and Forgotten Names",  author: "Sable Marquees",  price: "20.49", badge: "new", cover: "https://picsum.photos/seed/foxfire/400/560" },
-  { id: 14, title: "A Bouquet of Broken Spells",   author: "Isolde Fairleigh", price: "17.99", badge: "new", cover: "https://picsum.photos/seed/bouquetspells/400/560" },
-  { id: 15, title: "The Cartographer of Nightmares", author: "Declan Vex",    price: "25.49", badge: "new", cover: "https://picsum.photos/seed/cartographer/400/560" },
-  { id: 16, title: "The Hollow Forest",             author: "Sable Haze",      price: "22.99", badge: "new", cover: "https://picsum.photos/seed/hollowforest/400/560" },
-  { id: 17, title: "Glass and Ether",               author: "Niamh Vray",      price: "19.99", badge: "new", cover: "https://picsum.photos/seed/glassether/400/560" },
-  { id: 18, title: "The Last Oracle",               author: "Clio Pendrake",   price: "23.99", badge: "new", cover: "https://picsum.photos/seed/lastoracle/400/560" },
-  { id: 19, title: "Mirrors of the Deep",           author: "Seren Cross",     price: "21.49", badge: "new", cover: "https://picsum.photos/seed/mirrorsdeep/400/560" },
-  { id: 20, title: "The Runed Gate",                author: "Elliot Asher",    price: "20.99", badge: "new", cover: "https://picsum.photos/seed/runedgate/400/560" },
+  { id: 11, title: "The Starweaver's Daughter",     author: "Isadora Vives",     price: "21.99", badge: "new", cover: "https://picsum.photos/seed/starweaver/400/560" },
+  { id: 12, title: "The Moonpetal Inn",              author: "Theodora Wren",    price: "18.99", badge: "new", cover: "https://picsum.photos/seed/moonpetal/400/560" },
+  { id: 13, title: "Foxfire and Forgotten Names",   author: "Sable Marquees",   price: "20.49", badge: "new", cover: "https://picsum.photos/seed/foxfire/400/560" },
+  { id: 14, title: "A Bouquet of Broken Spells",    author: "Isolde Fairleigh", price: "17.99", badge: "new", cover: "https://picsum.photos/seed/bouquetspells/400/560" },
+  { id: 15, title: "The Cartographer of Nightmares",author: "Declan Vex",       price: "25.49", badge: "new", cover: "https://picsum.photos/seed/cartographer/400/560" },
+  { id: 16, title: "The Hollow Forest",              author: "Sable Haze",       price: "22.99", badge: "new", cover: "https://picsum.photos/seed/hollowforest/400/560" },
+  { id: 17, title: "Glass and Ether",                author: "Niamh Vray",       price: "19.99", badge: "new", cover: "https://picsum.photos/seed/glassether/400/560" },
+  { id: 18, title: "The Last Oracle",                author: "Clio Pendrake",    price: "23.99", badge: "new", cover: "https://picsum.photos/seed/lastoracle/400/560" },
+  { id: 19, title: "Mirrors of the Deep",            author: "Seren Cross",      price: "21.49", badge: "new", cover: "https://picsum.photos/seed/mirrorsdeep/400/560" },
+  { id: 20, title: "The Runed Gate",                 author: "Elliot Asher",     price: "20.99", badge: "new", cover: "https://picsum.photos/seed/runedgate/400/560" },
 ];
 
-// Additional per-book details (description, tags, ISBN) keyed by book id
+// Additional per-book details keyed by book id
 const BOOK_DETAILS = {
   1:  { description: "Set in Victorian London, this tale follows a mysterious woman who arrives at a grand estate, harboring secrets that could unravel the entire aristocracy.", tags: ["Victorian Gothic", "Dark Romance", "English"], isbn: "978-1-234567-91-3", year: "2023" },
   2:  { description: "In the witching hours of a cursed town, Morgana must outwit the coven elders before the next blood moon rises and the ancient spell is unleashed.", tags: ["Dark Fantasy", "Supernatural", "English"], isbn: "978-1-234567-92-0", year: "2022" },
@@ -191,13 +193,13 @@ function BookCard({ book, onOpenDetail }) {
 // BOOK CAROUSEL  (Most Popular / New Arrivals)
 // ─────────────────────────────────────────────────────────────
 
-=======
->>>>>>> f6bb8b2a751d641de9dcbadd8183608efa713e04
 const PER_PAGE = 5;
 
 function BookCarousel({ icon, title, subtitle, books, onOpenDetail, id }) {
   const [page, setPage] = useState(0);
+  // Reset to first page whenever the books array changes
   useEffect(() => { setPage(0); }, [books]);
+
   if (!books.length) return null;
 
   const total   = Math.ceil(books.length / PER_PAGE);
@@ -221,26 +223,12 @@ function BookCarousel({ icon, title, subtitle, books, onOpenDetail, id }) {
       </div>
 
       <div className="book-grid">
-<<<<<<< HEAD
-        {visible.map((book) => (
-          <BookCard key={book.id} book={book} onOpenDetail={onOpenDetail} />
-        ))}
-=======
+        {/* Fixed-slot rendering: keeps grid columns stable on the last page */}
         {Array.from({ length: PER_PAGE }).map((_, index) => {
           const book = visible[index];
-          if (book) {
-            return <BookCard key={book.id} book={book} />;
-          }
-          // Placeholder slots that keep columns from stretching on the last page
-          return (
-            <div 
-              key={`empty-${index}`} 
-              style={{ visibility: "hidden", minHeight: "1px" }} 
-              aria-hidden="true" 
-            />
-          );
+          if (book) return <BookCard key={book.id} book={book} onOpenDetail={onOpenDetail} />;
+          return <div key={`empty-${index}`} style={{ visibility: "hidden", minHeight: "1px" }} aria-hidden="true" />;
         })}
->>>>>>> f6bb8b2a751d641de9dcbadd8183608efa713e04
       </div>
 
       <div className="c-dots" role="tablist">
@@ -253,7 +241,6 @@ function BookCarousel({ icon, title, subtitle, books, onOpenDetail, id }) {
 }
 
 // ─────────────────────────────────────────────────────────────
-<<<<<<< HEAD
 // BESTSELLER CAROUSEL
 // ─────────────────────────────────────────────────────────────
 
@@ -268,23 +255,13 @@ function BestsellerCarousel({ books, onOpenDetail }) {
       </h2>
 
       <div className="bs-card">
-        {/* Prev arrow */}
-        <button
-          className="bs-arrow bs-arrow-l"
-          onClick={() => setIdx((i) => i - 1)}
-          disabled={idx === 0}
-          aria-label="Previous bestseller"
-        >
-          ‹
-        </button>
+        <button className="bs-arrow bs-arrow-l" onClick={() => setIdx((i) => i - 1)} disabled={idx === 0} aria-label="Previous bestseller">‹</button>
 
-        {/* Cover image */}
         <div className="bs-img-wrap">
           <img src={book.cover} alt={book.title} className="bs-img" />
           <span className="bs-badge">{book.badge}</span>
         </div>
 
-        {/* Details */}
         <div className="bs-content">
           <p className="bs-label">{book.label}</p>
           <h3 className="bs-title">{book.title}</h3>
@@ -293,24 +270,13 @@ function BestsellerCarousel({ books, onOpenDetail }) {
           <p className="bs-desc">{book.description}</p>
           <div className="bs-bottom">
             <span className="bs-price">${book.price}</span>
-            <button
-              className="btn-view"
-              onClick={() => onOpenDetail && onOpenDetail(book)}
-            >
+            <button className="btn-view" onClick={() => onOpenDetail && onOpenDetail(book)}>
               View Book
             </button>
           </div>
         </div>
 
-        {/* Next arrow */}
-        <button
-          className="bs-arrow bs-arrow-r"
-          onClick={() => setIdx((i) => i + 1)}
-          disabled={idx === books.length - 1}
-          aria-label="Next bestseller"
-        >
-          ›
-        </button>
+        <button className="bs-arrow bs-arrow-r" onClick={() => setIdx((i) => i + 1)} disabled={idx === books.length - 1} aria-label="Next bestseller">›</button>
       </div>
     </section>
   );
@@ -322,11 +288,10 @@ function BestsellerCarousel({ books, onOpenDetail }) {
 
 function BookDetailModal({ book, onClose }) {
   const { addToCart } = useCart();
-  const [added, setAdded]       = useState(false);
-  const [activeImg, setActiveImg] = useState(0);
+  const [added, setAdded]         = useState(false);
+  const [activeImg, setActiveImg]   = useState(0);
   const [wishlisted, setWishlisted] = useState(false);
 
-  // Body scroll lock + Escape key
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -352,13 +317,12 @@ function BookDetailModal({ book, onClose }) {
   };
 
   const conditionMap = {
-    new:     { label: "NEW — Unused, pristine condition",     cls: "bdm-cond-new" },
-    pending: { label: "LIKE-NEW — Excellent, minimal use",    cls: "bdm-cond-used" },
-    ist:     { label: "GOOD — Some wear, fully readable",     cls: "bdm-cond-good" },
+    new:     { label: "NEW — Unused, pristine condition",  cls: "bdm-cond-new" },
+    pending: { label: "LIKE-NEW — Excellent, minimal use", cls: "bdm-cond-used" },
+    ist:     { label: "GOOD — Some wear, fully readable",  cls: "bdm-cond-good" },
   };
   const cond = conditionMap[book.badge] ?? conditionMap.new;
 
-  // Gallery: main cover + 2 alternate seeds for visual variety
   const images = [
     book.cover,
     `https://picsum.photos/seed/${book.id}_int/400/560`,
@@ -366,16 +330,10 @@ function BookDetailModal({ book, onClose }) {
   ];
 
   return (
-    <div
-      className="modal-backdrop"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-      role="presentation"
-    >
+    <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()} role="presentation">
       <div className="bdm-card" role="dialog" aria-modal="true" aria-labelledby="bdm-heading">
-        {/* Close */}
         <button className="modal-x bdm-close" onClick={onClose} aria-label="Close details">✕</button>
 
-        {/* ── Left: image gallery ───────────────────────── */}
         <div className="bdm-gallery">
           <button
             className={`bdm-bookmark-btn${wishlisted ? " active" : ""}`}
@@ -394,19 +352,13 @@ function BookDetailModal({ book, onClose }) {
 
           <div className="bdm-thumbs">
             {images.map((img, i) => (
-              <button
-                key={i}
-                className={`bdm-thumb${activeImg === i ? " active" : ""}`}
-                onClick={() => setActiveImg(i)}
-                aria-label={`View image ${i + 1}`}
-              >
+              <button key={i} className={`bdm-thumb${activeImg === i ? " active" : ""}`} onClick={() => setActiveImg(i)} aria-label={`View image ${i + 1}`}>
                 <img src={img} alt={`View ${i + 1}`} />
               </button>
             ))}
           </div>
         </div>
 
-        {/* ── Right: details ────────────────────────────── */}
         <div className="bdm-details">
           <div>
             <h2 className="bdm-title" id="bdm-heading">{book.title}</h2>
@@ -421,9 +373,7 @@ function BookDetailModal({ book, onClose }) {
           </div>
 
           <div className="bdm-tags">
-            {details.tags.map((t) => (
-              <span key={t} className="bdm-tag">{t}</span>
-            ))}
+            {details.tags.map((t) => <span key={t} className="bdm-tag">{t}</span>)}
           </div>
 
           <div>
@@ -453,24 +403,15 @@ function BookDetailModal({ book, onClose }) {
           </div>
 
           <div className="bdm-actions">
-            <button
-              className={`bdm-add-cart${added ? " added" : ""}`}
-              onClick={handleAddToCart}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <button className={`bdm-add-cart${added ? " added" : ""}`} onClick={handleAddToCart}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
               </svg>
               {added ? "Added to Cart!" : "Add to Cart"}
             </button>
-            <button
-              className={`bdm-wishlist-action${wishlisted ? " active" : ""}`}
-              onClick={() => setWishlisted((w) => !w)}
-              aria-label="Wishlist"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill={wishlisted ? "currentColor" : "none"}
-                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <button className={`bdm-wishlist-action${wishlisted ? " active" : ""}`} onClick={() => setWishlisted((w) => !w)} aria-label="Wishlist">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={wishlisted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
               </svg>
             </button>
@@ -482,10 +423,9 @@ function BookDetailModal({ book, onClose }) {
 }
 
 // ─────────────────────────────────────────────────────────────
-=======
->>>>>>> f6bb8b2a751d641de9dcbadd8183608efa713e04
 // FILTER PANEL
 // ─────────────────────────────────────────────────────────────
+
 function FilterPanel({ isOpen, onClose, filters, onFilterChange, availableGenres, genresLoading }) {
   const { priceMax, genres, conditions, languages } = filters;
 
@@ -527,20 +467,20 @@ function FilterPanel({ isOpen, onClose, filters, onFilterChange, availableGenres
             type="range" min={0} max={100} value={priceMax}
             onChange={(e) => onFilterChange((prev) => ({ ...prev, priceMax: +e.target.value }))}
             className="fp-range" style={{ background: sliderBg }}
-            aria-label={`Max price: ${priceMax} ₾`}
+            aria-label={`Max price: ${priceMax}`}
           />
           <div className="fp-price-row">
-            <span>0 ₾</span>
-            <span>Up to {priceMax} ₾</span>
+            <span>$0</span>
+            <span>Up to ${priceMax}</span>
           </div>
         </div>
 
         <div className="fp-section">
           <p className="fp-lbl">Genre</p>
           {genresLoading ? (
-            <p style={{ fontSize: "0.8rem", opacity: 0.5 }}>იტვირთება...</p>
+            <p style={{ fontSize: "0.8rem", opacity: 0.5 }}>Loading...</p>
           ) : availableGenres.length === 0 ? (
-            <p style={{ fontSize: "0.8rem", opacity: 0.5 }}>ჟანრები ვერ მოიძებნა</p>
+            <p style={{ fontSize: "0.8rem", opacity: 0.5 }}>No genres found</p>
           ) : (
             <div className="fp-tags">
               {availableGenres.map((g) => (
@@ -583,6 +523,7 @@ function FilterPanel({ isOpen, onClose, filters, onFilterChange, availableGenres
 // ─────────────────────────────────────────────────────────────
 // HERO
 // ─────────────────────────────────────────────────────────────
+
 function HeroSection({ onFilterToggle, searchQuery, onSearchChange, onSearchSubmit }) {
   return (
     <section className="hero" aria-label="Hero">
@@ -611,25 +552,13 @@ function HeroSection({ onFilterToggle, searchQuery, onSearchChange, onSearchSubm
 }
 
 // ─────────────────────────────────────────────────────────────
-// HOME
+// HOME PAGE
 // ─────────────────────────────────────────────────────────────
+
 function Home() {
-<<<<<<< HEAD
   const [filtersOpen, setFiltersOpen]   = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
-=======
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") ?? "");
-  const [apiQuery, setApiQuery]       = useState(searchParams.get("q") ?? "");
-
-  const [allBooks, setAllBooks]       = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const [filtersOpen, setFiltersOpen] = useState(false);
->>>>>>> f6bb8b2a751d641de9dcbadd8183608efa713e04
-
-  const [availableGenres, setAvailableGenres] = useState([]);
-  const [genresLoading, setGenresLoading]     = useState(true);
+  const [searchQuery, setSearchQuery]   = useState("");
 
   const [filters, setFilters] = useState({
     priceMax:   100,
@@ -638,69 +567,15 @@ function Home() {
     languages:  new Set(),
   });
 
-  useEffect(() => {
-    fetch(`${API_URL}/books/genres`)
-      .then((res) => res.json())
-      .then((data) => { setAvailableGenres(Array.isArray(data) ? data : []); setGenresLoading(false); })
-      .catch(() => setGenresLoading(false));
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-
-    const params = new URLSearchParams();
-    if (apiQuery)               params.set("q",         apiQuery);
-    if (filters.priceMax < 100) params.set("max_price", filters.priceMax);
-
-    fetch(`${API_URL}/books?${params}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (!cancelled) { setAllBooks(Array.isArray(data) ? data : []); setLoading(false); }
-      })
-      .catch(() => { if (!cancelled) { setAllBooks([]); setLoading(false); } });
-
-    return () => { cancelled = true; };
-  }, [apiQuery, filters.priceMax]);
-
-  const filteredBooks = useMemo(() => {
-    let result = allBooks;
-
-    if (filters.conditions.size > 0) {
-      const mapped = new Set([...filters.conditions].map((c) => CONDITION_MAP[c] ?? c.toLowerCase()));
-      result = result.filter((b) => mapped.has(b.condition));
-    }
-    if (filters.languages.size > 0) {
-      const mapped = new Set([...filters.languages].map((l) => LANGUAGE_MAP[l] ?? l.toLowerCase()));
-      result = result.filter((b) => mapped.has(b.language?.toLowerCase()));
-    }
-    if (filters.genres.size > 0) {
-      result = result.filter((b) => {
-        const bookGenres = (b.genres ?? []).map((g) => g.toLowerCase());
-        return [...filters.genres].some((g) =>
-          bookGenres.some((bg) => bg.includes(g.toLowerCase()))
-        );
-      });
-    }
-
-    return result;
-  }, [allBooks, filters.conditions, filters.languages, filters.genres]);
-
-  const featured    = filteredBooks.slice(0, 3);
-  const newArrivals = useMemo(
-    () => [...filteredBooks].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
-    [filteredBooks]
-  );
-
   function handleSearchSubmit(e) {
     e.preventDefault();
-    setApiQuery(searchQuery);
-    setSearchParams(searchQuery ? { q: searchQuery } : {});
+    // No-op with mock data; wire to API when backend is ready
   }
 
   return (
     <>
       <Navbar />
+
       <main>
         <HeroSection
           onFilterToggle={() => setFiltersOpen((o) => !o)}
@@ -715,12 +590,11 @@ function Home() {
             onClose={() => setFiltersOpen(false)}
             filters={filters}
             onFilterChange={setFilters}
-            availableGenres={availableGenres}
-            genresLoading={genresLoading}
+            availableGenres={GENRES}
+            genresLoading={false}
           />
 
           <div className="sections-area">
-<<<<<<< HEAD
             <BestsellerCarousel books={BESTSELLERS} onOpenDetail={setSelectedBook} />
 
             <BookCarousel
@@ -740,18 +614,6 @@ function Home() {
               books={NEW_ARRIVALS}
               onOpenDetail={setSelectedBook}
             />
-=======
-            {loading ? (
-              <h2 style={{ padding: "40px", textAlign: "center" }}>იტვირთება...</h2>
-            ) : filteredBooks.length === 0 ? (
-              <h2 style={{ padding: "40px", textAlign: "center" }}>წიგნები ვერ მოიძებნა</h2>
-            ) : (
-              <>
-                <BookCarousel icon="↗" title="Popular & Bestsellers" subtitle="Beloved by readers across the archive" books={filteredBooks} />
-                <BookCarousel icon="✦" title="New Arrivals & Discoveries"  subtitle="Just added — fresh discoveries await"  books={newArrivals} />
-              </>
-            )}
->>>>>>> f6bb8b2a751d641de9dcbadd8183608efa713e04
           </div>
         </div>
       </main>

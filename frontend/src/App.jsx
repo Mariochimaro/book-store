@@ -7,7 +7,7 @@ import Home from "./pages/Home.jsx";
 import BookDetail from "./pages/BookDetail.jsx";
 import Profile from "./pages/Profile.jsx";
 import Notifications from "./pages/Notifications.jsx";
-import AdminPanel from "./pages/AdminPanel.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
 
 import Cart from "./components/Cart.jsx";
 
@@ -22,7 +22,7 @@ function App() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/notifications" element={<Notifications />} />
-          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </BrowserRouter>
     </CartProvider>
