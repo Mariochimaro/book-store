@@ -1,59 +1,64 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL;
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser]       = useState(null);
+  const [loading, setLoading] = useState(true); // token-ის შემოწმება mount-ზე
 
-  /**
-   * Mock login — swap the body for a real fetch() when the backend is ready.
-   * Returns { success: true } or { success: false, error: string }.
-   */
-  function login(email, password) {
-    if (!email || !password) {
-      return { success: false, error: "Please fill in all fields." };
-    }
-    if (password.length < 3) {
-      return { success: false, error: "Password must be at least 3 characters." };
-    }
+  // ── Mount: localStorage-ში token თუ გვაქვს, /auth/me-ს ვეკითხებით ──
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) { setLoading(false); return; }
 
-    // Admin demo credentials
-    if (email === "admin@darklibrary.com" && password === "admin") {
-      setUser({ name: "Admin", email, role: "admin" });
+    fetch(`${API_URL}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("invalid token");
+        return res.json();
+      })
+      .then((data) => { setUser(data); })
+      .catch(() => { localStorage.removeItem("token"); })
+      .finally(() => { setLoading(false); });
+  }, []);
+
+  // ── Login: API call → token save → user set ──────────────
+  async function login(email, password) {
+    try {
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) return { success: false, error: data.detail ?? "შეცდომა" };
+
+      localStorage.setItem("token", data.access_token);
+
+      // token მივიღეთ — ახლა ვიღებთ სრულ user ობიექტს
+      const meRes  = await fetch(`${API_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${data.access_token}` },
+      });
+      const meData = await meRes.json();
+      setUser(meData);
       return { success: true };
+    } catch {
+      return { success: false, error: "სერვერთან კავშირი ვერ მოხერხდა" };
     }
-
-    // Accept any valid-looking credentials (mock backend behaviour)
-    const nameFromEmail = email.split("@")[0].replace(/[._]/g, " ");
-    const displayName   = nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1);
-    setUser({ name: displayName, email, role: "user" });
-    return { success: true };
   }
 
-  /**
-   * Mock register — auto-logs in the new user on success.
-   */
-  function register(name, email, password) {
-    if (!name.trim() || !email || !password) {
-      return { success: false, error: "Please fill in all fields." };
-    }
-    if (password.length < 3) {
-      return { success: false, error: "Password must be at least 3 characters." };
-    }
-
-    setUser({ name: name.trim(), email, role: "user" });
-    return { success: true };
-  }
-
+  // ── Logout ───────────────────────────────────────────────
   function logout() {
+    localStorage.removeItem("token");
     setUser(null);
   }
 
   return (
-    <AuthContext.Provider
-      value={{ user, login, register, logout, isLoggedIn: !!user }}
-    >
-      {children}
+    <AuthContext.Provider value={{ user, login, logout, loading, isLoggedIn: !!user }}>
+      {/* loading-ის დროს არაფერს არ ვრენდერავთ — თავიდან ავიცილებთ "ცარიელ flash"-ს */}
+      {loading ? null : children}
     </AuthContext.Provider>
   );
 }

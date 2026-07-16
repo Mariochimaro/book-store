@@ -1,6 +1,13 @@
+<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
+=======
+import { useState, useEffect, useMemo } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import BookCard from "../components/BookCard";
+>>>>>>> f2ccb28d968fedd23805066deda520ef318843ac
 import { useCart } from "../context/CartContext";
 
 // ─────────────────────────────────────────────────────────────
@@ -35,6 +42,7 @@ const GENRES = [
 // ─────────────────────────────────────────────────────────────
 // MOCK DATA  (swap for real API calls when backend is ready)
 // ─────────────────────────────────────────────────────────────
+<<<<<<< HEAD
 
 const BESTSELLERS = [
   {
@@ -193,6 +201,8 @@ function BookCard({ book, onOpenDetail }) {
 // BOOK CAROUSEL  (Most Popular / New Arrivals)
 // ─────────────────────────────────────────────────────────────
 
+=======
+>>>>>>> f2ccb28d968fedd23805066deda520ef318843ac
 const PER_PAGE = 5;
 
 function BookCarousel({ icon, title, subtitle, books, onOpenDetail, id }) {
@@ -223,7 +233,10 @@ function BookCarousel({ icon, title, subtitle, books, onOpenDetail, id }) {
       </div>
 
       <div className="book-grid">
+<<<<<<< HEAD
         {/* Fixed-slot rendering: keeps grid columns stable on the last page */}
+=======
+>>>>>>> f2ccb28d968fedd23805066deda520ef318843ac
         {Array.from({ length: PER_PAGE }).map((_, index) => {
           const book = visible[index];
           if (book) return <BookCard key={book.id} book={book} onOpenDetail={onOpenDetail} />;
@@ -241,11 +254,18 @@ function BookCarousel({ icon, title, subtitle, books, onOpenDetail, id }) {
 }
 
 // ─────────────────────────────────────────────────────────────
+<<<<<<< HEAD
 // BESTSELLER CAROUSEL
+=======
+// BESTSELLER CAROUSEL (adapted to run off live "featured" books instead
+// of the hardcoded BESTSELLERS array)
+>>>>>>> f2ccb28d968fedd23805066deda520ef318843ac
 // ─────────────────────────────────────────────────────────────
-
 function BestsellerCarousel({ books, onOpenDetail }) {
   const [idx, setIdx] = useState(0);
+  useEffect(() => { setIdx(0); }, [books]);
+  if (!books.length) return null;
+
   const book = books[idx];
 
   return (
@@ -255,19 +275,30 @@ function BestsellerCarousel({ books, onOpenDetail }) {
       </h2>
 
       <div className="bs-card">
+<<<<<<< HEAD
         <button className="bs-arrow bs-arrow-l" onClick={() => setIdx((i) => i - 1)} disabled={idx === 0} aria-label="Previous bestseller">‹</button>
+=======
+        <button
+          className="bs-arrow bs-arrow-l"
+          onClick={() => setIdx((i) => i - 1)}
+          disabled={idx === 0}
+          aria-label="Previous bestseller"
+        >
+          ‹
+        </button>
+>>>>>>> f2ccb28d968fedd23805066deda520ef318843ac
 
         <div className="bs-img-wrap">
           <img src={book.cover} alt={book.title} className="bs-img" />
-          <span className="bs-badge">{book.badge}</span>
+          <span className="bs-badge">Bestseller #{idx + 1}</span>
         </div>
 
         <div className="bs-content">
-          <p className="bs-label">{book.label}</p>
+          <p className="bs-label">Most Loved This Month</p>
           <h3 className="bs-title">{book.title}</h3>
           <p className="bs-author">{book.author}</p>
           <StarRating rating={book.rating} />
-          <p className="bs-desc">{book.description}</p>
+          <p className="bs-desc">{book.description ?? "No description available yet."}</p>
           <div className="bs-bottom">
             <span className="bs-price">${book.price}</span>
             <button className="btn-view" onClick={() => onOpenDetail && onOpenDetail(book)}>
@@ -276,20 +307,35 @@ function BestsellerCarousel({ books, onOpenDetail }) {
           </div>
         </div>
 
+<<<<<<< HEAD
         <button className="bs-arrow bs-arrow-r" onClick={() => setIdx((i) => i + 1)} disabled={idx === books.length - 1} aria-label="Next bestseller">›</button>
+=======
+        <button
+          className="bs-arrow bs-arrow-r"
+          onClick={() => setIdx((i) => i + 1)}
+          disabled={idx === books.length - 1}
+          aria-label="Next bestseller"
+        >
+          ›
+        </button>
+>>>>>>> f2ccb28d968fedd23805066deda520ef318843ac
       </div>
     </section>
   );
 }
 
 // ─────────────────────────────────────────────────────────────
-// BOOK DETAIL MODAL
+// BOOK DETAIL MODAL (adapted to read from real book fields instead of
+// the static BOOK_DETAILS lookup table)
 // ─────────────────────────────────────────────────────────────
-
 function BookDetailModal({ book, onClose }) {
   const { addToCart } = useCart();
+<<<<<<< HEAD
   const [added, setAdded]         = useState(false);
   const [activeImg, setActiveImg]   = useState(0);
+=======
+  const [added, setAdded] = useState(false);
+>>>>>>> f2ccb28d968fedd23805066deda520ef318843ac
   const [wishlisted, setWishlisted] = useState(false);
 
   useEffect(() => {
@@ -309,15 +355,9 @@ function BookDetailModal({ book, onClose }) {
     setTimeout(() => setAdded(false), 1300);
   }
 
-  const details = BOOK_DETAILS[book.id] ?? {
-    description: "A captivating tale of mystery and intrigue in a world unlike any other.",
-    tags: ["Fiction", "Dark Fiction"],
-    isbn: "978-0-000000-00-0",
-    year: "2023",
-  };
-
   const conditionMap = {
     new:     { label: "NEW — Unused, pristine condition",  cls: "bdm-cond-new" },
+<<<<<<< HEAD
     pending: { label: "LIKE-NEW — Excellent, minimal use", cls: "bdm-cond-used" },
     ist:     { label: "GOOD — Some wear, fully readable",  cls: "bdm-cond-good" },
   };
@@ -328,7 +368,16 @@ function BookDetailModal({ book, onClose }) {
     `https://picsum.photos/seed/${book.id}_int/400/560`,
     `https://picsum.photos/seed/${book.id}_alt/400/560`,
   ];
+=======
+    good:    { label: "GOOD — Some wear, fully readable",   cls: "bdm-cond-good" },
+    average: { label: "AVERAGE — Noticeable wear",          cls: "bdm-cond-used" },
+    damaged: { label: "DAMAGED — Heavily worn",             cls: "bdm-cond-used" },
+  };
+  const cond = conditionMap[book.condition] ?? conditionMap.good;
+>>>>>>> f2ccb28d968fedd23805066deda520ef318843ac
 
+  // Real data only gives us one cover image, so the multi-thumbnail gallery
+  // from the mock version is dropped rather than faked with repeated seeds.
   return (
     <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()} role="presentation">
       <div className="bdm-card" role="dialog" aria-modal="true" aria-labelledby="bdm-heading">
@@ -347,6 +396,7 @@ function BookDetailModal({ book, onClose }) {
           </button>
 
           <div className="bdm-main-img-wrap">
+<<<<<<< HEAD
             <img src={images[activeImg]} alt={book.title} className="bdm-main-img" />
           </div>
 
@@ -356,6 +406,9 @@ function BookDetailModal({ book, onClose }) {
                 <img src={img} alt={`View ${i + 1}`} />
               </button>
             ))}
+=======
+            <img src={book.cover} alt={book.title} className="bdm-main-img" />
+>>>>>>> f2ccb28d968fedd23805066deda520ef318843ac
           </div>
         </div>
 
@@ -368,27 +421,39 @@ function BookDetailModal({ book, onClose }) {
           <span className={`bdm-condition ${cond.cls}`}>{cond.label}</span>
 
           <div className="bdm-stars-price">
-            <StarRating rating={book.rating ?? 4.9} />
+            <StarRating rating={book.rating} />
             <span className="bdm-price">${book.price}</span>
           </div>
 
+<<<<<<< HEAD
           <div className="bdm-tags">
             {details.tags.map((t) => <span key={t} className="bdm-tag">{t}</span>)}
           </div>
+=======
+          {(book.genres ?? []).length > 0 && (
+            <div className="bdm-tags">
+              {book.genres.map((t) => (
+                <span key={t} className="bdm-tag">{t}</span>
+              ))}
+            </div>
+          )}
+>>>>>>> f2ccb28d968fedd23805066deda520ef318843ac
 
           <div>
             <p className="bdm-desc-heading">Description</p>
-            <p className="bdm-desc-text">{details.description}</p>
+            <p className="bdm-desc-text">{book.description ?? "No description available yet."}</p>
           </div>
 
           <div className="bdm-meta">
             <div>
               <p className="bdm-meta-lbl">ISBN</p>
-              <p className="bdm-meta-val">{details.isbn}</p>
+              <p className="bdm-meta-val">{book.isbn ?? "—"}</p>
             </div>
             <div>
               <p className="bdm-meta-lbl">Published</p>
-              <p className="bdm-meta-val">{details.year}</p>
+              <p className="bdm-meta-val">
+                {book.created_at ? new Date(book.created_at).getFullYear() : "—"}
+              </p>
             </div>
           </div>
 
@@ -404,7 +469,12 @@ function BookDetailModal({ book, onClose }) {
 
           <div className="bdm-actions">
             <button className={`bdm-add-cart${added ? " added" : ""}`} onClick={handleAddToCart}>
+<<<<<<< HEAD
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+=======
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+>>>>>>> f2ccb28d968fedd23805066deda520ef318843ac
                 <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
               </svg>
@@ -556,9 +626,24 @@ function HeroSection({ onFilterToggle, searchQuery, onSearchChange, onSearchSubm
 // ─────────────────────────────────────────────────────────────
 
 function Home() {
+<<<<<<< HEAD
   const [filtersOpen, setFiltersOpen]   = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
   const [searchQuery, setSearchQuery]   = useState("");
+=======
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") ?? "");
+  const [apiQuery, setApiQuery]       = useState(searchParams.get("q") ?? "");
+
+  const [allBooks, setAllBooks]       = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null);
+
+  const [availableGenres, setAvailableGenres] = useState([]);
+  const [genresLoading, setGenresLoading]     = useState(true);
+>>>>>>> f2ccb28d968fedd23805066deda520ef318843ac
 
   const [filters, setFilters] = useState({
     priceMax:   100,
@@ -595,6 +680,7 @@ function Home() {
           />
 
           <div className="sections-area">
+<<<<<<< HEAD
             <BestsellerCarousel books={BESTSELLERS} onOpenDetail={setSelectedBook} />
 
             <BookCarousel
@@ -614,6 +700,18 @@ function Home() {
               books={NEW_ARRIVALS}
               onOpenDetail={setSelectedBook}
             />
+=======
+            {loading ? (
+              <h2 style={{ padding: "40px", textAlign: "center" }}>იტვირთება...</h2>
+            ) : filteredBooks.length === 0 ? (
+              <h2 style={{ padding: "40px", textAlign: "center" }}>წიგნები ვერ მოიძებნა</h2>
+            ) : (
+              <>
+                <BookCarousel icon="↗" title="Popular & Bestsellers" subtitle="Beloved by readers across the archive" books={filteredBooks} />
+                <BookCarousel icon="✦" title="New Arrivals & Discoveries"  subtitle="Just added — fresh discoveries await"  books={newArrivals} />
+              </>
+            )}
+>>>>>>> f2ccb28d968fedd23805066deda520ef318843ac
           </div>
         </div>
       </main>

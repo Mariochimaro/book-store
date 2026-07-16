@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+<<<<<<< HEAD
 import { LoginModal, RegisterModal } from "./AuthModals";
 import { CartSidebar } from "./Cart";
+=======
+import { LoginModal }    from "./LoginModal";
+import { RegisterModal } from "./RegisterModal";
+import { CartSidebar }   from "./Cart";
+>>>>>>> f2ccb28d968fedd23805066deda520ef318843ac
 import { GenreModal } from "./GenreModal";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
@@ -14,9 +20,12 @@ function Navbar() {
   const navigate                  = useNavigate();
   const { totalItems }            = useCart();
   const { isLoggedIn, user, logout } = useAuth();
+<<<<<<< HEAD
 
   // Derived flag — true only for the admin@darklibrary.com account
   const isAdmin = user?.role === "admin";
+=======
+>>>>>>> f2ccb28d968fedd23805066deda520ef318843ac
 
   function handleSearch(e) {
     e.preventDefault();

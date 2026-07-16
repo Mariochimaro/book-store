@@ -1,5 +1,6 @@
+import re
 from fastapi import APIRouter, HTTPException, status, Depends, Request
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from passlib.context import CryptContext
 from database import supabase
 import traceback
@@ -27,6 +28,32 @@ class UserRegister(BaseModel):
     email: EmailStr
     password: str
 
+    @field_validator('username')
+    @classmethod
+    def username_alphanumeric(cls, v: str) -> str:
+        # 1. ვამოწმებთ, რომ სფეისების რაოდენობა არის 0, 1 ან 2
+        if v.count(' ') > 2:
+            raise ValueError('მომხმარებლის სახელი არ უნდა შეიცავდეს 2-ზე მეტ სფეისს.')
+        
+        # 2. ვამოწმებთ, რომ სტრიქონი შეიცავს მხოლოდ ასოებს, ციფრებს და სფეისებს
+        # ^[a-zA-Z0-9 ]+$ ნიშნავს: მხოლოდ ეს სიმბოლოები დასაშვებია დასაწყისიდან ბოლომდე
+        if not re.match(r"^[a-zA-Z0-9 ]+$", v):
+            raise ValueError('მომხმარებლის სახელი უნდა შეიცავდეს მხოლოდ ასოებს, ციფრებს და სფეისებს.')
+        
+        # 3. დამატებითი შემოწმება: არ იწყებოდეს ან არ მთავრდებოდეს სფეისით (სურვილისამებრ)
+        if v.startswith(' ') or v.endswith(' '):
+            raise ValueError('მომხმარებლის სახელი არ უნდა იწყებოდეს ან მთავრდებოდეს სფეისით.')
+            
+        return v
+
+    @field_validator('password')
+    @classmethod
+    def password_complexity(cls, v: str) -> str:
+        # პაროლის სირთულის შემოწმება პირდაპირ მოდელში
+        if len(v) < 8:
+            raise ValueError("პაროლი უნდა შედგებოდეს მინიმუმ 8 სიმბოლოსგან.")
+        return v
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
@@ -49,10 +76,13 @@ def create_access_token(data: dict):
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-
 # 1. რეგისტრაცია
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 def register_user(user_data: UserRegister):
+    # Pydantic უკვე დარწმუნდა, რომ პაროლი აკმაყოფილებს სირთულის წესებს
+    # და username არის ალფანუმერული.
+    
+    # მეილის არსებობის შემოწმება (ბიზნეს ლოგიკა)
     existing_user = supabase.table("users").select("id").eq("email", user_data.email).execute()
     if existing_user.data:
         raise HTTPException(status_code=400, detail="მომხმარებელი ამ მეილით უკვე არსებობს!")
@@ -76,8 +106,7 @@ def register_user(user_data: UserRegister):
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"ბაზაში ჩაწერისას მოხდა შეცდომა: {str(e)}")
-
-
+    
 # 2. სესიის დაწყება (LOGIN) + AUDIT LOG
 @router.post("/login")
 def login_user(user_data: UserLogin, request: Request):

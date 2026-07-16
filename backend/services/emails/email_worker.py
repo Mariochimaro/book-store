@@ -1,7 +1,6 @@
-import time
 import threading
 from database import supabase
-from services.email_service import send_purchase_instructions
+from services.emails.email_service import send_purchase_instructions
 
 def email_worker():
     print("Email Worker checking for pending emails...")

@@ -1,5 +1,18 @@
+import difflib
 from difflib import SequenceMatcher
 import re
+from database import supabase
+
+def format_public_book(book_data: dict) -> dict:
+    """
+    აშორებს წიგნის ლექსიკონს ისეთ ველებს, რომელთა დანახვაც იუზერისთვის არ არის საჭირო.
+    """
+    hidden_fields = [
+        "is_approved", "created_at", "sold_at", "cluster_id", 
+        "views", "rejection_reason", "deleted_at"
+    ]
+    # ვაბრუნებთ ახალ ლექსიკონს მხოლოდ იმ ველებით, რომლებიც არ არის hidden_fields-ში
+    return {k: v for k, v in book_data.items() if k not in hidden_fields}
 
 def lat_to_geo(text: str) -> str:
     #ორ-ასოიანი ბგერების ჩანაცვლება
@@ -78,3 +91,47 @@ def sort_books_by_genres(books_list: list, query_genres_str: str) -> list:
     scored_books.sort(key=lambda x: x[1], reverse=True)
     
     return [b[0] for b in scored_books]
+
+def text_similarity(str1: str, str2: str) -> float:
+    """აბრუნებს მსგავსებას 0.0-დან 1.0-მდე"""
+    if not str1 or not str2:
+        return 0.0
+    return difflib.SequenceMatcher(None, str1, str2).ratio()
+
+def get_or_create_cluster(title: str) -> int:
+    # 1. ვიღებთ ყველა არსებულ კლასტერს
+    response = supabase.table("book_clusters").select("*").execute()
+    clusters = response.data
+    
+    normalized_title = normalize(title)
+    best_match_id = None
+    highest_score = 0.0
+    
+    # 0.85 არის საკმაოდ მაღალი ზღვარი (85% დამთხვევა). 
+    # თუ გინდა უფრო მკაცრი იყოს, აწიე 0.9-მდე.
+    threshold = 0.85 
+    
+    # 2. ვეძებთ საუკეთესო დამთხვევას
+    for cluster in clusters:
+        cluster_title = normalize(cluster["canonical_title"])
+        # ვიყენებთ SequenceMatcher-ს მსგავსების დასათვლელად
+        score = SequenceMatcher(None, normalized_title, cluster_title).ratio()
+        
+        if score > highest_score:
+            highest_score = score
+            best_match_id = cluster["id"]
+            
+    # 3. თუ ვიპოვეთ კმაყოფილების ზღვარზე მაღალი მსგავსება, ვაბრუნებთ ID-ს
+    if highest_score >= threshold:
+        return best_match_id
+        
+    # 4. თუ ვერ ვიპოვეთ, ვქმნით ახალ კლასტერს
+    # slug-ისთვის ვწმენდთ სათაურს სპეც-სიმბოლოებისგან
+    slug = re.sub(r'[^a-z0-9\u10d0-\u10ff]+', '-', normalized_title)
+    
+    new_cluster = supabase.table("book_clusters").insert({
+        "canonical_title": title,
+        "slug": slug
+    }).execute()
+    
+    return new_cluster.data[0]["id"]

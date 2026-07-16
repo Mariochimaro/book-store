@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { useAuth } from "../context/AuthContext";
 
 function useModalBehavior(onClose) {
   useEffect(() => {
@@ -15,7 +14,23 @@ function useModalBehavior(onClose) {
   }, [onClose]);
 }
 
+// FastAPI-ს error detail შეიძლება იყოს:
+// - string (ჩვენი საკუთარი HTTPException-ები)
+// - obj-ების მასივი (Pydantic-ის ავტომატური 422 validation errors)
+// ეს ფუნქცია ორივე შემთხვევას სწორ string-ად აქცევს, რომ React-მა არ ჩამოაგდოს app
+function extractErrorMessage(data) {
+  if (!data) return "შეცდომა";
+  if (typeof data.detail === "string") return data.detail;
+  if (Array.isArray(data.detail)) {
+    return data.detail
+      .map((e) => e?.msg ?? "არასწორი მონაცემები")
+      .join(", ");
+  }
+  return "შეცდომა";
+}
+
 export function LoginModal({ onClose, onSwitchToRegister }) {
+  const { login } = useAuth();
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
   const [error, setError]       = useState("");
@@ -27,19 +42,11 @@ export function LoginModal({ onClose, onSwitchToRegister }) {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.detail ?? "შეცდომა");
-      } else {
-        localStorage.setItem("token", data.access_token);
+      const result = await login(email, password);
+      if (result.success) {
         onClose();
-        // TODO: replace reload with proper auth context
-        window.location.reload();
+      } else {
+        setError(extractErrorMessage({ detail: result.error }));
       }
     } catch {
       setError("სერვერთან კავშირი ვერ მოხერხდა");

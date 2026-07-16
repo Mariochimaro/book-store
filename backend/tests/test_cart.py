@@ -5,8 +5,8 @@ import pytest
 from fastapi.testclient import TestClient
 from main import app
 from database import supabase
-from services.email_worker import email_worker
-from services.timer_worker import check_expired_timers
+from services.emails.email_worker import email_worker
+from services.emails.timer_worker import check_expired_timers
 from datetime import datetime, timedelta, timezone
 
 client = TestClient(app)
