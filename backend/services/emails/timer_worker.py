@@ -35,6 +35,7 @@ def check_expired_timers(only_for_book_id=None, once=False, simulate_now=None):
         supabase.table("notifications").insert({
             "user_id": seller_id,
             "book_id": book_id,
+            "request_id": req_id,
             "type": "payment_check",
             "message": notification_message
         }).execute()

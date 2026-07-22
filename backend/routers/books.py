@@ -34,7 +34,8 @@ def get_books(
     max_price: Optional[float] = None, 
     language: Optional[str] = None, 
     condition: Optional[str] = None, 
-    q: Optional[str] = None
+    q: Optional[str] = None,
+    cluster_id: Optional[int] = None,   # ← ახალი პარამეტრი
 ):
     query = supabase.table("books").select("""
         *,
@@ -43,6 +44,9 @@ def get_books(
     
     if max_price:
         query = query.lte("price", max_price)
+
+    if cluster_id is not None:              # ← server-side ფილტრი
+        query = query.eq("cluster_id", cluster_id)
 
     response = query.execute()
     db_books = response.data
@@ -263,7 +267,8 @@ def edit_my_book(book_id: int, edit_data: BookEdit, current_user = Depends(get_c
         raise HTTPException(status_code=404, detail="წიგნი ვერ მოიძებნა.")
     
     old_book = response.data[0]
-    
+    was_rejected = old_book.get("status") == "rejected"
+
     # 2. ვამოწმებთ ავტორს
     if old_book["seller_id"] != user_id:
         raise HTTPException(status_code=403, detail="უფლება არ გაქვთ.")
@@ -302,15 +307,22 @@ def edit_my_book(book_id: int, edit_data: BookEdit, current_user = Depends(get_c
             needs_admin_review = True
         update_dict["description"] = edit_data.description
 
-    # 6. სტატუსის განახლება თუ ადმინის გადახედვა სჭირდება
-    if needs_admin_review:
+    # 6. სტატუსის განახლება
+    sent_to_review = needs_admin_review or was_rejected
+
+    if sent_to_review:
         update_dict["status"] = "pending"
         update_dict["is_approved"] = False
-        message = "ცვლილებები მნიშვნელოვანია და გაიგზავნა ადმინთან დასადასტურებლად."
+        update_dict["rejection_reason"] = None
+        message = (
+            "ცვლილებები მნიშვნელოვანია და გაიგზავნა ადმინთან დასადასტურებლად."
+            if needs_admin_review else
+            "წიგნი ხელახლა გაიგზავნა ადმინთან განსახილველად."
+        )
     else:
         message = "ცვლილებები ავტომატურად აისახა (ტიპოები/ფასი/გამოშვების წელი)."
 
-    # 7. ბაზაში გაგზავნა (თუ რამე შეიცვალა საერთოდ)
+    # 7. ბაზაში გაგზავნა
     if update_dict:
         try:
             supabase.table("books").update(update_dict).eq("id", book_id).execute()
@@ -319,7 +331,7 @@ def edit_my_book(book_id: int, edit_data: BookEdit, current_user = Depends(get_c
     else:
         message = "ცვლილებები არ მოიძებნა."
 
-    return {"status": "success", "message": message, "needs_review": needs_admin_review}
+    return {"status": "success", "message": message, "needs_review": sent_to_review}
 
 @router.put("/{book_id}/edit-photos")
 async def edit_book_photos(
@@ -375,8 +387,9 @@ async def edit_book_photos(
     # 2. წიგნის განახლება ბაზაში (სტატუსის pending-ზე გადაყვანა)
     update_data = {
         "photos_urls": new_photos_urls,
-        "status": "pending",        # ადმინმა უნდა შეამოწმოს ახალი ფოტოები
-        "is_approved": False
+        "status": "pending",
+        "is_approved": False,
+        "rejection_reason": None
     }
  
     try:
@@ -431,9 +444,10 @@ async def edit_book_video(
 
     # 2. წიგნის განახლება ბაზაში და სტატუსის ჩამოყრა (რადგან მედია ფაილია, სჭირდება ადმინის რევიუ)
     update_data = {
-        "book_video_url": uploaded_video_url,
+        "photos_urls": new_photos_urls,
         "status": "pending",
-        "is_approved": False
+        "is_approved": False,
+        "rejection_reason": None
     }
 
     try:

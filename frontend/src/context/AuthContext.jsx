@@ -35,17 +35,30 @@ export function AuthProvider({ children }) {
       const data = await res.json();
       if (!res.ok) return { success: false, error: data.detail ?? "შეცდომა" };
 
-      localStorage.setItem("token", data.access_token);
+      return setSession(data.access_token);
+    } catch {
+      return { success: false, error: "სერვერთან კავშირი ვერ მოხერხდა" };
+    }
+  }
 
-      // token მივიღეთ — ახლა ვიღებთ სრულ user ობიექტს
-      const meRes  = await fetch(`${API_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${data.access_token}` },
+  // ── setSession: token უკვე გვაქვს (მაგ. /auth/register-იდან) ──
+  // მხოლოდ ვინახავთ localStorage-ში და ვიღებთ /auth/me-ს, login-ის
+  // ცალკე request-ის გარეშე. login()-იც ამას იყენებს token-ის მიღების
+  // შემდეგ, რომ user state-ის დაყენების ლოგიკა ერთ ადგილას იყოს.
+  async function setSession(token) {
+    if (!token) return { success: false, error: "ტოკენი არ მოვიდა" };
+    localStorage.setItem("token", token);
+    try {
+      const meRes = await fetch(`${API_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+      if (!meRes.ok) throw new Error("invalid token");
       const meData = await meRes.json();
       setUser(meData);
       return { success: true };
     } catch {
-      return { success: false, error: "სერვერთან კავშირი ვერ მოხერხდა" };
+      localStorage.removeItem("token");
+      return { success: false, error: "სესიის დაწყება ვერ მოხერხდა" };
     }
   }
 
@@ -56,7 +69,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, isLoggedIn: !!user }}>
+    <AuthContext.Provider value={{ user, login, logout, setSession, loading, isLoggedIn: !!user }}>
       {/* loading-ის დროს არაფერს არ ვრენდერავთ — თავიდან ავიცილებთ "ცარიელ flash"-ს */}
       {loading ? null : children}
     </AuthContext.Provider>

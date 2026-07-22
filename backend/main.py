@@ -7,6 +7,9 @@ from contextlib import asynccontextmanager
 from scheduler import start_scheduler
 from services.emails.email_worker import start_email_worker
 from services.emails.timer_worker import start_timer_worker
+import jwt
+from config import SECRET_KEY
+from routers.auth import ALGORITHM
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -60,31 +63,56 @@ async def log_requests_and_security(request: Request, call_next):
     client_ip = request.client.host
     path = request.url.path
     method = request.method
+    user_agent = request.headers.get("user-agent", "")
     
-    # 1. ვამოწმებთ, ხომ არ არის IP შავ სიაში (Damage Control)
+    # 1. IP შემოწმება (Damage Control)
     if client_ip in BLOCKED_IPS:
         return JSONResponse(
             status_code=403, 
             content={"detail": "თქვენი IP მისამართი დაბლოკილია კიბერ-უსაფრთხოების სისტემის მიერ."}
         )
     
+    # ვცდილობთ ამოვიცნოთ იუზერი ტოკენიდან (Authorization header-იდან)
+    user_id = None
+    username = None
+    
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.split(" ")[1]
+        try:
+            # ვშიფრავთ ტოკენს, რომ გავიგოთ ვინ აგზავნის რექვესთს
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            user_id = payload.get("user_id")
+            username = payload.get("username")
+        except:
+            # თუ ტოკენი ვადაგასულია ან არასწორია, უბრალოდ ვაიგნორებთ ამ ეტაპზე 
+            # (თვითონ როუტერი დაბლოკავს მაინც)
+            pass
+    
     # 2. ვატარებთ მოთხოვნას
     response = await call_next(request)
     
-    # 3. გამოვრიცხოთ "ხმაურიანი" ენდპოინტები ლოგებიდან
+    # 3. გამოვრიცხოთ "ხმაურიანი" ენდპოინტები
     ignored_paths = ["/rate", "/bookmark"]
     is_ignored = any(path.endswith(p) for p in ignored_paths)
     
-    # 4. ვწერთ ლოგებს მხოლოდ საჭირო მოთხოვნებზე
+    # 4. ვწერთ ლოგებს
     if method in ["POST", "PUT", "DELETE"] or path.startswith("/admin"):
-        if not is_ignored:  # თუ არ არის იგნორირებულ სიაში
+    # Login ლოგდება auth.py-ში თავისი დეტალებით, ამიტომ აქ აღარ გვინდა გავაორმაგოთ
+        if path != "/auth/login" and not is_ignored:
             try:
                 log_data = {
-                    "action": f"{method} {path}", 
+                    "user_id": user_id,
+                    "username": username,
                     "ip_address": client_ip,
-                    "status_code": response.status_code
+                    "status_code": response.status_code,
+                    "method": method,
+                    "path": path,
+                    "user_agent": user_agent,
+                    "metadata": {"action": f"{method} {path}"}
                 }
-                # ვცადოთ მასივის სახით გადაწოდება
+                
+                # ვწერთ მასივის სახით
                 supabase.table("audit_logs").insert([log_data]).execute()
             except Exception as e:
                 print(f"Audit Log-ის ჩაწერა ვერ მოხერხდა: {e}")

@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import BookCard from "../components/BookCard";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -17,26 +18,68 @@ const LANGUAGE_MAP = {
 
 const CONDITION_MAP = {
   "New":      "new",
-  "Good": "good",
-  "Average":     "average",
-  "Damaged":     "damaged",
+  "Good":     "good",
+  "Average":  "average",
+  "Damaged":  "damaged",
 };
 
 const CONDITIONS = ["New", "Like-New", "Good", "Fair"];
 const LANGUAGES  = ["English", "Georgian", "French", "German", "Russian", "Japanese"];
 
+// SVG იკონები
+const StarIcon = ({ filled, hollow }) => {
+  // Determine background color
+  const fillOption = filled ? "#f59e0b" : "none";
+  
+  // Determine border color based on props, defaulting to gray
+  const strokeOption = filled || hollow ? "#f59e0b" : "#a1a1aa";
+
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={fillOption}
+      stroke={strokeOption}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
+  );
+};
+
+const ChevronLeft = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m15 18-6-6 6-6"/>
+  </svg>
+);
+
+const ChevronRight = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m9 18 6-6-6-6"/>
+  </svg>
+);
+
+const Sparkle = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"/>
+  </svg>
+)
+
 // ─────────────────────────────────────────────────────────────
 // BOOK CAROUSEL (Fixed layout resizing on partial pages)
 // ─────────────────────────────────────────────────────────────
-const PER_PAGE = 5;
-
-function BookCarousel({ icon, title, subtitle, books, onOpenDetail, id }) {
+function BookCarousel({ icon, title, subtitle, books, id, perPage = 5, rows = 1, onOpenDetail }) {
+  const itemsPerPage = perPage * rows;
   const [page, setPage] = useState(0);
-  useEffect(() => { setPage(0); }, [books]);
+  useEffect(() => { setPage(0); }, [books, itemsPerPage]);
   if (!books.length) return null;
 
-  const total   = Math.ceil(books.length / PER_PAGE);
-  const visible = books.slice(page * PER_PAGE, (page + 1) * PER_PAGE);
+  const total   = Math.ceil(books.length / itemsPerPage);
+  const visible = books.slice(page * itemsPerPage, (page + 1) * itemsPerPage);
 
   return (
     <section className="sec" id={id}>
@@ -55,18 +98,20 @@ function BookCarousel({ icon, title, subtitle, books, onOpenDetail, id }) {
         </div>
       </div>
 
-      <div className="book-grid">
-        {Array.from({ length: PER_PAGE }).map((_, index) => {
+      <div
+        className="book-grid"
+        style={rows > 1 ? { gridTemplateColumns: `repeat(${perPage}, 1fr)`, gridTemplateRows: `repeat(${rows}, auto)` } : undefined}
+      >
+        {Array.from({ length: itemsPerPage }).map((_, index) => {
           const book = visible[index];
           if (book) {
-            return <BookCard key={book.id} book={book} />;
+            return <BookCard key={book.id} book={book} onOpenDetail={onOpenDetail} />;
           }
-          // Placeholder slots that keep columns from stretching on the last page
           return (
-            <div 
-              key={`empty-${index}`} 
-              style={{ visibility: "hidden", minHeight: "1px" }} 
-              aria-hidden="true" 
+            <div
+              key={`empty-${index}`}
+              style={{ visibility: "hidden", minHeight: "1px" }}
+              aria-hidden="true"
             />
           );
         })}
@@ -82,67 +127,152 @@ function BookCarousel({ icon, title, subtitle, books, onOpenDetail, id }) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// BESTSELLER CAROUSEL (adapted to run off live "featured" books instead
-// of the hardcoded BESTSELLERS array)
+// BOOK GRID (plain, no pagination — search & filter results)
 // ─────────────────────────────────────────────────────────────
-function BestsellerCarousel({ books, onOpenDetail }) {
-  const [idx, setIdx] = useState(0);
-  useEffect(() => { setIdx(0); }, [books]);
+function BookGrid({ books, onOpenDetail }) {
   if (!books.length) return null;
-
-  const book = books[idx];
 
   return (
     <section className="sec">
-      <h2 className="sec-title" style={{ marginBottom: "28px" }}>
-        <span aria-hidden="true">⭐</span> Top Bestsellers
-      </h2>
-
-      <div className="bs-card">
-        <button
-          className="bs-arrow bs-arrow-l"
-          onClick={() => setIdx((i) => i - 1)}
-          disabled={idx === 0}
-          aria-label="Previous bestseller"
-        >
-          ‹
-        </button>
-
-        <div className="bs-img-wrap">
-          <img src={book.cover} alt={book.title} className="bs-img" />
-          <span className="bs-badge">Bestseller #{idx + 1}</span>
-        </div>
-
-        <div className="bs-content">
-          <p className="bs-label">Most Loved This Month</p>
-          <h3 className="bs-title">{book.title}</h3>
-          <p className="bs-author">{book.author}</p>
-          <StarRating rating={book.rating} />
-          <p className="bs-desc">{book.description ?? "No description available yet."}</p>
-          <div className="bs-bottom">
-            <span className="bs-price">${book.price}</span>
-            <button className="btn-view" onClick={() => onOpenDetail && onOpenDetail(book)}>
-              View Book
-            </button>
-          </div>
-        </div>
-
-        <button
-          className="bs-arrow bs-arrow-r"
-          onClick={() => setIdx((i) => i + 1)}
-          disabled={idx === books.length - 1}
-          aria-label="Next bestseller"
-        >
-          ›
-        </button>
+      <div className="book-grid">
+        {books.map((book) => (
+          <BookCard key={book.id} book={book} onOpenDetail={onOpenDetail} />
+        ))}
       </div>
     </section>
   );
 }
 
 // ─────────────────────────────────────────────────────────────
-// BOOK DETAIL MODAL (adapted to read from real book fields instead of
-// the static BOOK_DETAILS lookup table)
+// BESTSELLER CAROUSEL — runs off live "featured" books (top of the
+// filtered/sorted list), not hardcoded mock data.
+// ─────────────────────────────────────────────────────────────
+import './bestseller-carousel.css';
+import { motion, AnimatePresence } from "framer-motion";
+
+export function BestsellerCarousel({ bestClusters = [], onSelectCluster }) {
+  const [idx, setIdx] = useState(0);
+
+  // ავტომატური სლაიდერი (4 წამში ერთხელ)
+  useEffect(() => {
+    if (!bestClusters.length) return;
+    const t = setInterval(() => {
+      setIdx((i) => (i + 1) % bestClusters.length);
+    }, 7000);
+    return () => clearInterval(t);
+  }, [bestClusters.length]);
+
+  if (!bestClusters || bestClusters.length === 0) return null;
+
+  const cluster = bestClusters[idx];
+  const coverImage = cluster.cover_image || '/placeholder-book.jpg';
+  
+  return (
+    <section className="bs-section">
+      <h2 className="bs-sec-title">
+        <StarIcon hollow />
+        Top Bestseller Clusters
+      </h2>
+
+      <div className="bs-carousel-container">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="bs-grid"
+          >
+            {/* ქავერის სექცია */}
+            <div className="bs-cover-wrap">
+              <img
+                src={coverImage}
+                alt={cluster.canonical_title}
+                className="bs-cover-img"
+              />
+              <div className="bs-gradient-overlay" />
+              <span className="bs-badge">Bestseller #{idx + 1}</span>
+            </div>
+
+            {/* ინფო სექცია */}
+            <div className="bs-info-wrap">
+              <p className="bs-sub-title">Most Loved This Month</p>
+              
+              <h3 className="bs-book-title">{cluster.canonical_title}</h3>
+              
+              <p className="bs-author">{cluster.author || "სხვადასხვა ავტორი"}</p>
+
+              {/* ვარსკვლავები */}
+              <div className="bs-rating-row">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <StarIcon key={i} filled={i < Math.floor(cluster.rating || 5)} />
+                ))}
+                <span className="bs-rating-num">({cluster.rating || '5.0'})</span>
+              </div>
+
+              <p className="bs-desc">
+                {cluster.description || "იხილეთ ამ კლასტერში შემავალი მეორადი წიგნები."}
+              </p>
+
+              {/* ქვედა ზოლი */}
+              <div className="bs-bottom-row">
+                <div className="bs-price-box">
+                  <span className="bs-price-label">დან</span>
+                  <span className="bs-price-val">${cluster.min_price}</span>
+                </div>
+
+                <button
+                  onClick={() => onSelectCluster && onSelectCluster(cluster.cluster_id, cluster.slug)}
+                  className="bs-action-btn"
+                >
+                  ნახე წიგნები ({cluster.available_copies || 1})
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* წერტილები (Dots) */}
+        <div className="bs-dots">
+          {bestClusters.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIdx(i)}
+              className={`bs-dot ${i === idx ? 'bs-dot-active' : ''}`}
+              aria-label={`Slide ${i + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* ისრები */}
+        <button
+          onClick={() => setIdx((i) => (i - 1 + bestClusters.length) % bestClusters.length)}
+          className="bs-arrow bs-arrow-left"
+          aria-label="Previous"
+        >
+          <ChevronLeft />
+        </button>
+
+        <button
+          onClick={() => setIdx((i) => (i + 1) % bestClusters.length)}
+          className="bs-arrow bs-arrow-right"
+          aria-label="Next"
+        >
+          <ChevronRight />
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function book_at(books, idx) {
+  return books[idx];
+}
+
+// ─────────────────────────────────────────────────────────────
+// BOOK DETAIL MODAL — reads from real book fields (genres, condition,
+// photos_urls) instead of the old mock lookup table.
 // ─────────────────────────────────────────────────────────────
 function BookDetailModal({ book, onClose }) {
   const { addToCart } = useCart();
@@ -167,15 +297,14 @@ function BookDetailModal({ book, onClose }) {
   }
 
   const conditionMap = {
-    new:     { label: "NEW — Unused, pristine condition",  cls: "bdm-cond-new" },
-    good:    { label: "GOOD — Some wear, fully readable",   cls: "bdm-cond-good" },
-    average: { label: "AVERAGE — Noticeable wear",          cls: "bdm-cond-used" },
-    damaged: { label: "DAMAGED — Heavily worn",             cls: "bdm-cond-used" },
+    new:     { label: "ახალი",  cls: "bdm-cond-new" },
+    good:    { label: "კარგი",   cls: "bdm-cond-good" },
+    average: { label: "საშუალო", cls: "bdm-cond-used" },
+    damaged: { label: "დაზიანებული", cls: "bdm-cond-used" },
   };
   const cond = conditionMap[book.condition] ?? conditionMap.good;
+  const cover = book.photos_urls?.[0] ?? book.cover;
 
-  // Real data only gives us one cover image, so the multi-thumbnail gallery
-  // from the mock version is dropped rather than faked with repeated seeds.
   return (
     <div
       className="modal-backdrop"
@@ -186,19 +315,8 @@ function BookDetailModal({ book, onClose }) {
         <button className="modal-x bdm-close" onClick={onClose} aria-label="Close details">✕</button>
 
         <div className="bdm-gallery">
-          <button
-            className={`bdm-bookmark-btn${wishlisted ? " active" : ""}`}
-            onClick={() => setWishlisted((w) => !w)}
-            aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill={wishlisted ? "currentColor" : "none"}
-              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-            </svg>
-          </button>
-
           <div className="bdm-main-img-wrap">
-            <img src={book.cover} alt={book.title} className="bdm-main-img" />
+            <img src={cover} alt={book.title} className="bdm-main-img" />
           </div>
         </div>
 
@@ -211,8 +329,15 @@ function BookDetailModal({ book, onClose }) {
           <span className={`bdm-condition ${cond.cls}`}>{cond.label}</span>
 
           <div className="bdm-stars-price">
-            <StarRating rating={book.rating} />
-            <span className="bdm-price">${book.price}</span>
+            <p className="bdm-price">${book.price}</p>
+          </div>
+          <div className="bdm-meta">
+            <div>
+              <p className="bdm-meta-lbl">გამოშვების წელი</p>
+              <p className="bdm-meta-val">
+                {book.created_at ? new Date(book.created_at).getFullYear() : "—"}
+              </p>
+            </div>
           </div>
 
           {(book.genres ?? []).length > 0 && (
@@ -228,28 +353,7 @@ function BookDetailModal({ book, onClose }) {
             <p className="bdm-desc-text">{book.description ?? "No description available yet."}</p>
           </div>
 
-          <div className="bdm-meta">
-            <div>
-              <p className="bdm-meta-lbl">ISBN</p>
-              <p className="bdm-meta-val">{book.isbn ?? "—"}</p>
-            </div>
-            <div>
-              <p className="bdm-meta-lbl">Published</p>
-              <p className="bdm-meta-val">
-                {book.created_at ? new Date(book.created_at).getFullYear() : "—"}
-              </p>
-            </div>
-          </div>
-
-          <div className="bdm-rate-card">
-            <div className="bdm-rate-title">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style={{ color: "var(--accent)", marginRight: 6 }}>
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-              </svg>
-              Rate This Book
-            </div>
-            <p className="bdm-rate-note">Only buyers who purchased this book can rate it</p>
-          </div>
+          
 
           <div className="bdm-actions">
             <button className={`bdm-add-cart${added ? " added" : ""}`} onClick={handleAddToCart}>
@@ -388,7 +492,7 @@ function HeroSection({ onFilterToggle, searchQuery, onSearchChange, onSearchSubm
           <span className="hero-title-white">წიგნების</span>
           <span className="hero-title-accent">სამყარო</span>
         </h1>
-        <p className="hero-subtitle">სადაც ყოველი წიგნი ფანტასიას რეალობად აქცევს</p>
+        <p className="hero-subtitle">სადაც ყოველი წიგნი ფანტაზიას რეალობად აქცევს</p>
         <form className="hero-search-wrap" onSubmit={onSearchSubmit}>
           <input
             type="text" className="hero-search-input"
@@ -409,6 +513,7 @@ function HeroSection({ onFilterToggle, searchQuery, onSearchChange, onSearchSubm
 // ─────────────────────────────────────────────────────────────
 function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isLoggedIn } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") ?? "");
   const [apiQuery, setApiQuery]       = useState(searchParams.get("q") ?? "");
@@ -421,12 +526,28 @@ function Home() {
   const [availableGenres, setAvailableGenres] = useState([]);
   const [genresLoading, setGenresLoading]     = useState(true);
 
+  const [selectedClusterId, setSelectedClusterId] = useState(null);
+  const [selectedClusterSlug, setSelectedClusterSlug] = useState(null);
+
   const [filters, setFilters] = useState({
     priceMax:   100,
     genres:     new Set(),
     conditions: new Set(),
     languages:  new Set(),
   });
+
+  const [popularClusters, setPopularClusters] = useState([]);
+  const [recommendedBooks, setRecommendedBooks] = useState([]);
+
+  // "Popular & Bestsellers" — /feed/popular-დან
+  const [popularBooks, setPopularBooks] = useState([]);
+
+  // URL-დან q-ს სინქრონიზაცია (Navbar-იდან სერჩისთვის — გუშინდელი ფიქსი)
+  useEffect(() => {
+    const q = searchParams.get("q") ?? "";
+    setSearchQuery(q);
+    setApiQuery(q);
+  }, [searchParams]);
 
   useEffect(() => {
     fetch(`${API_URL}/books/genres`)
@@ -440,8 +561,9 @@ function Home() {
     setLoading(true);
 
     const params = new URLSearchParams();
-    if (apiQuery)               params.set("q",         apiQuery);
+    if (apiQuery)               params.set("q", apiQuery);
     if (filters.priceMax < 100) params.set("max_price", filters.priceMax);
+    if (selectedClusterId != null) params.set("cluster_id", selectedClusterId);
 
     fetch(`${API_URL}/books?${params}`)
       .then((res) => res.json())
@@ -451,11 +573,65 @@ function Home() {
       .catch(() => { if (!cancelled) { setAllBooks([]); setLoading(false); } });
 
     return () => { cancelled = true; };
-  }, [apiQuery, filters.priceMax]);
+  }, [apiQuery, filters.priceMax, selectedClusterId]);
+
+  useEffect(() => {
+    fetch(`${API_URL}/feed/popular-clusters`)
+      .then((res) => res.json())
+      .then((data) => setPopularClusters(data.clusters || []))
+      .catch((err) => console.error("Error fetching clusters:", err));
+  }, []);
+
+  // Popular & Bestsellers — /feed/popular
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch(`${API_URL}/feed/popular`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        const raw = Array.isArray(data) ? data : (data.books ?? data.results ?? []);
+        const books = raw.map((item) => item.book_data ?? item);
+        setPopularBooks(books);
+      })
+      .catch((err) => { console.error("Error fetching popular books:", err); if (!cancelled) setPopularBooks([]); });
+
+    return () => { cancelled = true; };
+  }, []);
+
+  // "Recommended for you" — მხოლოდ ავტორიზებულებისთვის
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setRecommendedBooks([]);
+      return;
+    }
+    let cancelled = false;
+
+    fetch(`${API_URL}/feed`, { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        const raw = Array.isArray(data) ? data : (data.books ?? data.results ?? []);
+        const books = raw.map((item) => item.book_data ?? item);
+        setRecommendedBooks(books);
+      })
+      .catch(() => { if (!cancelled) setRecommendedBooks([]); });
+
+    return () => { cancelled = true; };
+  }, [isLoggedIn]);
+
+  const handleSelectCluster = (clusterId, clusterSlug) => {
+    setSelectedClusterId(clusterId);
+    setSelectedClusterSlug(clusterSlug);
+    document.getElementById("popular-section")?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const filteredBooks = useMemo(() => {
     let result = allBooks;
 
+    if (selectedClusterId != null) {
+      result = result.filter((b) => b.cluster_id === selectedClusterId);
+    }
     if (filters.conditions.size > 0) {
       const mapped = new Set([...filters.conditions].map((c) => CONDITION_MAP[c] ?? c.toLowerCase()));
       result = result.filter((b) => mapped.has(b.condition));
@@ -474,13 +650,21 @@ function Home() {
     }
 
     return result;
-  }, [allBooks, filters.conditions, filters.languages, filters.genres]);
+  }, [allBooks, filters.conditions, filters.languages, filters.genres, selectedClusterId]);
 
-  const featured    = filteredBooks.slice(0, 3);
-  const newArrivals = useMemo(
-    () => [...filteredBooks].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
-    [filteredBooks]
-  );
+  const featured = filteredBooks.slice(0, 3);
+
+  // საძიებო/ფილტრის რომელიმე ფორმა აქტიურია? → carousel-ების ნაცვლად grid
+  const isFiltering =
+    !!apiQuery ||
+    filters.priceMax < 100 ||
+    filters.genres.size > 0 ||
+    filters.conditions.size > 0 ||
+    filters.languages.size > 0 ||
+    selectedClusterId != null;
+
+  const showRecommended = isLoggedIn && recommendedBooks.length > 0;
+  const popularPerPage  = showRecommended ? 5 : 10;
 
   function handleSearchSubmit(e) {
     e.preventDefault();
@@ -512,12 +696,89 @@ function Home() {
           <div className="sections-area">
             {loading ? (
               <h2 style={{ padding: "40px", textAlign: "center" }}>იტვირთება...</h2>
-            ) : filteredBooks.length === 0 ? (
-              <h2 style={{ padding: "40px", textAlign: "center" }}>წიგნები ვერ მოიძებნა</h2>
             ) : (
               <>
-                <BookCarousel icon="↗" title="Popular & Bestsellers" subtitle="Beloved by readers across the archive" books={filteredBooks} />
-                <BookCarousel icon="✦" title="New Arrivals & Discoveries"  subtitle="Just added — fresh discoveries await"  books={newArrivals} />
+                {!isFiltering && (
+                  <BestsellerCarousel
+                    bestClusters={popularClusters}
+                    onSelectCluster={handleSelectCluster}
+                  />
+                )}
+
+                {selectedClusterSlug && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 20px',
+                    borderRadius: '12px',
+                    margin: '0 auto 24px auto',
+                    maxWidth: '1024px',
+                  }}>
+                    <button
+                      onClick={() => { setSelectedClusterId(null); setSelectedClusterSlug(null); }}
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid #d6a05a90',
+                        backgroundColor: '#08091a',
+                        cursor: 'pointer',
+                        fontSize: '0.85rem',
+                        fontWeight: '600',
+                        color: '#F4E8D8',
+                        transition: 'background-color 0.2s'
+                      }}
+                      onMouseOver={(e) => e.target.style.backgroundColor = '#c97d3a'}
+                      onMouseOut={(e) => e.target.style.backgroundColor = '#08091a'}
+                    >
+                      ✕ ფილტრის გასუფთავება
+                    </button>
+                  </div>
+                )}
+
+                {filteredBooks.length === 0 ? (
+                  <h2 style={{ padding: "40px", textAlign: "center" }}>ამ კრიტერიუმებით წიგნები ვერ მოიძებნა</h2>
+                ) : isFiltering ? (
+                  <BookGrid
+                    books={filteredBooks}
+                    onOpenDetail={(book) => setSelectedBook(book)}
+                  />
+                ) : (
+                  <>
+                    <BookCarousel
+                      id="popular-section"
+                      icon="↗"
+                      title="Popular & Bestsellers"
+                      subtitle="Beloved by readers across the archive"
+                      books={popularBooks}
+                      perPage={popularPerPage}
+                      onOpenDetail={(book) => setSelectedBook(book)}
+                    />
+
+                    {showRecommended && (
+                      <BookCarousel
+                        id="recommended-section"
+                        icon="★"
+                        title="Recommended for you"
+                        subtitle="Picked based on your reading taste"
+                        books={recommendedBooks}
+                        perPage={5}
+                        onOpenDetail={(book) => setSelectedBook(book)}
+                      />
+                    )}
+
+                    <BookCarousel
+                      id="others-section"
+                      icon={<Sparkle />}
+                      title="Others"
+                      subtitle="More titles from the archive"
+                      books={filteredBooks}
+                      perPage={5}
+                      rows={2}
+                      onOpenDetail={(book) => setSelectedBook(book)}
+                    />
+                  </>
+                )}
               </>
             )}
           </div>

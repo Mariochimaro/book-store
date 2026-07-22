@@ -39,3 +39,9 @@ async def get_popular_feed():
     public_books = [format_public_book(book) for book in books]
     
     return {"books": public_books}
+
+@router.get("/popular-clusters")
+async def get_popular_clusters_feed():
+    print("DEBUG FEED: Fetching popular book clusters")
+    clusters = popularity.get_popular_clusters(limit=10)
+    return {"clusters": clusters}
