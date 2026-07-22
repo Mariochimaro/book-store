@@ -1,13 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-<<<<<<< HEAD
-import { LoginModal, RegisterModal } from "./AuthModals";
-import { CartSidebar } from "./Cart";
-=======
 import { LoginModal }    from "./LoginModal";
 import { RegisterModal } from "./RegisterModal";
 import { CartSidebar }   from "./Cart";
->>>>>>> f2ccb28d968fedd23805066deda520ef318843ac
 import { GenreModal } from "./GenreModal";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
@@ -20,17 +15,34 @@ function Navbar() {
   const navigate                  = useNavigate();
   const { totalItems }            = useCart();
   const { isLoggedIn, user, logout } = useAuth();
-<<<<<<< HEAD
 
-  // Derived flag — true only for the admin@darklibrary.com account
-  const isAdmin = user?.role === "admin";
-=======
->>>>>>> f2ccb28d968fedd23805066deda520ef318843ac
+  // Derived flag — real backend returns `is_admin` (boolean), not `role`.
+  // (get_current_user in auth.py selects "id, username, email, is_admin, ...")
+  const isAdmin = !!user?.is_admin;
 
-  function handleSearch(e) {
-    e.preventDefault();
-    if (query.trim()) navigate(`/?q=${encodeURIComponent(query.trim())}`);
+ function handleSearch(e) {
+  e.preventDefault();
+  
+  // 1. ყოველთვის ახალი პარამეტრების ობიექტი შევქმნათ
+  const searchParams = new URLSearchParams();
+  const cleanQuery = query.trim();
+  
+  if (cleanQuery) {
+    searchParams.set('q', cleanQuery);
+    
+    // 2. თუ გინდათ, რომ სხვა გვერდიდან ძებნისას ძველი ფილტრებიც შენარჩუნდეს (მხოლოდ იმ შემთხვევაში, თუ მთავარ გვერდზე ხართ):
+    if (window.location.pathname === '/') {
+      const currentParams = new URLSearchParams(window.location.search);
+      // გადმოგვაქვს ყველა ძველი ფილტრი (მაგალითად genre, price), გარდა 'q'-ისა
+      for (const [key, value] of currentParams.entries()) {
+        if (key !== 'q') searchParams.set(key, value);
+      }
+    }
   }
+
+  // 3. ყოველთვის გადავიყვანოთ მთავარ გვერდზე ახალი პარამეტრებით
+  navigate(`/?${searchParams.toString()}`);
+}
 
   return (
     <>
@@ -39,7 +51,22 @@ function Navbar() {
           {/* Left group: logo + page nav links */}
           <div className="nb-left">
             <Link to="/" className="nb-logo">
-              <span className="nb-logo-icon">📚</span>
+              <span className="nb-logo-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#f59f0bdb"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ display: 'inline-block', verticalAlign: 'middle' }}
+                >
+                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                </svg>
+              </span>
               წიგნების სამყარო
             </Link>
 
@@ -59,21 +86,36 @@ function Navbar() {
 
               <button
                 className="nb-page-link"
-                onClick={() => document.getElementById("new-arrivals-section")?.scrollIntoView({ behavior: "smooth" })}
+                onClick={() => document.getElementById("others-section")?.scrollIntoView({ behavior: "smooth" })}
               >
                 {/* Sparkle / 4-point star */}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"/>
                 </svg>
-                New Arrivals
+                All Books
               </button>
             </div>
           </div>{/* /nb-left */}
 
           {/* Search */}
           <form className="nb-search" onSubmit={handleSearch} role="search">
-            <span className="nb-search-icon" aria-hidden="true">🔍</span>
+            <span className="nb-search-icon" aria-hidden="true">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#a1a1aa"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ display: 'inline-block', verticalAlign: 'middle' }}
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </span>
             <input
               type="text"
               className="nb-search-input"
@@ -130,7 +172,7 @@ function Navbar() {
                   </button>
 
                   {/* Profile avatar */}
-                  <Link to="/profile" className="nb-avatar-btn" title={user?.name} aria-label={`Profile: ${user?.name}`}>
+                  <Link to="/profile" className="nb-avatar-btn" title={user?.username} aria-label={`Profile: ${user?.username}`}>
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                       <circle cx="12" cy="7" r="4"/>

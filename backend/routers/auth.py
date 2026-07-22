@@ -81,26 +81,36 @@ def create_access_token(data: dict):
 def register_user(user_data: UserRegister):
     # Pydantic უკვე დარწმუნდა, რომ პაროლი აკმაყოფილებს სირთულის წესებს
     # და username არის ალფანუმერული.
-    
-    # მეილის არსებობის შემოწმება (ბიზნეს ლოგიკა)
+ 
     existing_user = supabase.table("users").select("id").eq("email", user_data.email).execute()
     if existing_user.data:
         raise HTTPException(status_code=400, detail="მომხმარებელი ამ მეილით უკვე არსებობს!")
-        
+ 
     hashed_password = get_password_hash(user_data.password)
-    
+ 
     new_user = {
         "username": user_data.username,
         "email": user_data.email,
         "password_hash": hashed_password
     }
-    
+ 
     try:
         response = supabase.table("users").insert(new_user).execute()
         created_user = response.data[0]
+ 
+        # რეგისტრაციისთანავე ვცემთ token-ს — frontend-ს აღარ სჭირდება
+        # ცალკე POST /auth/login, რომ სესია დაიწყოს.
+        token = create_access_token({
+            "user_id": created_user["id"],
+            "email": created_user["email"],
+            "username": created_user["username"]
+        })
+ 
         return {
             "status": "success",
             "message": "რეგისტრაცია წარმატებულია!",
+            "access_token": token,
+            "token_type": "bearer",
             "user": {"id": created_user["id"], "username": created_user["username"], "email": created_user["email"]}
         }
     except Exception as e:
@@ -111,39 +121,58 @@ def register_user(user_data: UserRegister):
 @router.post("/login")
 def login_user(user_data: UserLogin, request: Request):
     client_ip = request.client.host
+    user_agent = request.headers.get("user-agent", "")
     
     user = supabase.table("users").select("*").eq("email", user_data.email).execute()
     if not user.data:
-        # Damage Control: ვლოგავთ არასწორ მცდელობას
-        supabase.table("audit_logs").insert({"action": "LOGIN_FAILED_NO_USER", "ip_address": client_ip, "metadata": {"email": user_data.email}}).execute()
+        # ლოგში ვამატებთ username, method, path და user_agent
+        supabase.table("audit_logs").insert([{
+            "ip_address": client_ip,
+            "status_code": 400,
+            "method": "POST",
+            "path": "/auth/login",
+            "user_agent": user_agent,
+            "metadata": {"email": user_data.email, "action": "LOGIN_FAILED_NO_USER"}
+        }]).execute()
         raise HTTPException(status_code=400, detail="მომხმარებელი ვერ მოიძებნა")
 
     db_user = user.data[0]
 
     if not verify_password(user_data.password, db_user["password_hash"]):
-        # Damage Control: ვლოგავთ პაროლის არასწორ ჩაწერას (Brute-force შეტევების დასაჭერად)
-        supabase.table("audit_logs").insert({"action": "LOGIN_FAILED_WRONG_PWD", "ip_address": client_ip, "metadata": {"email": user_data.email}}).execute()
+        supabase.table("audit_logs").insert([{
+            "user_id": db_user["id"],
+            "username": db_user["username"], # <-- ვამატებთ username-ს
+            "ip_address": client_ip,
+            "status_code": 400,
+            "method": "POST",
+            "path": "/auth/login",
+            "user_agent": user_agent,
+            "metadata": {"email": user_data.email, "action": "LOGIN_FAILED_WRONG_PWD"}
+        }]).execute()
         raise HTTPException(status_code=400, detail="არასწორი პაროლი")
 
-    # წარმატებული სესია
     token = create_access_token({
         "user_id": db_user["id"],
         "email": db_user["email"],
         "username": db_user["username"]
     })
 
-    # ვლოგავთ წარმატებულ შესვლას
-    supabase.table("audit_logs").insert({
+    # წარმატებული შესვლა
+    supabase.table("audit_logs").insert([{
         "user_id": db_user["id"],
-        "action": "USER_LOGIN_SUCCESS",
-        "ip_address": client_ip
-    }).execute()
+        "username": db_user["username"], # <-- ვამატებთ username-ს
+        "ip_address": client_ip,
+        "status_code": 200,
+        "method": "POST",
+        "path": "/auth/login",
+        "user_agent": user_agent,
+        "metadata": {"email": user_data.email, "action": "USER_LOGIN_SUCCESS"}
+    }]).execute()
 
     return {
         "access_token": token,
         "token_type": "bearer"
     }
-
 
 # 3. უსაფრთხოების ფილტრები (DEPENDENCIES)
 

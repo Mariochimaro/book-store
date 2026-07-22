@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext"; // 👈 გადაამოწმე რეალური იმპორტის გზა
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -12,10 +13,49 @@ const CONDITION_LABELS = {
   damaged: "დაზიანებული",
 };
 
+// კალათის ხატულა (Shopping Cart)
+const CartIcon = () => (
+  <svg 
+    width="18" 
+    height="18" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    aria-hidden="true"
+    style={{ marginRight: "8px", verticalAlign: "middle" }}
+  >
+    <circle cx="8" cy="21" r="1" />
+    <circle cx="19" cy="21" r="1" />
+    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+  </svg>
+);
+
+// თიქის ხატულა (Checkmark) წარმატებით დამატებისთვის
+const CheckIcon = () => (
+  <svg 
+    width="18" 
+    height="18" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2.5" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    aria-hidden="true"
+    style={{ marginRight: "8px", verticalAlign: "middle" }}
+  >
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+
 function BookDetail() {
   const { id }       = useParams();
   const navigate     = useNavigate();
   const { addToCart } = useCart();
+  const { isLoggedIn, user } = useAuth(); // 👈 ვვარაუდობ რომ user.id ხელმისაწვდომია
 
   const [book, setBook]           = useState(null);
   const [loading, setLoading]     = useState(true);
@@ -63,6 +103,9 @@ function BookDetail() {
   const photos = book.photos_urls ?? [];
   const hasVideo = !!book.book_video_url;
 
+  // საკუთარი განცხადებაა? — არ ვაჩვენოთ "კალათაში დამატება"
+  const isOwnBook = isLoggedIn && user?.id != null && book.seller?.id != null && user.id === book.seller.id;
+
   return (
     <>
       <Navbar />
@@ -82,8 +125,8 @@ function BookDetail() {
                 style={{ 
                   width: "280px", 
                   height: "380px", 
-                  backgroundColor: "#000000", // Background color covers empty spaces cleanly
-                  objectFit: "contain",       // Changed from cover to keep player buttons fully visible and clickable
+                  backgroundColor: "#000000",
+                  objectFit: "contain",
                   borderRadius: "8px" 
                 }}
               />
@@ -161,17 +204,47 @@ function BookDetail() {
               <p style={{ marginTop: "16px", lineHeight: "1.65" }}>{book.description}</p>
             )}
 
-            <button
-              onClick={handleAdd}
-              style={{
-                marginTop: "24px", padding: "12px 32px",
-                background: "var(--accent)", color: "#fff",
-                border: "none", borderRadius: "8px",
-                cursor: "pointer", fontSize: "1rem", fontWeight: "600",
-              }}
-            >
-              {added ? "✓ კალათაში დამატდა" : "🛒 კალათაში დამატება"}
-            </button>
+            {isOwnBook ? (
+              <p style={{
+                marginTop: "24px",
+                padding: "12px 16px",
+                borderRadius: "8px",
+                background: "#c97d3a1a",
+                border: "1px solid #c97d3a40",
+                color: "#d6a05a",
+                fontSize: "0.9rem",
+              }}>
+                ეს თქვენი განცხადებაა
+              </p>
+            ) : (
+              <button
+                onClick={handleAdd}
+                style={{
+                  marginTop: "24px", 
+                  padding: "12px 32px",
+                  background: "#b87743", 
+                  color: "#fff",
+                  border: "none", 
+                  borderRadius: "8px",
+                  cursor: "pointer", 
+                  fontSize: "1rem", 
+                  fontWeight: "600",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }}
+              >
+                {added ? (
+                  <>
+                    <CheckIcon /> კალათაში დამატდა
+                  </>
+                ) : (
+                  <>
+                    <CartIcon /> კალათაში დამატება
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </main>
