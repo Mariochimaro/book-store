@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X as XIcon, Send, Trash2 } from "lucide-react";
-import { authFetch } from "../utils/apiHelpers";
+import { authFetch } from "./Apihelpers";
 
 /**
  * MyBookEditModal — გამყიდველის საკუთარი წიგნის რედაქტირების modal.
