@@ -1,7 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL;
 const GOOGLE_DOMAINS = ["gmail.com", "googlemail.com"];
 
-// book_requests.status -> display label. Matches the enum values actually
+// book_requests.status -> display label. Matches the enum values actually//
 // used across buy_book/timerworker/confirm/reject.
 export const REQUEST_STATUS_LABELS = {
   waiting:           { label: "რიგში",               color: "#a0aec0" },
