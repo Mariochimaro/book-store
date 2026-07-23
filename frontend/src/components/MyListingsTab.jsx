@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { BookPlus, PackageOpen, Trash2, Eye, Pencil, X, Image as ImageIcon, Video as VideoIcon } from "lucide-react";
-import { authFetch, formatMoney } from "../utils/apiHelpers";
+import { authFetch, formatMoney } from "./apiHelpers";
 import OnboardingModal from "./OnboardingModal";
 import AddBook from "./AddBook";
 import { StoreIcon } from "./icons";

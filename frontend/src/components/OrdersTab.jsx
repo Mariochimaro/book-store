@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { authFetch, contactHref, formatMoney, REQUEST_STATUS_LABELS } from "../utils/apiHelpers";
+import { authFetch, contactHref, formatMoney, REQUEST_STATUS_LABELS } from "./apiHelpers";
 import { ReceiptIcon } from "./icons";
 
 export default function OrdersTab() {

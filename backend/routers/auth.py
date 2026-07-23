@@ -189,7 +189,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
             raise HTTPException(status_code=401, detail="არავალიდური ტოკენი")
 
         # 1. სელექტში დავამატეთ 'is_banned' სვეტიც
-        user = supabase.table("users").select("id, username, email, is_admin, is_banned, location, phone_numbers").eq("id", user_id).execute()
+        user = supabase.table("users").select("id, username, email, is_admin, is_banned, location, phone_numbers, genres").eq("id", user_id).execute()
         if not user.data:
             raise HTTPException(status_code=401, detail="მომხმარებელი ვერ მოიძებნა")
 

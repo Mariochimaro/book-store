@@ -12,7 +12,9 @@ def update_user_affinity(user_id: int, book_data: dict, action: str):
         "unbookmark": -2.0,  # Bookmark-ის მოხსნა
         "like": 4.0,
         "dislike": -5.0,
-        "remove_rating": -2.0 # შეფასების წაშლა
+        "remove_rating": -2.0, # შეფასების წაშლა
+        "select_genre_preference": 8.0,     # ჟანრის პრეფერენციაში მონიშვნა
+        "deselect_genre_preference": -8.0   # პრეფერენციიდან მოხსნა
     }
     
     weight = action_weights.get(action, 0)

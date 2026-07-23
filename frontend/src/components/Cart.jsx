@@ -1,12 +1,15 @@
 import { useEffect } from "react";
 import { useCart } from "../context/CartContext";
 
-// CartSidebar — Navbar-ის slide-in კალათა
-// App.jsx-ის /cart route-საც ეს კომპონენტი გამოიყენება (isOpen=true).
-export function CartSidebar({ isOpen, onClose }) {
-  const { items, removeFromCart, updateQty, totalItems, totalPrice } = useCart();
+const STATUS_LABEL = {
+  pending: "⏳ მოლოდინში — გადახდა/დადასტურება მიმდინარეობს",
+  sold: "❌ გაყიდულია",
+  seller_deleted: "⚠️ გამყიდველი აღარ არის",
+};
 
-  // body scroll lock
+export function CartSidebar({ isOpen, onClose }) {
+  const { cartBySeller, removeFromCart, totalItems, totalPrice, checkoutSeller, checkoutState, loading } = useCart();
+
   useEffect(() => {
     if (!isOpen) return;
     const prev = document.body.style.overflow;
@@ -14,7 +17,6 @@ export function CartSidebar({ isOpen, onClose }) {
     return () => { document.body.style.overflow = prev; };
   }, [isOpen]);
 
-  // Escape → close
   useEffect(() => {
     if (!isOpen) return;
     function onKey(e) { if (e.key === "Escape") onClose(); }
@@ -22,21 +24,19 @@ export function CartSidebar({ isOpen, onClose }) {
     return () => document.removeEventListener("keydown", onKey);
   }, [isOpen, onClose]);
 
+  async function handleSellerCheckout(sellerId) {
+    try {
+      await checkoutSeller(sellerId);
+    } catch {
+      // შეცდომა უკვე console-შია და checkoutState-შიც აისახა
+    }
+  }
+
   return (
     <>
-      <div
-        className={`cart-backdrop${isOpen ? " visible" : ""}`}
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      <div className={`cart-backdrop${isOpen ? " visible" : ""}`} onClick={onClose} aria-hidden="true" />
 
-      <div
-        className={`cart-panel${isOpen ? " open" : ""}`}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Shopping cart"
-      >
-        {/* ── header ── */}
+      <div className={`cart-panel${isOpen ? " open" : ""}`} role="dialog" aria-modal="true" aria-label="Shopping cart">
         <div className="cart-hd">
           <h2 className="cart-title">
             კალათა
@@ -45,72 +45,89 @@ export function CartSidebar({ isOpen, onClose }) {
           <button className="cart-x" onClick={onClose} aria-label="Close cart">✕</button>
         </div>
 
-        {/* ── empty state ── */}
-        {items.length === 0 ? (
+        {loading ? (
+          <div className="cart-body"><p className="cart-empty-txt">იტვირთება...</p></div>
+        ) : cartBySeller.length === 0 ? (
           <div className="cart-body">
-            <svg
-              className="cart-empty-icon"
-              viewBox="0 0 56 56"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <path d="M4 7H11L20 37H44"          stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M13 13H50L44 37H20"         stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx="24" cy="46" r="3.5"      stroke="currentColor" strokeWidth="2.8" />
-              <circle cx="40" cy="46" r="3.5"      stroke="currentColor" strokeWidth="2.8" />
-            </svg>
             <p className="cart-empty-txt">კალათა ცარიელია</p>
           </div>
-
         ) : (
           <>
-            {/* ── item list ── */}
             <div className="cart-items">
-              {items.map((item) => (
-                <div key={item.id} className="ci">
-                  <img
-                    src={item.photos_urls?.[0] ?? "/placeholder.jpg"}
-                    alt={item.title}
-                    className="ci-img"
-                    loading="lazy"
-                  />
+              {cartBySeller.map((group) => {
+                const activeItems = group.items.filter((i) => i.status === "active");
+                const hasActive = activeItems.length > 0;
 
-                  <div className="ci-info">
-                    <p className="ci-title">{item.title}</p>
-                    <p className="ci-author">{item.author ?? "—"}</p>
-                    <p className="ci-price">{item.price} ₾</p>
-                  </div>
+                return (
+                  <div key={group.sellerId} className="seller-group">
+                    <div className="seller-group-header">
+                      <span className="seller-name">{group.sellerUsername}</span>
+                      <span className="seller-group-total">{group.total.toFixed(2)} ₾</span>
+                    </div>
 
-                  <div className="ci-right">
+                    {group.items.map((item) => {
+                      const isActive = item.status === "active";
+                      return (
+                        <div key={item.cart_item_id} className={`ci${isActive ? "" : " ci-disabled"}`}>
+                          <img
+                            src={item.photos_urls?.[0] ?? "/placeholder.jpg"}
+                            alt={item.title}
+                            className="ci-img"
+                            loading="lazy"
+                          />
+                          <div className="ci-info">
+                            <p className="ci-title">{item.title}</p>
+                            <p className="ci-author">{item.author ?? "—"}</p>
+                            <p className="ci-price">{item.price} ₾</p>
+                            {!isActive && (
+                              <p className="ci-status-msg">
+                                {STATUS_LABEL[item.status] || item.message}
+                              </p>
+                            )}
+                          </div>
+                          <div className="ci-right">
+                            <button
+                              className="ci-remove"
+                              onClick={() => removeFromCart(item.cart_item_id)}
+                              disabled={!isActive}
+                              title={isActive ? "წაშლა" : "მოლოდინში მყოფი წიგნის წაშლა შეუძლებელია"}
+                              aria-label={`${item.title}-ის წაშლა`}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+
                     <button
-                      className="ci-remove"
-                      onClick={() => removeFromCart(item.id)}
-                      aria-label={`${item.title}-ის წაშლა`}
+                      className="seller-checkout-btn"
+                      disabled={!hasActive || checkoutState[group.sellerId] === "loading"}
+                      onClick={() => handleSellerCheckout(group.sellerId)}
                     >
-                      ✕
+                      {checkoutState[group.sellerId] === "loading"
+                        ? "იგზავნება..."
+                        : hasActive
+                          ? `${group.sellerUsername}-ისგან ${activeItems.length} წიგნის ყიდვა`
+                          : "მოთხოვნა უკვე გაგზავნილია"}
                     </button>
 
-                    {/* qty ვიზუალი უცვლელია; + no-op (მეორადი წიგნი = 1 ეგზ.) */}
-                    <div className="ci-qty" role="group" aria-label="Quantity">
-                      <button onClick={() => updateQty(item.id, item.qty - 1)} aria-label="Decrease quantity">−</button>
-                      <span aria-live="polite">{item.qty}</span>
-                      <button onClick={() => updateQty(item.id, item.qty + 1)} aria-label="Increase quantity">+</button>
-                    </div>
+                    {checkoutState[group.sellerId] === "error" && (
+                      <p className="seller-checkout-error">დაფიქსირდა შეცდომა, სცადეთ თავიდან.</p>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
-            {/* ── footer ── */}
             <div className="cart-footer">
               <div className="cart-total-row">
-                <span className="cart-total-lbl">სულ</span>
+                <span className="cart-total-lbl">სულ (აქტიური წიგნები)</span>
                 <span className="cart-total-val">{totalPrice.toFixed(2)} ₾</span>
               </div>
-              <button className="cart-checkout-btn">
-                გადახდა {/* TODO: wire to checkout flow */}
-              </button>
+              <p className="cart-hint">
+                მოლოდინში მყოფი წიგნები კალათაში დარჩება, სანამ გამყიდველი არ დაადასტურებს ან გააუქმებს გადახდას.
+              </p>
             </div>
           </>
         )}

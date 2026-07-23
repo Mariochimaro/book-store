@@ -5,26 +5,36 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser]       = useState(null);
-  const [loading, setLoading] = useState(true); // token-ის შემოწმება mount-ზე
+  const [loading, setLoading] = useState(true);
 
-  // ── Mount: localStorage-ში token თუ გვაქვს, /auth/me-ს ვეკითხებით ──
-  useEffect(() => {
+  // ── /auth/me - მომხმარებლის მონაცემების ხელახლა წამოღება ──
+  async function refreshUser() {
     const token = localStorage.getItem("token");
-    if (!token) { setLoading(false); return; }
+    if (!token) {
+      setUser(null);
+      return null;
+    }
+    try {
+      const res = await fetch(`${API_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("invalid token");
+      const meData = await res.json();
+      setUser(meData);
+      return meData;
+    } catch {
+      localStorage.removeItem("token");
+      setUser(null);
+      return null;
+    }
+  }
 
-    fetch(`${API_URL}/auth/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("invalid token");
-        return res.json();
-      })
-      .then((data) => { setUser(data); })
-      .catch(() => { localStorage.removeItem("token"); })
-      .finally(() => { setLoading(false); });
+  // ── Mount: localStorage-ში token თუ გვაქვს ──
+  useEffect(() => {
+    refreshUser().finally(() => setLoading(false));
   }, []);
 
-  // ── Login: API call → token save → user set ──────────────
+  // ── Login ──
   async function login(email, password) {
     try {
       const res = await fetch(`${API_URL}/auth/login`, {
@@ -41,36 +51,37 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // ── setSession: token უკვე გვაქვს (მაგ. /auth/register-იდან) ──
-  // მხოლოდ ვინახავთ localStorage-ში და ვიღებთ /auth/me-ს, login-ის
-  // ცალკე request-ის გარეშე. login()-იც ამას იყენებს token-ის მიღების
-  // შემდეგ, რომ user state-ის დაყენების ლოგიკა ერთ ადგილას იყოს.
+  // ── setSession ──
   async function setSession(token) {
     if (!token) return { success: false, error: "ტოკენი არ მოვიდა" };
     localStorage.setItem("token", token);
-    try {
-      const meRes = await fetch(`${API_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!meRes.ok) throw new Error("invalid token");
-      const meData = await meRes.json();
-      setUser(meData);
+    const meData = await refreshUser();
+    if (meData) {
       return { success: true };
-    } catch {
-      localStorage.removeItem("token");
+    } else {
       return { success: false, error: "სესიის დაწყება ვერ მოხერხდა" };
     }
   }
 
-  // ── Logout ───────────────────────────────────────────────
+  // ── Logout ──
   function logout() {
     localStorage.removeItem("token");
     setUser(null);
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, setSession, loading, isLoggedIn: !!user }}>
-      {/* loading-ის დროს არაფერს არ ვრენდერავთ — თავიდან ავიცილებთ "ცარიელ flash"-ს */}
+    <AuthContext.Provider
+      value={{
+        user,
+        setUser,
+        login,
+        logout,
+        setSession,
+        refreshUser,
+        loading,
+        isLoggedIn: !!user,
+      }}
+    >
       {loading ? null : children}
     </AuthContext.Provider>
   );

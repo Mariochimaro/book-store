@@ -5,7 +5,6 @@ from routers import auth, books, admin, user, cart, requests, feed
 from database import supabase
 from contextlib import asynccontextmanager
 from scheduler import start_scheduler
-from services.emails.email_worker import start_email_worker
 from services.emails.timer_worker import start_timer_worker
 import jwt
 from config import SECRET_KEY
@@ -20,7 +19,6 @@ limiter = Limiter(key_func=get_remote_address, default_limits=["5/second"])
 # lifespan
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    start_email_worker() 
     start_timer_worker()
 
     scheduler = start_scheduler()

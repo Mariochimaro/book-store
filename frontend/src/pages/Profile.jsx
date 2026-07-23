@@ -8,44 +8,46 @@ import FinancesTab from "../components/FinancesTab";
 import MyListingsTab from "../components/MyListingsTab";
 import { useAuth } from "../context/AuthContext";
 import { BellIcon, ReceiptIcon, BookmarkIcon, GearIcon, StoreIcon, ChartIcon } from "../components/icons";
+import EditProfileModal from "../components/EditProfileModal"; // 1. შემოვიტანეთ რედაქტირების მოდალი
+import { authFetch } from "../components/Apihelpers"; // 2. API შეკითხვისთვის
 
-// ── Preferences tab ──────────────────────────────────────────
-function PreferencesTab() {
-  return (
-    <>
-      <div className="pf-card">
-        <p className="pf-card-title"><GearIcon size={15} /> ჟანრის პრეფერენციები</p>
-        <p className="pf-card-body">ჯერ არ გაქვს არჩეული ჟანრი.</p>
-        <button className="btn-bronze"><GearIcon size={13} /> პრეფერენციების დაყენება</button>
-      </div>
-      <div className="pf-card">
-        <p className="pf-card-title">Reading Activity</p>
-        <div className="pf-activity-grid">
-          {[
-            { label: "მოწონებული წიგნები", val: 0 },
-            { label: "შეძენილი", val: 0 },
-            { label: "Wishlist-ში", val: 0 },
-          ].map(({ label, val }) => (
-            <div key={label} className="pf-activity-row">
-              <span className="pf-activity-name">{label}</span>
-              <span className="pf-activity-val">{val}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </>
-  );
-}
-
-// ── Main Profile ─────────────────────────────────────────────
-// 1. აქ მივიღეთ App.jsx-დან წამოსული onOpenAddBook ფუნქცია
 function Profile({ onOpenAddBook }) {
   const [activeTab, setActiveTab] = useState("notifications");
-  const { user, isLoggedIn } = useAuth();
+  const { user, isLoggedIn, setUser } = useAuth();
+  
+  // თავიდან profileData იყოს უბრალოდ `user` (id და email მაინც რომ გვქონდეს),
+  // მაგრამ მოგვიანებით ის შეივსება ბაზიდან წამოღებული სრული მონაცემებით.
   const [profileData, setProfileData] = useState(user);
+  
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [hasActiveBooks, setHasActiveBooks] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => { setProfileData(user); }, [user]);
+  useEffect(() => { 
+    if (!user) return; // თუ არ არის დალოგინებული, არაფერს ვაკეთებთ
+
+    // 1. ჯერ ვიღებთ მომხმარებლის სრულ პროფილს ბაზიდან
+    authFetch("/user/profile")
+      .then(data => {
+        if (data && data.user) {
+          setProfileData({ ...user, ...data.user }); 
+        } else if (data) {
+          setProfileData({ ...user, ...data }); 
+        }
+      })
+      .catch(err => console.log("Failed to fetch full profile data", err));
+
+    // 2. ვამოწმებთ, აქვს თუ არა იუზერს აქტიური წიგნები
+    authFetch("/books/my-books") 
+      .then(data => {
+         if (data && data.books && data.books.length > 0) {
+           setHasActiveBooks(true);
+         } else {
+           setHasActiveBooks(false);
+         }
+      })
+      .catch(err => console.log("Failed to fetch user books", err));
+  }, [user]);
 
   // სტუმარი — ლოგინ ექრანი
   if (!isLoggedIn) {
@@ -60,7 +62,8 @@ function Profile({ onOpenAddBook }) {
     );
   }
 
-  const avatarLetter = (user.username ?? "?")[0].toUpperCase();
+  // თუ ფოტო არ აქვს, პირველ ასოს ვაჩვენებთ
+  const avatarLetter = (profileData?.username ?? "?")[0].toUpperCase();
 
   const isOnboarded = Boolean(
     profileData?.location &&
@@ -74,10 +77,15 @@ function Profile({ onOpenAddBook }) {
     { id: "notifications", label: "შეტყობინებები", icon: <BellIcon size={14} /> },
     { id: "orders",        label: "შეკვეთები",       icon: <ReceiptIcon size={14} /> },
     { id: "wishlist",      label: "Wishlist",        icon: <BookmarkIcon size={14} /> },
-    { id: "preferences",   label: "Preferences",     icon: <GearIcon size={14} /> },
     { id: "listings",      label: "ჩემი წიგნები",    icon: <StoreIcon size={14} /> },
     ...(isOnboarded ? [{ id: "finances", label: "ფინანსები", icon: <ChartIcon size={14} /> }] : []),
   ];
+
+  // მოდალში შენახვის მერე იძახება
+  const handleProfileUpdate = (updatedUser) => {
+    setProfileData(updatedUser);
+    if (setUser) setUser(updatedUser); // გლობალური Auth სტეიტის განახლება
+  };
 
   return (
     <>
@@ -85,15 +93,47 @@ function Profile({ onOpenAddBook }) {
 
       <div className="pf-page">
         {/* ── Header ── */}
-        <div className="pf-header">
-          <div className="pf-avatar" aria-label={`Avatar for ${user.username}`}>
-            {avatarLetter}
+        <div className="pf-header" style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+          
+          {/* ფოტოს/ავატარის გამოჩენა */}
+          <div 
+            className="pf-avatar" 
+            aria-label={`Avatar for ${profileData?.username}`}
+            style={profileData?.profile_picture ? {
+              backgroundImage: `url(${profileData.profile_picture})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              color: "transparent" // ასოს ვმალავთ, თუ ფოტო გვაქვს
+            } : {}}
+          >
+            {!profileData?.profile_picture && avatarLetter}
           </div>
-          <div>
-            <h2 className="pf-name">{user.username}</h2>
-            <p className="pf-email">{user.email}</p>
-            {user.location && (
-              <p style={{ fontSize: "0.82rem", opacity: 0.55, marginTop: "2px" }}>📍 {user.location}</p>
+
+          <div style={{ flex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+              <h2 className="pf-name" style={{ margin: 0 }}>{profileData?.username}</h2>
+              
+              {/* რედაქტირების ღილაკი */}
+              <button 
+                onClick={() => setIsEditModalOpen(true)}
+                style={{
+                  background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", 
+                  color: "var(--accent)", padding: "4px 10px", borderRadius: "12px", 
+                  cursor: "pointer", fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "6px"
+                }}
+              >
+                <GearIcon size={12} /> რედაქტირება
+              </button>
+            </div>
+            
+            <p className="pf-email" style={{ marginTop: "4px" }}>{profileData?.email}</p>
+            {profileData?.location && (
+              <p style={{ fontSize: '0.82rem', opacity: 0.55, marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <svg xmlns="http://w3.org" viewBox="0 0 24 24" fill="currentColor" style={{ width: '1.1rem', height: '1.1rem' }}>
+                  <path fillRule="evenodd" d="m11.54 22.351.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742c1.008-.704 2.213-1.67 3.23-2.915C18.665 16.411 20 14.15 20 11.528c0-4.486-3.515-8.028-8-8.028s-8 3.542-8 8.028c0 2.622 1.335 4.883 2.378 6.556 1.017 1.244 2.222 2.21 3.23 2.916a16.975 16.975 0 0 0 1.143.742ZM12 13.5a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5Z" clipRule="evenodd" />
+                </svg>
+                {profileData.location}
+              </p>
             )}
           </div>
         </div>
@@ -113,14 +153,22 @@ function Profile({ onOpenAddBook }) {
           {activeTab === "notifications" && <NotificationsTab />}
           {activeTab === "orders"        && <OrdersTab />}
           {activeTab === "wishlist"      && <WishlistTab />}
-          {activeTab === "preferences"   && <PreferencesTab />}
           
-          {/* 2. აქ გადავეცით ფუნქცია MyListingsTab კომპონენტს */}
+          {/* აქ გადავეცით ფუნქცია MyListingsTab კომპონენტს */}
           {activeTab === "listings"      && <MyListingsTab onOpenAddBook={onOpenAddBook} />}
           
           {activeTab === "finances"      && isOnboarded && <FinancesTab />}
         </div>
       </div>
+
+      {/* 4. მოდალის გამოძახება */}
+      <EditProfileModal
+        open={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onComplete={handleProfileUpdate}
+        user={profileData}
+        hasActiveBooks={hasActiveBooks}
+      />
     </>
   );
 }

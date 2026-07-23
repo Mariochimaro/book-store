@@ -3,9 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { LoginModal }    from "./LoginModal";
 import { RegisterModal } from "./RegisterModal";
 import { CartSidebar }   from "./Cart";
-import { GenreModal } from "./GenreModal";
-import { useCart } from "../context/CartContext";
-import { useAuth } from "../context/AuthContext";
+import { GenreModal }    from "./GenreModal";
+import { useCart }       from "../context/CartContext";
+import { useAuth }       from "../context/AuthContext";
 
 function Navbar() {
   const [query, setQuery]         = useState("");
@@ -16,33 +16,38 @@ function Navbar() {
   const { totalItems }            = useCart();
   const { isLoggedIn, user, logout } = useAuth();
 
-  // Derived flag — real backend returns `is_admin` (boolean), not `role`.
-  // (get_current_user in auth.py selects "id, username, email, is_admin, ...")
   const isAdmin = !!user?.is_admin;
 
- function handleSearch(e) {
-  e.preventDefault();
-  
-  // 1. ყოველთვის ახალი პარამეტრების ობიექტი შევქმნათ
-  const searchParams = new URLSearchParams();
-  const cleanQuery = query.trim();
-  
-  if (cleanQuery) {
-    searchParams.set('q', cleanQuery);
+  // Handles logging out and redirecting to home page
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      navigate("/");
+    }
+  };
+
+  function handleSearch(e) {
+    e.preventDefault();
     
-    // 2. თუ გინდათ, რომ სხვა გვერდიდან ძებნისას ძველი ფილტრებიც შენარჩუნდეს (მხოლოდ იმ შემთხვევაში, თუ მთავარ გვერდზე ხართ):
-    if (window.location.pathname === '/') {
-      const currentParams = new URLSearchParams(window.location.search);
-      // გადმოგვაქვს ყველა ძველი ფილტრი (მაგალითად genre, price), გარდა 'q'-ისა
-      for (const [key, value] of currentParams.entries()) {
-        if (key !== 'q') searchParams.set(key, value);
+    const searchParams = new URLSearchParams();
+    const cleanQuery = query.trim();
+    
+    if (cleanQuery) {
+      searchParams.set('q', cleanQuery);
+      
+      if (window.location.pathname === '/') {
+        const currentParams = new URLSearchParams(window.location.search);
+        for (const [key, value] of currentParams.entries()) {
+          if (key !== 'q') searchParams.set(key, value);
+        }
       }
     }
-  }
 
-  // 3. ყოველთვის გადავიყვანოთ მთავარ გვერდზე ახალი პარამეტრებით
-  navigate(`/?${searchParams.toString()}`);
-}
+    navigate(`/?${searchParams.toString()}`);
+  }
 
   return (
     <>
@@ -75,7 +80,6 @@ function Navbar() {
                 className="nb-page-link"
                 onClick={() => document.getElementById("popular-section")?.scrollIntoView({ behavior: "smooth" })}
               >
-                {/* Trend / zigzag arrow */}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
@@ -88,7 +92,6 @@ function Navbar() {
                 className="nb-page-link"
                 onClick={() => document.getElementById("others-section")?.scrollIntoView({ behavior: "smooth" })}
               >
-                {/* Sparkle / 4-point star */}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"/>
@@ -96,7 +99,7 @@ function Navbar() {
                 All Books
               </button>
             </div>
-          </div>{/* /nb-left */}
+          </div>
 
           {/* Search */}
           <form className="nb-search" onSubmit={handleSearch} role="search">
@@ -130,10 +133,9 @@ function Navbar() {
           <div className="nb-actions">
             {isLoggedIn ? (
               isAdmin ? (
-                /* ── Admin nav: dashboard link + logout only ── */
+                /* ── Admin nav ── */
                 <>
                   <Link to="/admin" className="nb-admin-link" aria-label="Admin Dashboard">
-                    {/* Shield / admin icon */}
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                       strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -141,8 +143,8 @@ function Navbar() {
                     Admin Dashboard
                   </Link>
 
-                  {/* Logout */}
-                  <button className="nb-icon-btn" onClick={logout} aria-label="Sign out" title="Sign out">
+                  {/* Updated Admin Logout Button */}
+                  <button className="nb-icon-btn" onClick={handleLogout} aria-label="Sign out" title="Sign out">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                       strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -154,15 +156,6 @@ function Navbar() {
               ) : (
                 /* ── Regular user nav ── */
                 <>
-                  {/* Notifications */}
-                  <Link to="/notifications" className="nb-icon-btn" aria-label="Notifications">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                      <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                    </svg>
-                  </Link>
-
-                  {/* Genres */}
                   <button className="nb-genre-btn" onClick={() => setGenreOpen(true)} aria-label="Browse genres">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <circle cx="12" cy="12" r="3"/>
@@ -171,7 +164,6 @@ function Navbar() {
                     Genres
                   </button>
 
-                  {/* Profile avatar */}
                   <Link to="/profile" className="nb-avatar-btn" title={user?.username} aria-label={`Profile: ${user?.username}`}>
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -179,8 +171,8 @@ function Navbar() {
                     </svg>
                   </Link>
 
-                  {/* Logout */}
-                  <button className="nb-icon-btn" onClick={logout} aria-label="Sign out" title="Sign out">
+                  {/* Updated User Logout Button */}
+                  <button className="nb-icon-btn" onClick={handleLogout} aria-label="Sign out" title="Sign out">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                       <polyline points="16 17 21 12 16 7"/>

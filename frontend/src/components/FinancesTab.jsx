@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { authFetch, formatMoney } from "../utils/apiHelpers";
+import { authFetch, formatMoney } from "./apiHelpers";
 
 const KPIS = [
   { key: "total_earned",      label: "სულ შემოსავალი",       format: formatMoney, color: "#68d391" },

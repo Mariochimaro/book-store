@@ -26,7 +26,7 @@ def email_worker():
                     seller_accounts=book.data["users"].get("bank_accounts", []),
                     books_data=[{"title": book.data["title"], "price": book.data["price"], "link": "#"}],
                     total_price=book.data["price"],
-                    location=buyer.data.get("location", "თბილისი")
+                    location=book.data["users"].get("location", "შეთანხმებით")
                 )
                 
                 supabase.table("email_queue").update({"processed": True}).eq("id", item["id"]).execute()

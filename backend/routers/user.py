@@ -1,11 +1,13 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, BackgroundTasks, UploadFile, File, Form
 from typing import List, Optional
 from pydantic import BaseModel, field_validator
 import re
+import time
 from database import supabase
 from datetime import datetime
 # ვიყენებთ ჩვენს უსაფრთხო ფილტრს
 from routers.auth import get_current_user 
+from services.recommendations.affinity import update_user_affinity
 
 router = APIRouter(
     prefix="/user",
@@ -64,7 +66,7 @@ class UserProfileUpdate(BaseModel):
     username: Optional[str] = None
     location: Optional[str] = None
     phone_numbers: Optional[List[str]] = None
-    bank_accounts: Optional[List[BankAccount]] = None  # <-- account_numbers-ის ნაცვლად
+    bank_accounts: Optional[List[BankAccount]] = None
     birth_year: Optional[int] = None
     selling_method: Optional[List[str]] = None
 
@@ -90,15 +92,15 @@ def get_user_profile(current_user = Depends(get_current_user)):
         
     return user_info
 
-# 2. პროფილის მონაცემების განახლება (PUT /user/profile)
+# 2.1 პროფილის მონაცემების განახლება (PUT /user/profile)
 @router.put("/profile")
 def update_user_profile(
     data: UserProfileUpdate, 
     current_user = Depends(get_current_user)
 ):
-    user_id = current_user["id"]
+    user_id = current_user["id"] # ეს უკვე bigint-ია
     
-    # გამოვრიცხოთ ის ველები, რომლებიც იუზერმა არ გამოაგზავნა
+    # ვაშორებთ None მნიშვნელობებს
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     
     if not update_data:
@@ -127,6 +129,61 @@ def update_user_profile(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+# 2.2 პროფილის ფოტოს განახლება / წაშლა
+@router.put("/photo")
+async def update_profile_photo(
+    action: str = Form(..., description="'upload' ან 'delete'"),
+    photo: Optional[UploadFile] = File(None),
+    current_user = Depends(get_current_user)
+):
+    user_id = current_user["id"]
+    new_photo_url = None
+
+    if action == "delete":
+        new_photo_url = None
+    elif action == "upload":
+        if not photo:
+            raise HTTPException(status_code=400, detail="ფაილი არ არის არჩეული.")
+            
+        file_size = len(await photo.read())
+        await photo.seek(0)
+        if file_size > 5 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="ფოტოს ზომა აჭარბებს 5MB-ს!")
+
+        try:
+            file_ext = photo.filename.split(".")[-1]
+            # ვიყენებთ user_id + timestamp, uuid-ის ნაცვლად
+            unique_name = f"{user_id}_{int(time.time())}.{file_ext}"
+            file_bytes = await photo.read()
+            
+            supabase.storage.from_("profile-images").upload(
+                path=unique_name,
+                file=file_bytes,
+                file_options={"content-type": photo.content_type}
+            )
+            new_photo_url = supabase.storage.from_("profile-images").get_public_url(unique_name)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"ფოტოს ატვირთვისას მოხდა შეცდომა: {str(e)}")
+    else:
+        raise HTTPException(status_code=400, detail="არასწორი action პარამეტრი.")
+
+    # ვაახლებთ ბაზას
+    try:
+        response = supabase.table("users").update({"profile_picture": new_photo_url}).eq("id", user_id).execute()
+        updated_user = response.data[0]
+        if "password" in updated_user:
+            del updated_user["password"]
+            
+        return {
+            "status": "success", 
+            "message": "ფოტო წარმატებით განახლდა" if new_photo_url else "ფოტო წაიშალა",
+            "profile_picture": new_photo_url,
+            "user": updated_user
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"ბაზის განახლების შეცდომა: {str(e)}")
 
 # 3. ონბორდინგი
 @router.post("/onboarding")
@@ -302,3 +359,34 @@ async def get_user_bookmarks(current_user: dict = Depends(get_current_user)):
     bookmarked_books = [item["books"] for item in response.data if item.get("books")]
     
     return {"bookmarks": bookmarked_books}
+
+class GenrePreferencesPayload(BaseModel):
+    genres: List[str]
+
+@router.put("/genres")
+def update_genre_preferences(
+    payload: GenrePreferencesPayload,
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user),
+):
+    user_id = current_user["id"]
+    new_genres = {g.strip() for g in payload.genres if g.strip()}
+
+    res = supabase.table("users").select("genres").eq("id", user_id).single().execute()
+    old_genres = set(res.data.get("genres") or []) if res.data else set()
+
+    added   = new_genres - old_genres
+    removed = old_genres - new_genres
+
+    for genre in added:
+        background_tasks.add_task(
+            update_user_affinity, user_id, {"genres": [genre]}, "select_genre_preference"
+        )
+    for genre in removed:
+        background_tasks.add_task(
+            update_user_affinity, user_id, {"genres": [genre]}, "deselect_genre_preference"
+        )
+
+    supabase.table("users").update({"genres": list(new_genres)}).eq("id", user_id).execute()
+
+    return {"genres": sorted(new_genres)}

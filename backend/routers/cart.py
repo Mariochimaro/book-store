@@ -24,39 +24,50 @@ class BulkBuyRequest(BaseModel):
 # 1. კალათის შიგთავსის წამოღება (GET /cart)
 @router.get("")
 def get_cart(current_user=Depends(get_current_user)):
-    # ვიღებთ კალათის აითემებს
     cart_items = supabase.table("cart").select("*, books(*)").eq("user_id", current_user["id"]).execute()
-    
+
+    # წინასწარ ვკრეფთ ყველა საჭირო seller_id-ს, რომ ერთბაშად წამოვიღოთ username-ები
+    seller_ids = {item["books"]["seller_id"] for item in cart_items.data if item["books"]}
+
+    sellers_map = {}
+    if seller_ids:
+        sellers_res = supabase.table("users").select("id, username").in_("id", list(seller_ids)).execute()
+        sellers_map = {s["id"]: s["username"] for s in sellers_res.data}
+
     processed_cart = []
     for item in cart_items.data:
         book = item["books"]
-        
-        # თუ წიგნი საერთოდ აღარ არსებობს ბაზაში, წავშალოთ კალათიდან
+
         if not book:
             supabase.table("cart").delete().eq("id", item["id"]).execute()
             continue
-            
-        # ლოგიკა სტატუსების მიხედვით
-        book_status = book.get("status") # active, pending, sold, seller_deleted
-        
+
+        book_status = book.get("status")
+        seller_id = book["seller_id"]
+
         display_item = {
+            "cart_item_id": item["id"],
             "book_id": book["id"],
             "title": book["title"],
             "price": book["price"],
             "status": book_status,
             "can_purchase": book_status == "active",
-            "message": None
+            "message": None,
+            "seller_id": seller_id,
+            "seller_username": sellers_map.get(seller_id, "უცნობი გამყიდველი"),
+            "photos_urls": book.get("photos_urls", []),
+            "author": book.get("author"),
         }
-        
+
         if book_status == "seller_deleted":
             display_item["message"] = "გამყიდველი აღარ არის"
         elif book_status == "sold":
             display_item["message"] = "წიგნი უკვე გაყიდულია"
         elif book_status == "pending":
             display_item["message"] = "წიგნი რეზერვირებულია"
-            
+
         processed_cart.append(display_item)
-        
+
     return {"cart": processed_cart}
 
 # 2. კალათაში წიგნის დამატება (POST /cart/add)
@@ -200,89 +211,75 @@ def buy_book(
 
 @router.post("/buy-bulk")
 def buy_books_bulk(
-    payload: BulkBuyRequest, 
+    payload: BulkBuyRequest,
     background_tasks: BackgroundTasks,
     current_user=Depends(get_current_user)):
-    
+
     user_id = current_user["id"]
     book_ids = payload.book_ids
-    
-    if not book_ids:
-        raise HTTPException(status_code=400, detail="გთხოვთ, აირჩიოთ მინიმუმ ერთი წიგნი.")
 
-    # 1. წამოვიღოთ ეს წიგნები ბაზიდან
     books_res = supabase.table("books").select("*").in_("id", book_ids).execute()
     books = books_res.data
-    
+
     if not books:
         raise HTTPException(status_code=404, detail="არჩეული წიგნები ვერ მოიძებნა.")
 
-    # 2. შემოწმება: ყველა არჩეული წიგნი ნამდვილად ეკუთვნის თუ არა ერთ გამყიდველს?
     seller_ids = set(b["seller_id"] for b in books)
     if len(seller_ids) > 1:
-        raise HTTPException(
-            status_code=400, 
-            detail="ერთდროულად მხოლოდ ერთი გამყიდველის წიგნების ყიდვაა შესაძლებელი."
-        )
-        
+        raise HTTPException(status_code=400, detail="ერთდროულად მხოლოდ ერთი გამყიდველის წიგნების ყიდვაა შესაძლებელი.")
+
     seller_id = seller_ids.pop()
 
-    # 3. შემოწმება: საკუთარ წიგნებს ხომ არ ყიდულობს?
     if seller_id == user_id:
         raise HTTPException(status_code=400, detail="საკუთარი წიგნების ყიდვა შეუძლებელია.")
 
-    # აქ შევინახავთ სტატუსებს, რომ ბოლოს შევაჯამოთ
+    # group_id ბაზაზე ვქმნით (bigint identity), string-ის მაგივრად
+    group_res = supabase.table("purchase_groups").insert({
+        "buyer_id": user_id,
+        "seller_id": seller_id,
+    }).execute()
+    group_id = group_res.data[0]["id"]
+
     active_purchases = []
     waiting_purchases = []
     unavailable_books = []
 
-    # ტაიმერის გამოთვლა (15 წუთი)
     now = datetime.now(timezone.utc)
     expires_at = (now + timedelta(minutes=15)).isoformat()
 
-    # 4. ვამუშავებთ თითოეულ წიგნს ინდივიდუალურად (Loop)
     for book in books:
         b_id = book["id"]
-        
-        # თუ წიგნი უკვე გაიყიდა ან წაიშალა, ვაგდებთ მიუწვდომლებში
+
         if book["status"] in ["sold", "seller_deleted"]:
             unavailable_books.append(b_id)
             continue
 
-        # ვამოწმებთ, ეს იუზერი უკვე ხომ არ დგას ამ წიგნის რიგში
         existing_req = supabase.table("book_requests").select("id").eq("book_id", b_id).eq("buyer_id", user_id).execute()
         if existing_req.data:
-            continue  # უკვე გაგზავნილი აქვს მოთხოვნა ამ წიგნზე და ვაიგნორებთ
+            continue
 
-        # ვამოწმებთ, ვინმეს უკვე ხომ არ აქვს დაწყებული 15-წუთიანი ტაიმერი ამ წიგნზე
         active_req = supabase.table("book_requests").select("id").eq("book_id", b_id).eq("status", "active_timer").execute()
 
-        # სცენარი A: არავინაა რიგში და წიგნი ხელმისაწვდომია
         if not active_req.data and book["status"] == "active":
-            # 1. ემატება მოთხოვნებში (ტაიმერით)
             supabase.table("book_requests").insert({
                 "book_id": b_id,
                 "buyer_id": user_id,
                 "seller_id": seller_id,
                 "status": "active_timer",
-                "expires_at": expires_at
+                "expires_at": expires_at,
+                "group_id": group_id,
             }).execute()
-            
-            # 2. წიგნის სტატუსი ხდება pending
+
             supabase.table("books").update({"status": "pending"}).eq("id", b_id).execute()
-            
             active_purchases.append(book)
-            
-        # სცენარი B: სხვა ვიღაცას უკვე დაწყებული აქვს ტაიმერი (წიგნი pending-შია)
         else:
-            # ეს მყიდველი უბრალოდ დგება რიგში
             supabase.table("book_requests").insert({
                 "book_id": b_id,
                 "buyer_id": user_id,
                 "seller_id": seller_id,
-                "status": "waiting"
+                "status": "waiting",
+                "group_id": group_id,
             }).execute()
-            
             waiting_purchases.append(book)
 
     # 5. მეილის გაგზავნის ლოგიკა

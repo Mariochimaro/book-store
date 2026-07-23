@@ -801,6 +801,45 @@ a { text-decoration: none; }
   background: rgba(255,255,255,0.04);
 }
 
+
+.fp-genre-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+.fp-genre-search svg {
+  position: absolute;
+  left: 0.6rem;
+  color: #8892a0;
+  pointer-events: none;
+}
+.fp-genre-search input {
+  width: 100%;
+  padding: 0.45rem 1.8rem 0.45rem 1.9rem;
+  border-radius: 8px;
+  border: 1px solid #2d3748;
+  background: var(--bg-card);
+  color: inherit;
+  font-size: 0.82rem;
+  outline: none;
+}
+.fp-genre-search input:focus {
+  border-color: var(--accent);
+}
+.fp-genre-search-clear {
+  position: absolute;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  color: #8892a0;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+}
+.fp-genre-search-clear:hover { color: inherit; }
+
 /* ============================================================
    AUTH MODALS
    ============================================================ */
@@ -3419,4 +3458,187 @@ a { text-decoration: none; }
   background-color: #475569;
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+
+
+
+
+.gp-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 1rem;
+}
+.gp-modal {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+.gp-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: #8892a0;
+  cursor: pointer;
+}
+.gp-close:hover { color: inherit; }
+
+.gp-header { margin-bottom: 1rem; padding-right: 1.5rem; }
+.gp-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1.3rem; font-weight: 600; margin: 0; }
+.gp-desc { font-size: 0.85rem; opacity: 0.65; margin-top: 0.35rem; }
+
+.gp-search { position: relative; display: flex; align-items: center; margin-bottom: 1rem; }
+.gp-search svg { position: absolute; left: 0.6rem; color: #8892a0; pointer-events: none; }
+.gp-search input {
+  width: 100%;
+  padding: 0.5rem 0.8rem 0.5rem 1.9rem;
+  border-radius: 8px;
+  border: 1px solid #2d3748;
+  background: transparent;
+  color: inherit;
+  font-size: 0.85rem;
+  outline: none;
+}
+.gp-search input:focus { border-color: var(--accent); }
+
+.gp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.55rem;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+.gp-empty { grid-column: 1 / -1; text-align: center; font-size: 0.85rem; opacity: 0.6; padding: 1.2rem 0; }
+
+.gp-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 8px;
+  border: 1.5px solid #2d3748;
+  background: transparent;
+  color: #8892a0;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.gp-tag:hover { border-color: color-mix(in srgb, var(--accent) 40%, #2d3748); color: inherit; }
+.gp-tag.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); color: inherit; }
+
+.gp-cb {
+  width: 16px; height: 16px; flex-shrink: 0;
+  border-radius: 4px;
+  border: 1.5px solid #56607a;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem;
+  color: var(--bg-card);
+}
+.gp-cb.checked { background: var(--accent); border-color: var(--accent); }
+
+.gp-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid #2d3748;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.gp-count { font-size: 0.82rem; opacity: 0.6; }
+.gp-actions { display: flex; gap: 0.5rem; }
+
+.gp-btn { padding: 0.5rem 1.1rem; border-radius: 8px; font-size: 0.85rem; cursor: pointer; border: none; }
+.gp-btn-outline { background: transparent; border: 1px solid #2d3748; color: inherit; }
+.gp-btn-outline:hover { border-color: #56607a; }
+.gp-btn-primary { background: var(--accent); color: var(--bg-card); font-weight: 600; }
+.gp-btn-primary:hover { opacity: 0.9; }
+
+.gm-search { position: relative; display: flex; align-items: center; margin-bottom: 0.8rem; }
+.gm-search svg { position: absolute; left: 0.6rem; color: #8892a0; pointer-events: none; }
+.gm-search input {
+  width: 100%;
+  padding: 0.5rem 1.8rem 0.5rem 1.9rem;
+  border-radius: 8px;
+  border: 1px solid #2d3748;
+  background: transparent;
+  color: inherit;
+  font-size: 0.85rem;
+  outline: none;
+}
+.gm-search input:focus { border-color: var(--accent); }
+.gm-search-clear {
+  position: absolute; right: 0.5rem; background: none; border: none;
+  color: #8892a0; font-size: 1rem; line-height: 1; cursor: pointer;
+}
+.gm-search-clear:hover { color: inherit; }
+.gm-empty { grid-column: 1 / -1; text-align: center; font-size: 0.85rem; opacity: 0.6; padding: 1rem 0; }
+
+
+/* მთავარი მოდალის კონტეინერი */
+.gm-card {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh; /* ეკრანის სიმაღლის მაქსიმუმ 90% დაიკავოს, რომ არ ჩაიმალოს ეკრანს მიღმა */
+  overflow: hidden; /* ზედმეტი ნაწილი არ გამოვიდეს გარეთ */
+  padding-bottom: 4px;
+  padding-top: 35px;
+}
+
+/* უშუალოდ ჟანრების ბადე, რომელიც უნდა დაისქროლოს */
+.gm-grid {
+  overflow-y: auto; /* ამატებს ვერტიკალურ სქროლბარს საჭიროების შემთხვევაში */
+  flex-grow: 1; /* იკავებს მოდალის შიგნით დარჩენილ თავისუფალ სივრცეს */
+  max-height: 50vh; /* სურვილისამებრ, შეგიძლიათ შეზღუდოთ სიმაღლე (მაგ: 400px ან 50vh) */
+  
+  /* სქროლბარის გამოჩენისას რომ ღილაკები არ მიედოს კიდეს */
+  padding-right: 8px; 
+}
+
+/* (სურვილისამებრ) უფრო ლამაზი სქროლბარის დიზაინი (Webkit-ბრაუზერებისთვის: Chrome, Safari, Edge) */
+.gm-grid::-webkit-scrollbar {
+  width: 6px;
+}
+.gm-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+.gm-grid::-webkit-scrollbar-thumb {
+  background-color: var(--accent, #a0aec0); /* გამოიყენეთ თქვენი თემის ფერი ან ნაცრისფერი */
+  border-radius: 10px;
+}
+
+.modal-btn-ghost1 {
+  flex: 0 0 auto;
+  padding: 13px 22px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  margin-bottom: 20px;
+}
+
+.modal-btn-ghost1:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
 }

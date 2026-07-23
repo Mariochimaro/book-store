@@ -153,7 +153,6 @@ import { motion, AnimatePresence } from "framer-motion";
 export function BestsellerCarousel({ bestClusters = [], onSelectCluster }) {
   const [idx, setIdx] = useState(0);
 
-  // ავტომატური სლაიდერი (4 წამში ერთხელ)
   useEffect(() => {
     if (!bestClusters.length) return;
     const t = setInterval(() => {
@@ -167,6 +166,9 @@ export function BestsellerCarousel({ bestClusters = [], onSelectCluster }) {
   const cluster = bestClusters[idx];
   const coverImage = cluster.cover_image || '/placeholder-book.jpg';
   
+  // 1. პრიორიტეტი ქართულს (geo_title), ხოლო თუ არ არსებობს -> canonical_title
+  const displayTitle = cluster.geo_title || cluster.canonical_title;
+
   return (
     <section className="bs-section">
       <h2 className="bs-sec-title">
@@ -188,7 +190,7 @@ export function BestsellerCarousel({ bestClusters = [], onSelectCluster }) {
             <div className="bs-cover-wrap">
               <img
                 src={coverImage}
-                alt={cluster.canonical_title}
+                alt={displayTitle}
                 className="bs-cover-img"
               />
               <div className="bs-gradient-overlay" />
@@ -199,7 +201,8 @@ export function BestsellerCarousel({ bestClusters = [], onSelectCluster }) {
             <div className="bs-info-wrap">
               <p className="bs-sub-title">Most Loved This Month</p>
               
-              <h3 className="bs-book-title">{cluster.canonical_title}</h3>
+              {/* 2. აქ გამოჩნდება ქართული სათაური (ან ინგლისური fallback) */}
+              <h3 className="bs-book-title">{displayTitle}</h3>
               
               <p className="bs-author">{cluster.author || "სხვადასხვა ავტორი"}</p>
 
@@ -223,7 +226,14 @@ export function BestsellerCarousel({ bestClusters = [], onSelectCluster }) {
                 </div>
 
                 <button
-                  onClick={() => onSelectCluster && onSelectCluster(cluster.cluster_id, cluster.slug)}
+                  onClick={() => 
+                    onSelectCluster && 
+                    onSelectCluster(
+                      cluster.cluster_id || cluster.id, 
+                      cluster.slug, 
+                      displayTitle // 3. გადავცემთ არჩეულ სათაურს Home-ის ჰედერისთვისაც
+                    )
+                  }
                   className="bs-action-btn"
                 >
                   ნახე წიგნები ({cluster.available_copies || 1})
@@ -386,6 +396,7 @@ function BookDetailModal({ book, onClose }) {
 // ─────────────────────────────────────────────────────────────
 function FilterPanel({ isOpen, onClose, filters, onFilterChange, availableGenres, genresLoading }) {
   const { priceMax, genres, conditions, languages } = filters;
+  const [genreSearch, setGenreSearch] = useState("");
 
   function toggleSet(key, val) {
     onFilterChange((prev) => {
@@ -397,9 +408,15 @@ function FilterPanel({ isOpen, onClose, filters, onFilterChange, availableGenres
 
   function reset() {
     onFilterChange({ priceMax: 100, genres: new Set(), conditions: new Set(), languages: new Set() });
+    setGenreSearch("");
   }
 
   const sliderBg = `linear-gradient(to right, var(--accent) ${priceMax}%, #2d3748 ${priceMax}%)`;
+
+  const filteredGenres = useMemo(
+    () => availableGenres.filter((g) => g.toLowerCase().includes(genreSearch.trim().toLowerCase())),
+    [availableGenres, genreSearch]
+  );
 
   return (
     <aside className={`fp-sidebar${isOpen ? " open" : ""}`} aria-label="Filters">
@@ -407,12 +424,12 @@ function FilterPanel({ isOpen, onClose, filters, onFilterChange, availableGenres
         <div className="fp-header">
           <span className="fp-title">
             <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <line x1="2" y1="3.5"  x2="14" y2="3.5"  stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              <line x1="2" y1="8"    x2="14" y2="8"    stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="2" y1="3.5" x2="14" y2="3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               <line x1="2" y1="12.5" x2="14" y2="12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              <circle cx="5"  cy="3.5"  r="2" fill="var(--bg-card)" stroke="currentColor" strokeWidth="1.5" />
-              <circle cx="11" cy="8"    r="2" fill="var(--bg-card)" stroke="currentColor" strokeWidth="1.5" />
-              <circle cx="7"  cy="12.5" r="2" fill="var(--bg-card)" stroke="currentColor" strokeWidth="1.5" />
+              <circle cx="5" cy="3.5" r="2" fill="var(--bg-card)" stroke="currentColor" strokeWidth="1.5" />
+              <circle cx="11" cy="8" r="2" fill="var(--bg-card)" stroke="currentColor" strokeWidth="1.5" />
+              <circle cx="7" cy="12.5" r="2" fill="var(--bg-card)" stroke="currentColor" strokeWidth="1.5" />
             </svg>
             Filters
           </span>
@@ -435,13 +452,42 @@ function FilterPanel({ isOpen, onClose, filters, onFilterChange, availableGenres
 
         <div className="fp-section">
           <p className="fp-lbl">Genre</p>
+
+          {!genresLoading && availableGenres.length > 0 && (
+            <div className="fp-genre-search">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              <input
+                type="text"
+                value={genreSearch}
+                onChange={(e) => setGenreSearch(e.target.value)}
+                placeholder="ჟანრის ძებნა..."
+                aria-label="Search genres"
+              />
+              {genreSearch && (
+                <button
+                  type="button"
+                  className="fp-genre-search-clear"
+                  onClick={() => setGenreSearch("")}
+                  aria-label="Clear search"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          )}
+
           {genresLoading ? (
             <p style={{ fontSize: "0.8rem", opacity: 0.5 }}>იტვირთება...</p>
           ) : availableGenres.length === 0 ? (
             <p style={{ fontSize: "0.8rem", opacity: 0.5 }}>ჟანრები ვერ მოიძებნა</p>
+          ) : filteredGenres.length === 0 ? (
+            <p style={{ fontSize: "0.8rem", opacity: 0.5 }}>"{genreSearch}"-ის შედეგი ვერ მოიძებნა</p>
           ) : (
             <div className="fp-tags">
-              {availableGenres.map((g) => (
+              {filteredGenres.map((g) => (
                 <button key={g} className={`fp-tag${genres.has(g) ? " on" : ""}`} onClick={() => toggleSet("genres", g)}>
                   {g}
                 </button>
@@ -528,6 +574,7 @@ function Home() {
 
   const [selectedClusterId, setSelectedClusterId] = useState(null);
   const [selectedClusterSlug, setSelectedClusterSlug] = useState(null);
+  const [selectedClusterTitle, setSelectedClusterTitle] = useState(null);
 
   const [filters, setFilters] = useState({
     priceMax:   100,
@@ -620,18 +667,20 @@ function Home() {
     return () => { cancelled = true; };
   }, [isLoggedIn]);
 
-  const handleSelectCluster = (clusterId, clusterSlug) => {
+  const handleSelectCluster = (clusterId, clusterSlug, clusterTitle) => {
     setSelectedClusterId(clusterId);
     setSelectedClusterSlug(clusterSlug);
-    document.getElementById("popular-section")?.scrollIntoView({ behavior: 'smooth' });
+    setSelectedClusterTitle(clusterTitle); // ვინახავთ სათაურს
+    document.getElementById("filtered-cluster-section")?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const filteredBooks = useMemo(() => {
     let result = allBooks;
 
-    if (selectedClusterId != null) {
-      result = result.filter((b) => b.cluster_id === selectedClusterId);
+    if (selectedClusterId !== null && selectedClusterId !== undefined) {
+      result = result.filter((b) => Number(b.cluster_id) === Number(selectedClusterId));
     }
+    
     if (filters.conditions.size > 0) {
       const mapped = new Set([...filters.conditions].map((c) => CONDITION_MAP[c] ?? c.toLowerCase()));
       result = result.filter((b) => mapped.has(b.condition));
@@ -705,33 +754,54 @@ function Home() {
                   />
                 )}
 
-                {selectedClusterSlug && (
-                  <div style={{
+                {selectedClusterId && (
+                  <div id="filtered-cluster-section" style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '12px 20px',
+                    padding: '16px 24px',
                     borderRadius: '12px',
                     margin: '0 auto 24px auto',
                     maxWidth: '1024px',
+                    backgroundColor: '#111222', // ოდნავ გამოყოფილი ფონი
+                    borderLeft: '4px solid #d6a05a'
                   }}>
+                    <div>
+                      <h2 style={{ margin: 0, color: '#F4E8D8', fontSize: '1.4rem' }}>
+                        {selectedClusterTitle}
+                      </h2>
+                      <p style={{ margin: '4px 0 0 0', color: '#888', fontSize: '0.9rem' }}>
+                        ნაპოვნია {filteredBooks.length} სხვადასხვა გამოცემა/ვერსია
+                      </p>
+                    </div>
+
                     <button
-                      onClick={() => { setSelectedClusterId(null); setSelectedClusterSlug(null); }}
+                      onClick={() => { 
+                        setSelectedClusterId(null); 
+                        setSelectedClusterSlug(null); 
+                        setSelectedClusterTitle(null);
+                      }}
                       style={{
-                        padding: '6px 14px',
+                        padding: '8px 16px',
                         borderRadius: '8px',
-                        border: '1px solid #d6a05a90',
-                        backgroundColor: '#08091a',
+                        border: '1px solid rgba(214, 160, 90, 0.5)',
+                        backgroundColor: 'transparent',
                         cursor: 'pointer',
-                        fontSize: '0.85rem',
+                        fontSize: '0.9rem',
                         fontWeight: '600',
                         color: '#F4E8D8',
-                        transition: 'background-color 0.2s'
+                        transition: 'all 0.2s'
                       }}
-                      onMouseOver={(e) => e.target.style.backgroundColor = '#c97d3a'}
-                      onMouseOut={(e) => e.target.style.backgroundColor = '#08091a'}
+                      onMouseOver={(e) => {
+                        e.target.style.backgroundColor = '#d6a05a';
+                        e.target.style.color = '#000';
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.backgroundColor = 'transparent';
+                        e.target.style.color = '#F4E8D8';
+                      }}
                     >
-                      ✕ ფილტრის გასუფთავება
+                      ✕ ფილტრის წაშლა
                     </button>
                   </div>
                 )}
@@ -739,6 +809,7 @@ function Home() {
                 {filteredBooks.length === 0 ? (
                   <h2 style={{ padding: "40px", textAlign: "center" }}>ამ კრიტერიუმებით წიგნები ვერ მოიძებნა</h2>
                 ) : isFiltering ? (
+                  // აქ უკვე BookGrid გამოიტანს მხოლოდ ამ კლასტერის წიგნებს
                   <BookGrid
                     books={filteredBooks}
                     onOpenDetail={(book) => setSelectedBook(book)}
