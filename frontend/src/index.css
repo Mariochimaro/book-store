@@ -72,7 +72,7 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--font-sans);
-  background: var(--bg);
+  background: #0F141B;
   color: var(--text);
   font-size: 15px;
   line-height: 1.5;
@@ -465,11 +465,17 @@ a { text-decoration: none; }
   position: relative;
   display: flex;         /* Added to keep card heights completely uniform */
   flex-direction: column;/* stacked vertically */
+  border: 1px solid oklch(76.9% 0.17337 64.355 / 0.547); /* 1px border შენს ფერში */
+  transition: all 0.3s ease;
+  height: 100%;
 }
 
 .bc:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 18px 44px rgba(0,0,0,0.55);
+  transform: translateY(-4px); /* ოდნავ მაღლა იწევა */
+  border-width: 1px; 
+  /* Shadow შენივე ფერში (გამჭირვალე) და არა შავში */
+  box-shadow: 0 8px 45px oklch(76.9% 0.188 70.08 / 0.25);
+  margin: -1px; /* კომპენსაცია რომ border 2px-ზე ზომა არ "ახტეს" */
 }
 
 .bc-img-wrap {
@@ -479,28 +485,31 @@ a { text-decoration: none; }
   aspect-ratio: 3/4;     /* Now perfectly stable and unbreakable */
   overflow: hidden;
   background: var(--bg-card-alt);
+  aspect-ratio: 1 / 1; /* კვადრატული ფოტო, როგორც ფიგმაზე */
 }
 
 .bc-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.35s;
+  object-position: top;
+  transition: transform 0.5s ease;
 }
 
-.bc:hover .bc-img { transform: scale(1.05); }
-
-.bc-badge {
+.bc:hover .bc-img {
+  transform: scale(1.05); /* ოდნავ დიდდება მარტო ფოტო */
+}
+.bc-condition-badge {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  font-size: 9.5px;
-  font-weight: 800;
+  bottom: 7px;
+  left: 8px;
+  font-size: 10px;
+  font-weight: 600;
   letter-spacing: 0.6px;
   text-transform: uppercase;
-  padding: 3px 9px;
-  border-radius: 3px;
-  z-index: 1;
+  padding: 2px 8px;
+  border-radius: 12px;
+  z-index: 10;
 }
 
 .bc-new     { background: var(--green);      color: #fff; }
@@ -557,6 +566,109 @@ a { text-decoration: none; }
 }
 
 .bc-cart:hover { background: var(--accent-h); }
+
+/* გრადიენტი ფოტოს ქვემოთ, რომ ბეჯი კარგად გამოჩნდეს */
+.bc-img-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* ---------------- BADGES & ABSOLUTE ITEMS ---------------- */
+.bc-reserved-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #fe9a00;
+  color: #000;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-bottom-left-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  z-index: 10;
+}
+
+/* Bookmark (ზედა მარცხენა) */
+.bc-bookmark-btn {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  background: transparent; /* გამჭირვალე ფონი */
+  border: none;
+  color: rgba(255, 255, 255, 0.7); /* ნახევრად გამჭვირვალე თეთრი სანამ დავაჭერთ */
+  cursor: pointer;
+  padding: 4px;
+  transition: all 0.2s ease;
+  opacity: 0; /* დამალულია hover-მდე */
+}
+/* Bookmark გამოჩნდება ქარდზე hover-ის დროს, ან თუ უკვე მონიშნულია */
+.bc:hover .bc-bookmark-btn,
+.bc-bookmark-btn.active {
+  opacity: 1;
+}
+.bc-bookmark-btn:hover {
+  color: #fff;
+}
+.bc-bookmark-btn.active {
+  color: oklch(76.9% 0.188 70.08);
+}
+
+/* ---------------- ACTIONS & FOOTER ---------------- */
+.bc-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Like & Dislike ღილაკები (გამჭირვალე ოთხკუთხედის გარეშე) */
+.bc-action-btn {
+  background: transparent; /* აშორებს თეთრ ფონს */
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #a1a1aa; /* ნაცრისფერი outline */
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bc-action-btn:hover {
+  color: oklch(76.9% 0.188 70.08);
+}
+.bc-action-btn.active-like {
+  color: oklch(76.9% 0.188 70.08); /* ბრენდის ფერი როცა დალაიქებულია */
+}
+.bc-action-btn.active-dislike {
+  color: #ef4444; /* წითელი ფერი როცა დასისლაიქებულია */
+}
+.bc-action-btn.active-dislike:hover {
+  color: #dc2626;
+}
+
+/* კალათის ღილაკის მცირე სტილიზაცია (შეგიძლია დატოვო შენიც) */
+.bc-cart-btn {
+  background-color: oklch(76.9% 0.188 70.08);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+.bc-cart-btn:hover {
+  opacity: 0.9;
+}
+.bc-cart-ok {
+  background-color: #16a34a; /* მწვანე, დამატებისას */
+}
 
 /* Pagination dots */
 .c-dots {

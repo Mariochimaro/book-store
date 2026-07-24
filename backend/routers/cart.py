@@ -63,7 +63,7 @@ def get_cart(current_user=Depends(get_current_user)):
             display_item["message"] = "გამყიდველი აღარ არის"
         elif book_status == "sold":
             display_item["message"] = "წიგნი უკვე გაყიდულია"
-        elif book_status == "pending":
+        elif book_status == "reserved":
             display_item["message"] = "წიგნი რეზერვირებულია"
 
         processed_cart.append(display_item)
@@ -163,8 +163,8 @@ def buy_book(
             "expires_at": expires_at
         }).execute()
         
-        # წიგნის სტატუსს ვცვლით pending-ზე
-        supabase.table("books").update({"status": "pending"}).eq("id", book_id).execute()
+        # წიგნის სტატუსს ვცვლით reserved-ზე
+        supabase.table("books").update({"status": "reserved"}).eq("id", book_id).execute()
         
         # 1. ვიღებთ გამყიდველის ინფორმაციას
         seller_res = supabase.table("users").select("username, email, phone_numbers, bank_accounts, location").eq("id", book["seller_id"]).execute()
@@ -193,7 +193,7 @@ def buy_book(
             "expires_at": expires_at
         }
         
-    # სცენარი B: წიგნი pending-შია, ვიღაცას უკვე ჩართული აქვს 15 წუთი (შემდგომი მყიდველები)
+    # სცენარი B: წიგნი reserved-შია, ვიღაცას უკვე ჩართული აქვს 15 წუთი (შემდგომი მყიდველები)
     else:
         # ვამატებთ მომხმარებელს waiting რიგში
         supabase.table("book_requests").insert({
@@ -270,7 +270,7 @@ def buy_books_bulk(
                 "group_id": group_id,
             }).execute()
 
-            supabase.table("books").update({"status": "pending"}).eq("id", b_id).execute()
+            supabase.table("books").update({"status": "reserved"}).eq("id", b_id).execute()
             active_purchases.append(book)
         else:
             supabase.table("book_requests").insert({

@@ -7,6 +7,16 @@ const STATUS_LABEL = {
   seller_deleted: "⚠️ გამყიდველი აღარ არის",
 };
 
+// განსხვავებული ფერების პალიტრა გამყიდველების ღილაკებისთვის
+const SELLER_BUTTON_COLORS = [
+  "#b87743", // მთავარი ბრენდის ფერი (ყავისფერი/ხაკისფერი)
+  "#2563eb", // ლურჯი
+  "#7c3aed", // იისფერი
+  "#0d9488", // ზურმუხტისფერი / მწვანე
+  "#db2777", // ვარდისფერი
+  "#ea580c", // სტაფილოსფერი
+];
+
 export function CartSidebar({ isOpen, onClose }) {
   const { cartBySeller, removeFromCart, totalItems, totalPrice, checkoutSeller, checkoutState, loading } = useCart();
 
@@ -54,9 +64,13 @@ export function CartSidebar({ isOpen, onClose }) {
         ) : (
           <>
             <div className="cart-items">
-              {cartBySeller.map((group) => {
+              {cartBySeller.map((group, index) => {
                 const activeItems = group.items.filter((i) => i.status === "active");
                 const hasActive = activeItems.length > 0;
+                
+                // ვარჩევთ ფერს ინდექსის მიხედვით
+                const buttonColor = SELLER_BUTTON_COLORS[index % SELLER_BUTTON_COLORS.length];
+                const isDisabled = !hasActive || checkoutState[group.sellerId] === "loading";
 
                 return (
                   <div key={group.sellerId} className="seller-group">
@@ -102,8 +116,25 @@ export function CartSidebar({ isOpen, onClose }) {
 
                     <button
                       className="seller-checkout-btn"
-                      disabled={!hasActive || checkoutState[group.sellerId] === "loading"}
+                      disabled={isDisabled}
                       onClick={() => handleSellerCheckout(group.sellerId)}
+                      style={{
+                        backgroundColor: isDisabled ? "#e5e7eb" : buttonColor,
+                        color: isDisabled ? "#9ca3af" : "#ffffff",
+                        cursor: isDisabled ? "not-allowed" : "pointer",
+                        borderRadius: "14px", // მომრგვალებული ფორმა
+                        padding: "13px 20px",
+                        border: "none",
+                        fontWeight: "600",
+                        fontSize: "0.95rem",
+                        width: "100%",
+                        boxShadow: isDisabled ? "none" : "0 4px 14px rgba(0, 0, 0, 0.1)",
+                        transition: "all 0.2s ease-in-out",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginTop: "12px"
+                      }}
                     >
                       {checkoutState[group.sellerId] === "loading"
                         ? "იგზავნება..."

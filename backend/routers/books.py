@@ -98,10 +98,10 @@ def update_book_views(book_id: int, new_views: int):
 def get_book_by_id(book_id: int, 
                    background_tasks: BackgroundTasks,
                    current_user: Optional[dict] = Depends(get_optional_current_user)):
-    # მოგვაქვს წიგნი და გამყიდველის ინფო
+    # დამატებულია selling_method seller ობიექტში
     response = supabase.table("books").select("""
         *,
-        seller:users(id, username, location)
+        seller:users(id, username, location, selling_method)
     """).eq("id", book_id).execute()
     
     if not response.data:
@@ -112,18 +112,14 @@ def get_book_by_id(book_id: int,
         
     book = response.data[0]
     
-    # ვიღებთ მიმდინარე ნახვების რაოდენობას (თუ None არის, ვთვლით 0-ად) და ვუმატებთ 1-ს
     current_views = book.get("views") or 0
     new_views = current_views + 1
     
-    # 3. ვაძლევთ FastAPI-ს დავალებას, რომ პასუხის დაბრუნების შემდეგ ბაზაშიც განაახლოს
     background_tasks.add_task(update_book_views, book_id, new_views)
     
-    # 4. Affinity-ის განახლება
     if current_user:
         background_tasks.add_task(affinity.update_user_affinity, current_user["id"], book, "view")
 
-    # 5. მომხმარებელს (ფრონტენდს) პირდაპირ განახლებულ რიცხვს ვუბრუნებთ
     book["views"] = new_views
         
     return book

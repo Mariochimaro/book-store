@@ -8,23 +8,23 @@ import { useAuth } from "../context/AuthContext";
 const API_URL = import.meta.env.VITE_API_URL;
 
 const LANGUAGE_MAP = {
-  English:  "eng",
-  Georgian: "geo",
-  French:   "fra",
-  German:   "deu",
-  Russian:  "rus",
-  Japanese: "jpn",
+  "ინგლისური":  "eng",
+  "ქართული": "geo",
+  "ფრანგული":   "fra",
+  "გერმანული":   "deu",
+  "რუსული":  "rus",
+  "იაპონური": "jpn",
 };
 
 const CONDITION_MAP = {
-  "New":      "new",
-  "Good":     "good",
-  "Average":  "average",
-  "Damaged":  "damaged",
+  "ახალი":      "new",
+  "კარგი":     "good",
+  "საშუალო":  "average",
+  "დაზიანებული":  "damaged",
 };
 
-const CONDITIONS = ["New", "Like-New", "Good", "Fair"];
-const LANGUAGES  = ["English", "Georgian", "French", "German", "Russian", "Japanese"];
+const CONDITIONS = ["ახალი", "კარგი", "საშუალო", "დაზიანებული"];
+const LANGUAGES  = ["ინგლისური", "ქართული", "ფრანგული", "გერმანული", "რუსული", "იაპონური"];
 
 // SVG იკონები
 const StarIcon = ({ filled, hollow }) => {
@@ -548,7 +548,7 @@ function HeroSection({ onFilterToggle, searchQuery, onSearchChange, onSearchSubm
           />
           <button type="submit" className="hero-search-btn">Search</button>
         </form>
-        <button className="hero-filter-btn" onClick={onFilterToggle}>⇌ Browse &amp; Filter</button>
+        <button className="hero-filter-btn" onClick={onFilterToggle}>⇌  ფილტრებით პოვნა </button>
       </div>
     </section>
   );
