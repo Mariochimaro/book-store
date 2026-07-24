@@ -647,6 +647,7 @@ function Home() {
   }, []);
 
   // "Recommended for you" — მხოლოდ ავტორიზებულებისთვის
+  // "Recommended for you" — მხოლოდ ავტორიზებულებისთვის
   useEffect(() => {
     if (!isLoggedIn) {
       setRecommendedBooks([]);
@@ -654,19 +655,31 @@ function Home() {
     }
     let cancelled = false;
 
-    fetch(`${API_URL}/feed`, { credentials: "include" })
+    // 1. ამოვიღოთ ტოკენი ლოკალური მეხსიერებიდან (შეამოწმე რა სახელით ინახავ, "token" თუ "access_token")
+    const token = localStorage.getItem("token"); 
+
+    fetch(`${API_URL}/feed`, { 
+      // 2. გავატანოთ Bearer ტოკენი ჰედერში
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    })
       .then((res) => res.json())
       .then((data) => {
         if (cancelled) return;
-        const raw = Array.isArray(data) ? data : (data.books ?? data.results ?? []);
+        
+        // 3. ყოველი შემთხვევისთვის data.feed-იც დავამატე, გააჩნია ბექენდი რა key-თ აბრუნებს
+        const raw = Array.isArray(data) ? data : (data.feed ?? data.books ?? data.results ?? []);
         const books = raw.map((item) => item.book_data ?? item);
+        
         setRecommendedBooks(books);
       })
       .catch(() => { if (!cancelled) setRecommendedBooks([]); });
 
     return () => { cancelled = true; };
   }, [isLoggedIn]);
-
+  
   const handleSelectCluster = (clusterId, clusterSlug, clusterTitle) => {
     setSelectedClusterId(clusterId);
     setSelectedClusterSlug(clusterSlug);
