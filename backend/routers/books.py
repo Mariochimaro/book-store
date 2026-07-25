@@ -40,7 +40,7 @@ def get_books(
     query = supabase.table("books").select("""
         *,
         seller:users(id, username, location)
-    """).in("status", ["active", "reserved"]);
+    """).in("status", ["active", "reserved"])
     
     if max_price:
         query = query.lte("price", max_price)
