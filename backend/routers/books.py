@@ -76,7 +76,7 @@ def get_all_genres():
     response = (
         supabase.table("books")
         .select("genres")
-        .eq("status", "active")
+        .in_("status", ["active", "reserved"])
         .execute()
     )
     genre_set = set()
