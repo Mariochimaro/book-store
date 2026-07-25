@@ -351,6 +351,8 @@ function AdminBookDetailModal({ book, onClose, onApprove, onReject }) {
   const [editCondition, setEditCondition] = useState(book.condition || "good");
   const [editGenres, setEditGenres] = useState((book.genres || []).join(", "));
 
+  const [activePhoto, setActivePhoto] = useState(0);
+
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -362,7 +364,9 @@ function AdminBookDetailModal({ book, onClose, onApprove, onReject }) {
     };
   }, [onClose]);
 
-  const cover = book.photos_urls?.[0] ?? book.cover;
+  const photos = book.photos_urls?.length ? book.photos_urls : (book.cover ? [book.cover] : []);
+  const hasVideo = Boolean(book.video_url || book.book_video_url);
+  const videoUrl = book.video_url || book.book_video_url;
 
   return (
     <div
@@ -370,23 +374,93 @@ function AdminBookDetailModal({ book, onClose, onApprove, onReject }) {
       onClick={(e) => e.target === e.currentTarget && onClose()}
       role="presentation"
     >
-      <div className="bdm-card" role="dialog" aria-modal="true" aria-labelledby="bdm-heading">
+      <div
+        className="bdm-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="bdm-heading"
+        style={{ display: "flex", flexDirection: "column", gap: "20px", maxWidth: "560px" }}
+      >
         <button className="modal-x bdm-close" onClick={onClose} aria-label="Close details">
           <XIcon size={16} />
         </button>
 
-        <div className="bdm-gallery">
-          <div className="bdm-main-img-wrap">
-            <img src={cover} alt={editTitle} className="bdm-main-img" />
+        {/* 1. MEDIA GALLERY AREA — now smaller & centered on top */}
+        <div style={{ width: "180px", margin: "0 auto" }}>
+          <div style={{
+            width: "100%", aspectRatio: "3/4", backgroundColor: "#f3f4f6",
+            borderRadius: "14px", overflow: "hidden", position: "relative",
+            display: "flex", alignItems: "center", justifyContent: "center"
+          }}>
+            {hasVideo && activePhoto === photos.length ? (
+              <video
+                src={videoUrl}
+                controls playsInline controlsList="nodownload"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            ) : (
+              <img
+                src={photos[activePhoto] ?? "/placeholder.jpg"}
+                alt={editTitle}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            )}
           </div>
+
+          {/* Thumbnails */}
+          {(photos.length > 1 || hasVideo) && (
+            <div style={{ display: "flex", gap: "8px", marginTop: "10px", overflowX: "auto", paddingBottom: "4px", justifyContent: "center" }}>
+              {photos.map((url, i) => (
+                <img
+                  key={i}
+                  src={url}
+                  alt=""
+                  onClick={() => setActivePhoto(i)}
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "8px",
+                    objectFit: "cover",
+                    cursor: "pointer",
+                    border: `2px solid ${i === activePhoto ? "var(--accent, #b87743)" : "transparent"}`,
+                    opacity: i === activePhoto ? 1 : 0.6,
+                    transition: "all 0.2s ease",
+                    flexShrink: 0,
+                  }}
+                />
+              ))}
+
+              {hasVideo && (
+                <div
+                  onClick={() => setActivePhoto(photos.length)}
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "8px",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    backgroundColor: "#1a202c", color: "#fff",
+                    cursor: "pointer",
+                    border: `2px solid ${activePhoto === photos.length ? "var(--accent, #b87743)" : "transparent"}`,
+                    opacity: activePhoto === photos.length ? 1 : 0.6,
+                    transition: "all 0.2s ease",
+                    fontWeight: "bold",
+                    fontSize: "0.9rem",
+                    flexShrink: 0,
+                  }}
+                >
+                  ▶
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        <div className="bdm-details">
-          {/* რედაქტირებადი სათაური - ლოგების ინპუტის სტილით */}
+        {/* 2. DETAILS AREA — full width below media */}
+        <div className="bdm-details" style={{ flex: "1", minWidth: 0, padding: 0 }}>
           <div>
             <label className="text-xs" style={{ color: "var(--text-3, #718096)" }}>Title (Editable)</label>
             <div className="lg-search-row mt-1">
-              <input 
+              <input
                 type="text"
                 className="lg-search-input w-full"
                 value={editTitle}
@@ -397,13 +471,12 @@ function AdminBookDetailModal({ book, onClose, onApprove, onReject }) {
             <p className="bdm-author mt-2">{book.author || "—"}</p>
           </div>
 
-          {/* Condition-ის ველი (ლოგების სტილის გარსით) */}
           <div className="mt-3">
              <label className="text-xs block mb-1" style={{ color: "var(--text-3, #718096)" }}>Condition</label>
              <div className="lg-search-row">
-               <select 
+               <select
                  className="lg-search-input w-full bg-transparent"
-                 value={editCondition} 
+                 value={editCondition}
                  onChange={(e) => setEditCondition(e.target.value)}
                >
                  <option value="new" style={{ color: "#000" }}>ახალი</option>
@@ -427,11 +500,10 @@ function AdminBookDetailModal({ book, onClose, onApprove, onReject }) {
             </div>
           </div>
 
-          {/* რედაქტირებადი ჟანრები - ლოგების ინპუტის სტილით */}
           <div className="mt-3">
              <label className="text-xs block mb-1" style={{ color: "var(--text-3, #718096)" }}>Genres (comma separated)</label>
              <div className="lg-search-row">
-               <input 
+               <input
                  type="text"
                  className="lg-search-input w-full"
                  value={editGenres}
@@ -446,10 +518,10 @@ function AdminBookDetailModal({ book, onClose, onApprove, onReject }) {
             <p className="bdm-desc-text">{book.description ?? "No description available yet."}</p>
           </div>
 
-          {/* ადმინის მოქმედებები */}
+          {/* Approve / Reject — already side by side */}
           <div className="bdm-actions mt-4 flex gap-2">
-            <button 
-              className="bdm-add-cart" 
+            <button
+              className="bdm-add-cart"
               style={{ backgroundColor: "#10b981", color: "#fff", flex: 1, display: "flex", justifyContent: "center", alignItems: "center", gap: "6px" }}
               onClick={() => onApprove(book.id, {
                 title: editTitle,
@@ -459,8 +531,8 @@ function AdminBookDetailModal({ book, onClose, onApprove, onReject }) {
             >
               <CheckIcon size={14} /> Approve & Save
             </button>
-            <button 
-              className="bdm-wishlist-action" 
+            <button
+              className="bdm-wishlist-action"
               style={{ backgroundColor: "#ef4444", color: "#fff", flex: 1, borderRadius: "8px", padding: "10px", fontWeight: 600, display: "flex", justifyContent: "center", alignItems: "center", gap: "6px" }}
               onClick={() => onReject(book)}
             >

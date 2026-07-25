@@ -93,43 +93,33 @@ function Profile({ onOpenAddBook }) {
 
       <div className="pf-page">
         {/* ── Header ── */}
-        <div className="pf-header" style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-          
-          {/* ფოტოს/ავატარის გამოჩენა */}
-          <div 
-            className="pf-avatar" 
+        <div className="pf-header">
+          <div
+            className="pf-avatar"
             aria-label={`Avatar for ${profileData?.username}`}
             style={profileData?.profile_picture ? {
               backgroundImage: `url(${profileData.profile_picture})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
-              color: "transparent" // ასოს ვმალავთ, თუ ფოტო გვაქვს
+              color: "transparent"
             } : {}}
           >
             {!profileData?.profile_picture && avatarLetter}
           </div>
 
-          <div style={{ flex: 1 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-              <h2 className="pf-name" style={{ margin: 0 }}>{profileData?.username}</h2>
-              
-              {/* რედაქტირების ღილაკი */}
-              <button 
-                onClick={() => setIsEditModalOpen(true)}
-                style={{
-                  background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", 
-                  color: "var(--accent)", padding: "4px 10px", borderRadius: "12px", 
-                  cursor: "pointer", fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "6px"
-                }}
-              >
+          <div className="pf-header-info">
+            <div className="pf-name-row">
+              <h2 className="pf-name">{profileData?.username}</h2>
+
+              <button className="pf-edit-btn" onClick={() => setIsEditModalOpen(true)}>
                 <GearIcon size={12} /> რედაქტირება
               </button>
             </div>
-            
-            <p className="pf-email" style={{ marginTop: "4px" }}>{profileData?.email}</p>
+
+            <p className="pf-email">{profileData?.email}</p>
             {profileData?.location && (
-              <p style={{ fontSize: '0.82rem', opacity: 0.55, marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <svg xmlns="http://w3.org" viewBox="0 0 24 24" fill="currentColor" style={{ width: '1.1rem', height: '1.1rem' }}>
+              <p className="pf-location">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="pf-location-icon">
                   <path fillRule="evenodd" d="m11.54 22.351.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742c1.008-.704 2.213-1.67 3.23-2.915C18.665 16.411 20 14.15 20 11.528c0-4.486-3.515-8.028-8-8.028s-8 3.542-8 8.028c0 2.622 1.335 4.883 2.378 6.556 1.017 1.244 2.222 2.21 3.23 2.916a16.975 16.975 0 0 0 1.143.742ZM12 13.5a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5Z" clipRule="evenodd" />
                 </svg>
                 {profileData.location}
@@ -153,10 +143,7 @@ function Profile({ onOpenAddBook }) {
           {activeTab === "notifications" && <NotificationsTab />}
           {activeTab === "orders"        && <OrdersTab />}
           {activeTab === "wishlist"      && <WishlistTab />}
-          
-          {/* აქ გადავეცით ფუნქცია MyListingsTab კომპონენტს */}
           {activeTab === "listings"      && <MyListingsTab onOpenAddBook={onOpenAddBook} />}
-          
           {activeTab === "finances"      && isOnboarded && <FinancesTab />}
         </div>
       </div>

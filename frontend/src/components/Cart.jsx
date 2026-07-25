@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 const STATUS_LABEL = {
   pending: "⏳ მოლოდინში — გადახდა/დადასტურება მიმდინარეობს",
@@ -10,15 +11,23 @@ const STATUS_LABEL = {
 // განსხვავებული ფერების პალიტრა გამყიდველების ღილაკებისთვის
 const SELLER_BUTTON_COLORS = [
   "#b87743", // მთავარი ბრენდის ფერი (ყავისფერი/ხაკისფერი)
-  "#2563eb", // ლურჯი
+  "#10dbca", // ცისფერი
   "#7c3aed", // იისფერი
   "#0d9488", // ზურმუხტისფერი / მწვანე
   "#db2777", // ვარდისფერი
   "#ea580c", // სტაფილოსფერი
 ];
 
+const ArrowRightIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: "4px", verticalAlign: "middle" }}>
+    <path d="M5 12h14" />
+    <path d="m12 5 7 7-7 7" />
+  </svg>
+);
+
 export function CartSidebar({ isOpen, onClose }) {
   const { cartBySeller, removeFromCart, totalItems, totalPrice, checkoutSeller, checkoutState, loading } = useCart();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -40,6 +49,11 @@ export function CartSidebar({ isOpen, onClose }) {
     } catch {
       // შეცდომა უკვე console-შია და checkoutState-შიც აისახა
     }
+  }
+
+  function handleViewBook(bookId) {
+    onClose();
+    navigate(`/book/${bookId}`);
   }
 
   return (
@@ -73,46 +87,66 @@ export function CartSidebar({ isOpen, onClose }) {
                 const isDisabled = !hasActive || checkoutState[group.sellerId] === "loading";
 
                 return (
-                  <div key={group.sellerId} className="seller-group">
-                    <div className="seller-group-header">
-                      <span className="seller-name">{group.sellerUsername}</span>
-                      <span className="seller-group-total">{group.total.toFixed(2)} ₾</span>
-                    </div>
+                  <div key={group.sellerId} className="seller-group" style={{ marginBottom: "32px" }}>
+                    
+                    {/* დავამატეთ gap: "24px" რათა ერთი გამყიდველის წიგნებს შორის მეტი დაშორება იყოს */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                      {group.items.map((item) => {
+                        const isActive = item.status === "active";
+                        return (
+                          <div key={item.cart_item_id} className={`ci${isActive ? "" : " ci-disabled"}`}>
+                            <img
+                                src={item.photos_urls?.[0] ?? "/placeholder.jpg"}
+                                alt={item.title}
+                                className="ci-img"
+                                loading="lazy"
+                                onClick={() => handleViewBook(item.id)}
+                                style={{ cursor: "pointer" }}
+                              />
+                              
+                              <div className="ci-info">
+                                <p 
+                                  className="ci-title" 
+                                  onClick={() => handleViewBook(item.id)}
+                                  style={{ cursor: "pointer", transition: "color 0.2s" }}
+                                >
+                                  {item.title}
+                                </p>
+                                <p className="ci-author">{item.author ?? "—"}</p>
+                              </div>
 
-                    {group.items.map((item) => {
-                      const isActive = item.status === "active";
-                      return (
-                        <div key={item.cart_item_id} className={`ci${isActive ? "" : " ci-disabled"}`}>
-                          <img
-                            src={item.photos_urls?.[0] ?? "/placeholder.jpg"}
-                            alt={item.title}
-                            className="ci-img"
-                            loading="lazy"
-                          />
-                          <div className="ci-info">
-                            <p className="ci-title">{item.title}</p>
-                            <p className="ci-author">{item.author ?? "—"}</p>
-                            <p className="ci-price">{item.price} ₾</p>
-                            {!isActive && (
-                              <p className="ci-status-msg">
-                                {STATUS_LABEL[item.status] || item.message}
-                              </p>
-                            )}
-                          </div>
-                          <div className="ci-right">
-                            <button
-                              className="ci-remove"
-                              onClick={() => removeFromCart(item.cart_item_id)}
-                              disabled={!isActive}
-                              title={isActive ? "წაშლა" : "მოლოდინში მყოფი წიგნის წაშლა შეუძლებელია"}
-                              aria-label={`${item.title}-ის წაშლა`}
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
+                              {/* Price and status isolated to move independently on mobile grid */}
+                              <div className="ci-meta-group">
+                                {!isActive && (
+                                  <p className="ci-status-msg">
+                                    {STATUS_LABEL[item.status] || item.message}
+                                  </p>
+                                )}
+                                <p className="ci-price">{item.price} ₾</p>
+                              </div>
+                              
+                              <div className="ci-right">
+                                <button
+                                  className="ci-remove"
+                                  onClick={() => removeFromCart(item.cart_item_id)}
+                                  disabled={!isActive}
+                                  title={isActive ? "წაშლა" : "მოლოდინში მყოფი წიგნის წაშლა შეუძლებელია"}
+                                  aria-label={`${item.title}-ის წაშლა`}
+                                >
+                                  ✕
+                                </button>
+
+                                <button
+                                  className="ci-view-btn"
+                                  onClick={() => handleViewBook(item.id)}
+                                >
+                                  ნახვა <ArrowRightIcon />
+                                </button>
+                              </div>
+                            </div>
+                        );
+                      })}
+                    </div>
 
                     <button
                       className="seller-checkout-btn"
@@ -122,18 +156,18 @@ export function CartSidebar({ isOpen, onClose }) {
                         backgroundColor: isDisabled ? "#e5e7eb" : buttonColor,
                         color: isDisabled ? "#9ca3af" : "#ffffff",
                         cursor: isDisabled ? "not-allowed" : "pointer",
-                        borderRadius: "14px", // მომრგვალებული ფორმა
-                        padding: "13px 20px",
+                        borderRadius: "14px",
+                        padding: "8px 15px",
                         border: "none",
-                        fontWeight: "600",
-                        fontSize: "0.95rem",
+                        fontWeight: "500",
+                        fontSize: "0.85rem",
                         width: "100%",
                         boxShadow: isDisabled ? "none" : "0 4px 14px rgba(0, 0, 0, 0.1)",
                         transition: "all 0.2s ease-in-out",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        marginTop: "12px"
+                        marginTop: "24px" // გაიზარდა დაშორება ღილაკსა და წიგნებს შორის
                       }}
                     >
                       {checkoutState[group.sellerId] === "loading"

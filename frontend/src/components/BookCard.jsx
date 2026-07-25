@@ -7,7 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 const CONDITION_BADGE = {
   new:     { label: "ახალი",        cls: "bc-new" },
-  good:    { label: "კარგი",        cls: "bc-new" },
+  good:    { label: "კარგი",        cls: "bc-good" },
   average: { label: "საშუალო",     cls: "bc-pending" },
   damaged: { label: "დაზიანებული", cls: "bc-ist" },
 };
@@ -124,7 +124,7 @@ function BookCard({ book }) {
 
         {/* Reserved (ზედა მარჯვენა) */}
         {isReserved && (
-          <span className="bc-reserved-badge">Reserved</span>
+          <span className="bc-reserved-badge">დაჯავშნილი</span>
         )}
 
         {/* Bookmark (ზედა მარცხენა) - ჩანს მხოლოდ დალოგინებულისთვის */}

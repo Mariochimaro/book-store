@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import BookCard from "../components/BookCard";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import BookCarousel from "../components/BookCarousel";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -68,80 +69,6 @@ const Sparkle = () => (
     <path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"/>
   </svg>
 )
-
-// ─────────────────────────────────────────────────────────────
-// BOOK CAROUSEL (Fixed layout resizing on partial pages)
-// ─────────────────────────────────────────────────────────────
-function BookCarousel({ icon, title, subtitle, books, id, perPage = 5, rows = 1, onOpenDetail }) {
-  const itemsPerPage = perPage * rows;
-  const [page, setPage] = useState(0);
-  useEffect(() => { setPage(0); }, [books, itemsPerPage]);
-  if (!books.length) return null;
-
-  const total   = Math.ceil(books.length / itemsPerPage);
-  const visible = books.slice(page * itemsPerPage, (page + 1) * itemsPerPage);
-
-  return (
-    <section className="sec" id={id}>
-      <div className="sec-head">
-        <div>
-          <h2 className="sec-title">
-            <span aria-hidden="true">{icon}</span>
-            {title}
-          </h2>
-          {subtitle && <p className="sec-sub">{subtitle}</p>}
-        </div>
-        <div className="sec-nav">
-          <span className="page-lbl">{page + 1} / {total}</span>
-          <button className="arr-btn" onClick={() => setPage((p) => p - 1)} disabled={page === 0} aria-label="Previous page">‹</button>
-          <button className="arr-btn" onClick={() => setPage((p) => p + 1)} disabled={page === total - 1} aria-label="Next page">›</button>
-        </div>
-      </div>
-
-      <div
-        className="book-grid"
-        style={rows > 1 ? { gridTemplateColumns: `repeat(${perPage}, 1fr)`, gridTemplateRows: `repeat(${rows}, auto)` } : undefined}
-      >
-        {Array.from({ length: itemsPerPage }).map((_, index) => {
-          const book = visible[index];
-          if (book) {
-            return <BookCard key={book.id} book={book} onOpenDetail={onOpenDetail} />;
-          }
-          return (
-            <div
-              key={`empty-${index}`}
-              style={{ visibility: "hidden", minHeight: "1px" }}
-              aria-hidden="true"
-            />
-          );
-        })}
-      </div>
-
-      <div className="c-dots" role="tablist">
-        {Array.from({ length: total }, (_, i) => (
-          <button key={i} className={`c-dot${i === page ? " on" : ""}`} onClick={() => setPage(i)} role="tab" aria-selected={i === page} aria-label={`Page ${i + 1}`} />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
-// BOOK GRID (plain, no pagination — search & filter results)
-// ─────────────────────────────────────────────────────────────
-function BookGrid({ books, onOpenDetail }) {
-  if (!books.length) return null;
-
-  return (
-    <section className="sec">
-      <div className="book-grid">
-        {books.map((book) => (
-          <BookCard key={book.id} book={book} onOpenDetail={onOpenDetail} />
-        ))}
-      </div>
-    </section>
-  );
-}
 
 // ─────────────────────────────────────────────────────────────
 // BESTSELLER CAROUSEL — runs off live "featured" books (top of the
@@ -221,8 +148,8 @@ export function BestsellerCarousel({ bestClusters = [], onSelectCluster }) {
               {/* ქვედა ზოლი */}
               <div className="bs-bottom-row">
                 <div className="bs-price-box">
+                  <span className="bs-price-val">₾{cluster.min_price} </span>
                   <span className="bs-price-label">დან</span>
-                  <span className="bs-price-val">${cluster.min_price}</span>
                 </div>
 
                 <button
@@ -754,7 +681,8 @@ function Home() {
             availableGenres={availableGenres}
             genresLoading={genresLoading}
           />
-
+          {filtersOpen && <div className="fp-backdrop" onClick={() => setFiltersOpen(false)} />}
+          
           <div className="sections-area">
             {loading ? (
               <h2 style={{ padding: "40px", textAlign: "center" }}>იტვირთება...</h2>
@@ -822,8 +750,10 @@ function Home() {
                 {filteredBooks.length === 0 ? (
                   <h2 style={{ padding: "40px", textAlign: "center" }}>ამ კრიტერიუმებით წიგნები ვერ მოიძებნა</h2>
                 ) : isFiltering ? (
-                  // აქ უკვე BookGrid გამოიტანს მხოლოდ ამ კლასტერის წიგნებს
-                  <BookGrid
+                  <BookCarousel
+                    id="filtered-results-section"
+                    title={selectedClusterId ? null : "შედეგები"}
+                    subtitle={selectedClusterId ? null : `ნაპოვნია ${filteredBooks.length} წიგნი`}
                     books={filteredBooks}
                     onOpenDetail={(book) => setSelectedBook(book)}
                   />
@@ -835,7 +765,6 @@ function Home() {
                       title="Popular & Bestsellers"
                       subtitle="Beloved by readers across the archive"
                       books={popularBooks}
-                      perPage={popularPerPage}
                       onOpenDetail={(book) => setSelectedBook(book)}
                     />
 
@@ -846,7 +775,6 @@ function Home() {
                         title="Recommended for you"
                         subtitle="Picked based on your reading taste"
                         books={recommendedBooks}
-                        perPage={5}
                         onOpenDetail={(book) => setSelectedBook(book)}
                       />
                     )}
@@ -857,8 +785,6 @@ function Home() {
                       title="Others"
                       subtitle="More titles from the archive"
                       books={filteredBooks}
-                      perPage={5}
-                      rows={2}
                       onOpenDetail={(book) => setSelectedBook(book)}
                     />
                   </>

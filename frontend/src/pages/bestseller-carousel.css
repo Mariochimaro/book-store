@@ -1,3 +1,7 @@
+/* ============================================================================================================================================
+   BESTSELLER SLIDESHOW
+   ============================================================================================================================================ */
+
 .bs-section {
   max-width: 1024px;
   margin: 32px auto;
@@ -144,12 +148,12 @@
 }
 
 .bs-price-box {
-  display: flex;
+  display: inline;
   flex-direction: column;
 }
 
 .bs-price-label {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   color: #9ca3af;
 }
 
@@ -235,4 +239,40 @@
 
 .bs-arrow-right {
   right: 8px;
+}
+
+@media (max-width: 767px) {
+  .bs-carousel-container { height: 480px; }
+
+  .bs-grid {
+    grid-template-columns: 1fr;
+    position: relative;
+    height: 100%;
+  }
+
+  .bs-cover-wrap {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+  }
+
+  .bs-cover-img { height: 100%; }
+
+  .bs-gradient-overlay {
+    display: block;
+    background: linear-gradient(to top, #171d25 15%, transparent 60%);
+  }
+
+  .bs-info-wrap {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: auto;
+    padding: 20px;
+    justify-content: flex-end;
+    z-index: 2;
+  }
+
+  .bs-desc { display: none; } /* trims height so it reads as a caption, not a panel */
+  .bs-book-title { font-size: 1.15rem; }
+  .bs-bottom-row { gap: 10px; }
 }

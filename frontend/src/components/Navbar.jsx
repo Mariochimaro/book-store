@@ -12,14 +12,15 @@ function Navbar() {
   const [modal, setModal]         = useState(null); // "login" | "register" | null
   const [cartOpen, setCart]       = useState(false);
   const [genreOpen, setGenreOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate                  = useNavigate();
   const { totalItems }            = useCart();
   const { isLoggedIn, user, logout } = useAuth();
 
   const isAdmin = !!user?.is_admin;
 
-  // Handles logging out and redirecting to home page
   const handleLogout = async () => {
+    setMobileMenuOpen(false);
     try {
       await logout();
     } catch (error) {
@@ -31,13 +32,13 @@ function Navbar() {
 
   function handleSearch(e) {
     e.preventDefault();
-    
+
     const searchParams = new URLSearchParams();
     const cleanQuery = query.trim();
-    
+
     if (cleanQuery) {
       searchParams.set('q', cleanQuery);
-      
+
       if (window.location.pathname === '/') {
         const currentParams = new URLSearchParams(window.location.search);
         for (const [key, value] of currentParams.entries()) {
@@ -72,7 +73,7 @@ function Navbar() {
                   <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
                 </svg>
               </span>
-              წიგნების სამყარო
+              <span className="nb-logo-text">წიგნების სამყარო</span>
             </Link>
 
             <div className="nb-page-links" role="navigation" aria-label="Page sections">
@@ -101,7 +102,7 @@ function Navbar() {
             </div>
           </div>
 
-          {/* Search */}
+          {/* Search — always visible, never collapses into the menu */}
           <form className="nb-search" onSubmit={handleSearch} role="search">
             <span className="nb-search-icon" aria-hidden="true">
               <svg
@@ -135,7 +136,7 @@ function Navbar() {
               isAdmin ? (
                 /* ── Admin nav ── */
                 <>
-                  <Link to="/admin" className="nb-admin-link" aria-label="Admin Dashboard">
+                  <Link to="/admin" className="nb-admin-link nb-collapsible" aria-label="Admin Dashboard">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                       strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -143,8 +144,7 @@ function Navbar() {
                     Admin Dashboard
                   </Link>
 
-                  {/* Updated Admin Logout Button */}
-                  <button className="nb-icon-btn" onClick={handleLogout} aria-label="Sign out" title="Sign out">
+                  <button className="nb-icon-btn nb-collapsible" onClick={handleLogout} aria-label="Sign out" title="Sign out">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                       strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -156,7 +156,7 @@ function Navbar() {
               ) : (
                 /* ── Regular user nav ── */
                 <>
-                  <button className="nb-genre-btn" onClick={() => setGenreOpen(true)} aria-label="Browse genres">
+                  <button className="nb-genre-btn nb-collapsible" onClick={() => setGenreOpen(true)} aria-label="Browse genres">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <circle cx="12" cy="12" r="3"/>
                       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -171,8 +171,7 @@ function Navbar() {
                     </svg>
                   </Link>
 
-                  {/* Updated User Logout Button */}
-                  <button className="nb-icon-btn" onClick={handleLogout} aria-label="Sign out" title="Sign out">
+                  <button className="nb-icon-btn nb-collapsible" onClick={handleLogout} aria-label="Sign out" title="Sign out">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                       <polyline points="16 17 21 12 16 7"/>
@@ -184,13 +183,17 @@ function Navbar() {
             ) : (
               /* ── Guest nav ── */
               <>
-                <button className="nb-login"    onClick={() => setModal("login")}>Login</button>
-                <button className="nb-register" onClick={() => setModal("register")}>Register</button>
+                <button className="nb-login nb-collapsible" onClick={() => setModal("login")}>Login</button>
+                <button className="nb-register nb-collapsible" onClick={() => setModal("register")}>Register</button>
               </>
             )}
 
-            {/* Cart — always visible */}
-            <button className="nb-cart" onClick={() => setCart(true)} aria-label="Shopping cart">
+            {/* Cart — always visible when logged in; hidden on mobile for guests */}
+            <button
+              className={`nb-cart${!isLoggedIn ? " nb-guest-hide-mobile" : ""}`}
+              onClick={() => setCart(true)}
+              aria-label="Shopping cart"
+            >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
@@ -201,6 +204,70 @@ function Navbar() {
                 </span>
               )}
             </button>
+
+            {/* Hamburger — sits at the very right end, only shown once collapsible items are hidden */}
+            <div className="nb-hamburger-wrap">
+              <button
+                className="nb-hamburger-btn"
+                onClick={() => setMobileMenuOpen((o) => !o)}
+                aria-label="Menu"
+                aria-expanded={mobileMenuOpen}
+              >
+                {mobileMenuOpen ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+                  </svg>
+                )}
+              </button>
+
+              {mobileMenuOpen && (
+                <div className="nb-mobile-dropdown" role="menu">
+                  <button
+                    className="nb-mobile-item"
+                    onClick={() => { document.getElementById("popular-section")?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); }}
+                  >
+                    Popular Books
+                  </button>
+                  <button
+                    className="nb-mobile-item"
+                    onClick={() => { document.getElementById("others-section")?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); }}
+                  >
+                    All Books
+                  </button>
+
+                  {isLoggedIn ? (
+                    isAdmin ? (
+                      <>
+                        <Link className="nb-mobile-item" to="/admin" onClick={() => setMobileMenuOpen(false)}>
+                          Admin Dashboard
+                        </Link>
+                        <button className="nb-mobile-item" onClick={handleLogout}>Sign out</button>
+                      </>
+                    ) : (
+                      <>
+                        <button className="nb-mobile-item" onClick={() => { setGenreOpen(true); setMobileMenuOpen(false); }}>
+                          Genres
+                        </button>
+                        <button className="nb-mobile-item" onClick={handleLogout}>Sign out</button>
+                      </>
+                    )
+                  ) : (
+                    <>
+                      <button className="nb-mobile-item" onClick={() => { setModal("login"); setMobileMenuOpen(false); }}>
+                        Login
+                      </button>
+                      <button className="nb-mobile-item" onClick={() => { setModal("register"); setMobileMenuOpen(false); }}>
+                        Register
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </nav>
