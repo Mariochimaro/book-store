@@ -40,7 +40,7 @@ def get_books(
     query = supabase.table("books").select("""
         *,
         seller:users(id, username, location)
-    """).in("status", ["active", "reserved"])
+    """).in_("status", ["active", "reserved"])
     
     if max_price:
         query = query.lte("price", max_price)
@@ -76,7 +76,7 @@ def get_all_genres():
     response = (
         supabase.table("books")
         .select("genres")
-        .eq("status", "active")
+        .in_("status", ["active", "reserved"])
         .execute()
     )
     genre_set = set()
