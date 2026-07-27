@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import BookCard from "./BookCard";
+import "./Styles/bestseller-carousel.css"
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const COLUMN_BREAKPOINTS = [
   { maxWidth: 520,  columns: 2 },

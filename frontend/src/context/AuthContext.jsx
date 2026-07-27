@@ -3,6 +3,11 @@ import { createContext, useContext, useState, useEffect } from "react";
 const API_URL = import.meta.env.VITE_API_URL;
 const AuthContext = createContext(null);
 
+export function authHeaders() {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser]       = useState(null);
   const [loading, setLoading] = useState(true);

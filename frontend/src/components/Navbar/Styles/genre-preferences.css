@@ -1,0 +1,163 @@
+/* ============================================================================================================================================
+   GENRE PREFERENCES MODAL  (.gm-*)
+   ============================================================================================================================================ */
+
+/* Widen the shared modal-card for the 3-col grid */
+.gm-card {
+  max-width: 660px;
+  width: 92vw;
+}
+
+.gm-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.gm-sparkle { color: var(--accent); flex-shrink: 0; }
+
+/* 3-column genre grid */
+.gm-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 18px 0 22px;
+}
+
+@media (max-width: 520px) {
+  .gm-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Individual genre toggle button */
+.gm-genre-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: 13.5px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.gm-genre-btn:hover {
+  border-color: rgba(201, 125, 58, 0.4);
+  color: var(--text);
+}
+
+.gm-genre-btn.checked {
+  border-color: var(--accent);
+  background: rgba(201, 125, 58, 0.1);
+  color: var(--text);
+}
+
+/* Checkbox square */
+.gm-check {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.gm-check.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* Footer row */
+.gm-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.gm-count {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.gm-search { position: relative; display: flex; align-items: center; margin-bottom: 0.8rem; }
+.gm-search svg { position: absolute; left: 0.6rem; color: #8892a0; pointer-events: none; }
+.gm-search input {
+  width: 100%;
+  padding: 0.5rem 1.8rem 0.5rem 1.9rem;
+  border-radius: 8px;
+  border: 1px solid #2d3748;
+  background: transparent;
+  color: inherit;
+  font-size: 0.85rem;
+  outline: none;
+}
+.gm-search input:focus { border-color: var(--accent); }
+.gm-search-clear {
+  position: absolute; right: 0.5rem; background: none; border: none;
+  color: #8892a0; font-size: 1rem; line-height: 1; cursor: pointer;
+}
+.gm-search-clear:hover { color: inherit; }
+.gm-empty { grid-column: 1 / -1; text-align: center; font-size: 0.85rem; opacity: 0.6; padding: 1rem 0; }
+
+
+/* მთავარი მოდალის კონტეინერი */
+.gm-card {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh; /* ეკრანის სიმაღლის მაქსიმუმ 90% დაიკავოს, რომ არ ჩაიმალოს ეკრანს მიღმა */
+  overflow: hidden; /* ზედმეტი ნაწილი არ გამოვიდეს გარეთ */
+  padding-bottom: 4px;
+  padding-top: 35px;
+}
+
+/* უშუალოდ ჟანრების ბადე, რომელიც უნდა დაისქროლოს */
+.gm-grid {
+  overflow-y: auto; /* ამატებს ვერტიკალურ სქროლბარს საჭიროების შემთხვევაში */
+  flex-grow: 1; /* იკავებს მოდალის შიგნით დარჩენილ თავისუფალ სივრცეს */
+  max-height: 50vh; /* სურვილისამებრ, შეგიძლიათ შეზღუდოთ სიმაღლე (მაგ: 400px ან 50vh) */
+  
+  /* სქროლბარის გამოჩენისას რომ ღილაკები არ მიედოს კიდეს */
+  padding-right: 8px; 
+}
+
+/* (სურვილისამებრ) უფრო ლამაზი სქროლბარის დიზაინი (Webkit-ბრაუზერებისთვის: Chrome, Safari, Edge) */
+.gm-grid::-webkit-scrollbar {
+  width: 6px;
+}
+.gm-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+.gm-grid::-webkit-scrollbar-thumb {
+  background-color: var(--accent, #a0aec0); /* გამოიყენეთ თქვენი თემის ფერი ან ნაცრისფერი */
+  border-radius: 10px;
+}
+
+.modal-btn-ghost1 {
+  flex: 0 0 auto;
+  padding: 13px 22px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  margin-bottom: 20px;
+}
+
+.modal-btn-ghost1:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+}

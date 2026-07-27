@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { authFetch, formatMoney } from "./Apihelpers";
-import { BookmarkIcon } from "./icons";
+import { authFetch, formatMoney } from "../../context/Apihelpers";
+import { BookmarkIcon } from "../icons";
 
 export default function WishlistTab() {
   const [books, setBooks] = useState([]);

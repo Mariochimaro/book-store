@@ -1,0 +1,808 @@
+/* ============================================================================================================================================
+   ADMIN DASHBOARD
+   ============================================================================================================================================ */
+
+.ad-page {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 92px 24px 80px; /* 60px fixed navbar + 32px breathing room */
+}
+
+/* ── Page header ──────────────────────────────────────────── */
+.ad-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.ad-title-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.ad-shield-svg {
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.ad-page-title {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 4px;
+  line-height: 1.2;
+}
+
+.ad-page-sub {
+  font-size: 0.85rem;
+  color: var(--text-2);
+  margin: 0;
+}
+
+.ad-admin-badge {
+  background: rgba(201, 125, 58, 0.14);
+  border: 1px solid rgba(201, 125, 58, 0.35);
+  color: var(--accent-h);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 13px;
+  border-radius: var(--r-sm);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Secondary tab navigation ─────────────────────────────── */
+.ad-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ad-tabs::-webkit-scrollbar { display: none; }
+
+.ad-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;          /* sit on the border-bottom */
+  color: var(--text-2);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.18s, border-color 0.18s;
+}
+
+.ad-tab:hover:not(.active) { color: var(--text); }
+
+.ad-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.ad-tab-badge {
+  background: var(--accent);
+  color: #1a0e04;
+  font-size: 0.68rem;
+  font-weight: 700;
+  min-width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  line-height: 1;
+}
+
+/* ── Content area ─────────────────────────────────────────── */
+.ad-count-text {
+  font-size: 0.82rem;
+  color: var(--text-2);
+  margin-bottom: 16px;
+}
+
+/* ── Book review card ─────────────────────────────────────── */
+.ad-book-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+  margin-bottom: 14px;
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  transition: border-color 0.2s;
+}
+.ad-book-card:hover { border-color: rgba(201,125,58,0.25); }
+
+.ad-book-cover {
+  width: 68px;
+  height: 92px;
+  object-fit: cover;
+  border-radius: var(--r-sm);
+  flex-shrink: 0;
+}
+
+.ad-book-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ad-book-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.ad-book-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 2px;
+}
+
+.ad-book-author {
+  font-size: 0.8rem;
+  color: var(--text-2);
+  margin: 0 0 2px;
+}
+
+.ad-book-listed {
+  font-size: 0.78rem;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.ad-listed-name {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.ad-book-desc {
+  font-size: 0.8rem;
+  color: var(--text-2);
+  line-height: 1.55;
+  margin: 0 0 10px;
+}
+
+/* ── Tag pills ────────────────────────────────────────────── */
+.ad-book-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.ad-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+/* condition badges */
+.ad-cond-likenew {
+  background: rgba(99,179,237,0.12);
+  color: #63b3ed;
+  border: 1px solid rgba(99,179,237,0.28);
+}
+.ad-cond-new {
+  background: rgba(154,230,180,0.12);
+  color: #9ae6b4;
+  border: 1px solid rgba(154,230,180,0.28);
+}
+.ad-cond-good {
+  background: rgba(246,173,85,0.12);
+  color: #f6ad55;
+  border: 1px solid rgba(246,173,85,0.28);
+}
+.ad-cond-fair {
+  background: rgba(252,129,74,0.12);
+  color: #fc814a;
+  border: 1px solid rgba(252,129,74,0.28);
+}
+
+/* price, isbn, genre */
+.ad-price-tag {
+  background: rgba(201,125,58,0.18);
+  color: var(--accent-h);
+  border: 1px solid rgba(201,125,58,0.3);
+  font-weight: 600;
+}
+.ad-isbn-tag {
+  background: rgba(255,255,255,0.05);
+  color: var(--text-3);
+  border: 1px solid var(--border);
+}
+.ad-genre-tag {
+  background: rgba(147,51,234,0.12);
+  color: #c084fc;
+  border: 1px solid rgba(147,51,234,0.28);
+}
+
+/* ── Submission date ──────────────────────────────────────── */
+.ad-book-date {
+  font-size: 0.72rem;
+  color: var(--text-3);
+  margin: 0;
+}
+
+/* ── Approve / Reject buttons ─────────────────────────────── */
+.ad-book-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.ad-approve-btn,
+.ad-reject-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: var(--r-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.16s, transform 0.12s;
+  white-space: nowrap;
+}
+.ad-approve-btn:hover,
+.ad-reject-btn:hover  { opacity: 0.85; transform: translateY(-1px); }
+.ad-approve-btn:active,
+.ad-reject-btn:active  { transform: translateY(0); }
+
+.ad-approve-btn {
+  background: var(--accent);
+  color: #fff;
+}
+.ad-reject-btn {
+  background: rgba(220, 53, 69, 0.88);
+  color: #fff;
+}
+
+/* ── Empty states ─────────────────────────────────────────── */
+.ad-empty {
+  text-align: center;
+  padding: 64px 20px;
+  color: var(--text-2);
+}
+
+.ad-empty-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+  opacity: 0.35;
+  color: var(--text-2);
+}
+
+.ad-empty-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.ad-empty-sub {
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+
+/* ── All Books table ──────────────────────────────────────── */
+.ad-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+}
+
+.ad-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+  min-width: 640px;
+}
+
+.ad-th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-2);
+  background: var(--bg-card-alt);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.ad-th-cover  { width: min-content; }
+.ad-th-r      { text-align: right; }
+
+.ad-tr {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s; 
+}
+.ad-tr:last-child { border-bottom: none; }
+.ad-tr:hover      { background: rgba(255,255,255,0.025); }
+
+.ad-td {
+  padding: 10px 14px;
+  color: var(--text);
+  vertical-align: middle;
+  max-width: 130px;
+}
+.ad-td-cover { width: 64px; }
+.ad-td-r     { text-align: right; }
+
+.ad-table-cover {
+  width: 42px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+}
+
+.ad-td-title {
+  font-weight: 600;
+  color: var(--text);
+  max-width: 200px;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ad-td-author { color: var(--text-2); font-size: 0.82rem; }
+
+.ad-td-price  { color: var(--accent); font-weight: 600; }
+
+.ad-td-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-weight: 500;
+}
+.ad-td-star { color: var(--star); font-size: 0.85rem; }
+
+.ad-popular-badge {
+  display: inline-block;
+  background: rgba(201,125,58,0.16);
+  color: var(--accent-h);
+  border: 1px solid rgba(201,125,58,0.28);
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+/* row action buttons */
+.ad-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.ad-action-btn + .ad-action-btn { margin-left: 5px; }
+
+.ad-edit-btn:hover {
+  color: var(--accent);
+  border-color: rgba(201,125,58,0.4);
+  background: rgba(201,125,58,0.08);
+}
+.ad-delete-btn:hover {
+  color: #fc8181;
+  border-color: rgba(252,129,129,0.4);
+  background: rgba(252,129,129,0.08);
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .ad-page { padding: 80px 16px 60px; } /* keep top clear of navbar on mobile */
+
+  .ad-header { flex-direction: column; gap: 10px; }
+
+  .ad-book-card { flex-wrap: wrap; }
+
+  .ad-book-top {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ad-book-actions {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .ad-approve-btn,
+  .ad-reject-btn { flex: 1; }
+}
+
+/* ==============================================================================================================================================
+   ADMIN DASHBOARD — REPORTS PANEL
+   ============================================================================================================================================== */
+
+/* Sub-filter row */
+.rp-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.rp-filter-btn {
+  padding: 5px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.rp-filter-btn:hover:not(.active) {
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+}
+.rp-filter-btn.active {
+  background: rgba(201,125,58,0.18);
+  border-color: rgba(201,125,58,0.4);
+  color: var(--accent-h);
+  font-weight: 600;
+}
+
+.rp-open-count {
+  font-size: 0.78rem;
+  color: var(--text-3);
+  margin-left: 4px;
+}
+
+/* Card list */
+.rp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rp-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  transition: background 0.15s;
+}
+.rp-card:hover { background: rgba(255,255,255,0.022); }
+
+/* Warning icon */
+.rp-alert-icon {
+  color: #f6ad55;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Body */
+.rp-body { flex: 1; min-width: 0; }
+
+.rp-top-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.rp-user-line {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.rp-username {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* Status badges */
+.rp-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+.rp-badge-open {
+  background: rgba(245,101,101,0.2);
+  color: #fc8181;
+  border: 1px solid rgba(245,101,101,0.35);
+}
+.rp-badge-blocked {
+  background: rgba(160,174,192,0.15);
+  color: #a0aec0;
+  border: 1px solid rgba(160,174,192,0.25);
+}
+.rp-badge-resolved {
+  background: rgba(201,125,58,0.16);
+  color: var(--accent-h);
+  border: 1px solid rgba(201,125,58,0.28);
+}
+
+.rp-flag-count {
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.rp-desc {
+  font-size: 0.82rem;
+  color: var(--text-2);
+  margin: 0 0 4px;
+  line-height: 1.4;
+}
+.rp-date {
+  font-size: 0.72rem;
+  color: var(--text-3);
+  margin: 0;
+}
+
+/* Action buttons (open reports only) */
+.rp-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.rp-logs-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.rp-logs-btn:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+}
+
+.rp-block-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  background: rgba(229,62,62,0.85);
+  border: none;
+  border-radius: var(--r-sm);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.rp-block-btn:hover  { opacity: 0.85; }
+.rp-block-btn:active { transform: scale(0.97); }
+
+.rp-dismiss-btn {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+}
+.rp-dismiss-btn:hover { color: var(--text-2); }
+
+/* =========================================================================================================================================
+   REJECT MODAL STYLES (Admin Dashboard)
+   ========================================================================================================================================= */
+
+.reject-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.reject-modal-container {
+  background-color: #1e293b;
+  color: #f8fafc;
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+  border: 1px solid #334155;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.reject-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reject-modal-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reject-modal-title-icon {
+  font-size: 1.2rem;
+}
+
+.reject-modal-close {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.15s ease;
+}
+
+.reject-modal-close:hover {
+  color: #f8fafc;
+}
+
+.reject-modal-label-small {
+  display: block;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.reject-modal-label {
+  display: block;
+  font-size: 0.82rem;
+  color: #cbd5e1;
+  margin-bottom: 6px;
+}
+
+.reject-modal-presets {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.reject-preset-btn {
+  text-align: left;
+  font-size: 0.82rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background-color: #0f172a;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.reject-preset-btn:hover {
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.reject-preset-btn.selected {
+  border-color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+.reject-modal-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background-color: #0f172a;
+  color: #f8fafc;
+  outline: none;
+  resize: vertical;
+}
+
+.reject-modal-textarea:focus {
+  border-color: #ef4444;
+}
+
+.reject-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.reject-btn-cancel {
+  flex: 1;
+  padding: 10px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background-color: transparent;
+  color: #cbd5e1;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.15s ease;
+}
+
+.reject-btn-cancel:hover {
+  background-color: #334155;
+}
+
+.reject-btn-submit {
+  flex: 1;
+  padding: 10px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: none;
+  background-color: #dc2626;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.15s ease;
+}
+
+.reject-btn-submit:hover:not(:disabled) {
+  background-color: #b91c1c;
+}
+
+.reject-btn-submit:disabled {
+  background-color: #475569;
+  cursor: not-allowed;
+  opacity: 0.6;
+}

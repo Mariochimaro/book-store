@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
+import "./Styles/genre-preferences.css"
 
 const API_URL = import.meta.env.VITE_API_URL;
 

@@ -1,6 +1,9 @@
 import { useEffect } from "react";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import "./Styles/cart.css"
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const STATUS_LABEL = {
   pending: "⏳ მოლოდინში — გადახდა/დადასტურება მიმდინარეობს",

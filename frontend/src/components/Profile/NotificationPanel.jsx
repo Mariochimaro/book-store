@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { authFetch, contactHref, timeAgo } from "./Apihelpers";
-import { BellIcon } from "./icons";
+import { authFetch, contactHref, timeAgo } from "../../context/Apihelpers";
+import { BellIcon } from "../icons";
 
 export default function NotificationsTab() {
   const [notifications, setNotifications] = useState([]);

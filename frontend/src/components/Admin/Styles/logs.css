@@ -1,0 +1,86 @@
+/* ============================================================
+   ADMIN DASHBOARD — LOGS PANEL
+   ============================================================ */
+
+/* Search + count row */
+.lg-search-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.lg-search-input {
+  flex: 1;
+  padding: 8px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.18s;
+}
+.lg-search-input::placeholder { color: var(--text-3); }
+.lg-search-input:focus        { border-color: rgba(201,125,58,0.5); }
+
+.lg-entry-count {
+  font-size: 0.8rem;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+/* Table column sizing */
+.lg-table        { min-width: 560px; }
+.lg-th-action    { width: 200px; }
+.lg-th-admin     { width: 80px; }
+.lg-th-date      { width: 200px; white-space: nowrap; }
+
+/* Cell text */
+.lg-td-target { color: var(--text); font-size: 0.84rem; }
+.lg-td-muted  { color: var(--text-2); font-size: 0.82rem; }
+
+/* Empty filter row */
+.lg-empty-row {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 0.84rem;
+}
+
+/* Action badge pills — monospace, styled per type */
+.lg-badge {
+  display: inline-block;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 3px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.lg-badge-approve {
+  background: rgba(201,125,58,0.15);
+  color: var(--accent-h);
+  border: 1px solid rgba(201,125,58,0.3);
+}
+
+.lg-badge-reject {
+  background: rgba(245,101,101,0.14);
+  color: #fc8181;
+  border: 1px solid rgba(245,101,101,0.3);
+}
+
+.lg-badge-block {
+  background: rgba(197,48,48,0.75);
+  color: #fff;
+  border: 1px solid transparent;
+}
+
+.lg-badge-resolve {
+  background: rgba(160,174,192,0.1);
+  color: var(--text-3);
+  border: 1px solid rgba(160,174,192,0.2);
+}

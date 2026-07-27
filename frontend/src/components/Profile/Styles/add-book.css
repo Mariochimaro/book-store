@@ -1,0 +1,217 @@
+/* ============================================================================================================================================
+   Add Book Modal
+   ============================================================================================================================================ */
+/* ── Seller modal: icon + heading row ── */
+.seller-modal-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  color: var(--accent);
+}
+
+.seller-modal-title-row .modal-title { margin-bottom: 0; }
+
+/* ── "(optional)" muted label suffix ── */
+.modal-opt {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-3);
+  margin-left: 4px;
+}
+
+/* ── Textarea (extends .modal-inp) ── */
+.modal-textarea {
+  resize: vertical;
+  min-height: 84px;
+  line-height: 1.55;
+}
+
+/* ── Two-button row at the bottom of the seller form ── */
+.modal-btn-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+/* Ghost / Cancel button */
+.modal-btn-ghost {
+  flex: 0 0 auto;
+  padding: 13px 22px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+
+.modal-btn-ghost:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+}
+
+/* Activate button fills remaining space */
+.modal-btn-grow {
+  flex: 1;
+  padding: 13px;
+}
+
+/* ── Modal error message ── */
+.modal-error {
+  font-size: 12.5px;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: var(--r-sm);
+  padding: 8px 12px;
+  margin-bottom: 14px;
+}
+
+
+.ab-card {
+  max-width: 640px;
+  width: 92vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  text-align: left;
+}
+.ab-field { margin-bottom: 4px; }
+.ab-grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.ab-span2 { grid-column: 1 / -1; }
+
+.ab-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.ab-photo-tile {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  background: var(--bg-card-alt);
+  border: 1px solid var(--border);
+}
+.ab-photo-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ab-photo-remove {
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.6);
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ab-add-tile {
+  aspect-ratio: 3 / 4;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--r-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--text-3);
+  cursor: pointer;
+  font-size: 11px;
+  text-align: center;
+  padding: 4px;
+  transition: border-color .15s, color .15s;
+}
+.ab-add-tile:hover { border-color: var(--accent); color: var(--accent); }
+
+.ab-video-box {
+  border: 1.5px dashed var(--border);
+  border-radius: var(--r-sm);
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-3);
+  cursor: pointer;
+  font-size: 13px;
+  transition: border-color .15s, color .15s;
+}
+.ab-video-box:hover { border-color: var(--accent); color: var(--text); }
+.ab-video-set {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(255,255,255,0.03);
+}
+.ab-video-name {
+  font-size: 13px;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ab-video-remove {
+  background: none;
+  border: none;
+  color: #f87171;
+  font-size: 12.5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.ab-search-wrap { position: relative; }
+.ab-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-3);
+  pointer-events: none;
+}
+.ab-search-input { padding-left: 34px !important; }
+
+.ab-genre-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  max-height: 130px;
+  overflow-y: auto;
+  padding: 2px;
+  margin-bottom: 10px;
+}
+.ab-genre-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 4px;
+}
+.ab-genre-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(201,125,58,0.12);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 11.5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+.ab-genre-chip button { background: none; border: none; color: var(--accent); display: flex; padding: 0; }
+
+select.modal-inp { cursor: pointer; }
+
+.ab-spin { animation: ab-spin 0.8s linear infinite; }
+@keyframes ab-spin { to { transform: rotate(360deg); } }

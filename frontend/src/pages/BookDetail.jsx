@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import BookCarousel from "../components/BookCarousel";
+import Navbar from "../components/Navbar/Navbar";
+import BookCarousel from "../components/Home/Bestsellers";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
-import BookCard from "../components/BookCard";
-import "./bookdetail.css";
+import BookCard from "../components/Home/BookCard";
+import "../styles/bookdetail.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 

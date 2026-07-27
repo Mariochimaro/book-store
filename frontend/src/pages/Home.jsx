@@ -1,10 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import BookCard from "../components/BookCard";
+import Navbar from "../components/Navbar/Navbar";
+import BookCard from "../components/Home/BookCard";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
-import BookCarousel from "../components/BookCarousel";
+import BookCarousel from "../components/Home/Bestsellers";
+import { motion, AnimatePresence } from "framer-motion";
+import '../styles/homepage.css';
+import '../styles/filter.css'
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -74,9 +77,6 @@ const Sparkle = () => (
 // BESTSELLER CAROUSEL — runs off live "featured" books (top of the
 // filtered/sorted list), not hardcoded mock data.
 // ─────────────────────────────────────────────────────────────
-import './bestseller-carousel.css';
-import { motion, AnimatePresence } from "framer-motion";
-
 export function BestsellerCarousel({ bestClusters = [], onSelectCluster }) {
   const [idx, setIdx] = useState(0);
 

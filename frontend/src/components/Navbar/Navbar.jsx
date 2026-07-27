@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LoginModal }    from "./LoginModal";
 import { RegisterModal } from "./RegisterModal";
-import { CartSidebar }   from "./Cart";
+import { CartSidebar }   from "../Home/Cart";
 import { GenreModal }    from "./GenreModal";
-import { useCart }       from "../context/CartContext";
-import { useAuth }       from "../context/AuthContext";
+import { useCart }       from "../../context/CartContext";
+import { useAuth }       from "../../context/AuthContext";
 
 function Navbar() {
   const [query, setQuery]         = useState("");

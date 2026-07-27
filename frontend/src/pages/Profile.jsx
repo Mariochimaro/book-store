@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import NotificationsTab from "../components/NotificationPanel";
-import OrdersTab from "../components/OrdersTab";
-import WishlistTab from "../components/WishlistTab";
-import FinancesTab from "../components/FinancesTab";
-import MyListingsTab from "../components/MyListingsTab";
+import Navbar from "../components/Navbar/Navbar";
+import NotificationsTab from "../components/Profile/NotificationPanel";
+import OrdersTab from "../components/Profile/OrdersTab";
+import WishlistTab from "../components/Profile/WishlistTab";
+import FinancesTab from "../components/Profile/FinancesTab";
+import MyListingsTab from "../components/Profile/MyListingsTab";
 import { useAuth } from "../context/AuthContext";
 import { BellIcon, ReceiptIcon, BookmarkIcon, GearIcon, StoreIcon, ChartIcon } from "../components/icons";
-import EditProfileModal from "../components/EditProfileModal"; // 1. შემოვიტანეთ რედაქტირების მოდალი
-import { authFetch } from "../components/Apihelpers"; // 2. API შეკითხვისთვის
+import EditProfileModal from "../components/Profile/EditProfileModal"; // 1. შემოვიტანეთ რედაქტირების მოდალი
+import { authFetch } from "../context/Apihelpers"; // 2. API შეკითხვისთვის
+import "../styles/profile.css"
 
 function Profile({ onOpenAddBook }) {
   const [activeTab, setActiveTab] = useState("notifications");

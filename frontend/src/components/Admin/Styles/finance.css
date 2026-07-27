@@ -1,0 +1,336 @@
+/* ============================================================
+   ADMIN DASHBOARD — FINANCE PANEL  (.fn-*)
+   ============================================================ */
+
+/* Root container */
+.fn-root {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Shared card shell */
+.fn-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+}
+
+/* ── Top grid: revenue chart + stat cards ────────────────── */
+.fn-top-grid {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* Platform Revenue card internals */
+.fn-revenue-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fn-rev-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fn-card-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.fn-card-sub {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  margin: 3px 0 0;
+}
+
+.fn-mom-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #34d399;
+  background: rgba(52,211,153,0.13);
+  border: 1px solid rgba(52,211,153,0.25);
+  border-radius: 4px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Bar chart */
+.fn-bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 130px;
+  flex: 1;
+}
+
+.fn-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+}
+
+.fn-bar-track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.fn-bar {
+  width: 100%;
+  background: rgba(201,125,58,0.28);
+  border-radius: 4px 4px 0 0;
+  min-height: 6px;
+  transition: height 0.4s ease;
+}
+
+.fn-bar.fn-bar-hi {
+  background: var(--accent);
+}
+
+.fn-bar-label {
+  font-size: 0.7rem;
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+
+/* Chart footer */
+.fn-chart-foot {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.fn-foot-txt {
+  font-size: 0.78rem;
+  color: var(--text-2);
+}
+
+.fn-foot-txt strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Right: stacked stat cards */
+.fn-stats-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fn-stat-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+}
+
+.fn-stat-green {
+  border-color: rgba(52,211,153,0.2);
+  background: linear-gradient(135deg, var(--bg-card) 60%, rgba(52,211,153,0.05));
+}
+
+.fn-stat-gold {
+  border-color: rgba(201,125,58,0.28);
+  background: linear-gradient(135deg, var(--bg-card) 60%, rgba(201,125,58,0.07));
+}
+
+.fn-stat-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.fn-stat-lbl {
+  font-size: 0.73rem;
+  color: var(--text-2);
+  margin: 0 0 5px;
+}
+
+.fn-stat-val {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+  margin: 0 0 3px;
+}
+
+.fn-val-gold {
+  color: var(--accent);
+}
+
+.fn-stat-sub {
+  font-size: 0.72rem;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.fn-stat-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.07);
+  color: var(--text-2);
+  flex-shrink: 0;
+}
+
+.fn-icon-green {
+  background: rgba(52,211,153,0.15);
+  color: #34d399;
+}
+
+.fn-icon-gold {
+  background: rgba(201,125,58,0.18);
+  color: var(--accent);
+}
+
+/* ── Bottom grid: genre bars + top books ─────────────────── */
+.fn-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* Genre Popularity */
+.fn-genre-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.fn-genre-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fn-genre-lbl {
+  font-size: 0.8rem;
+  color: var(--text-2);
+  width: 128px;
+  flex-shrink: 0;
+}
+
+.fn-prog-track {
+  flex: 1;
+  height: 5px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.fn-prog-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.fn-genre-pct {
+  font-size: 0.78rem;
+  color: var(--text-2);
+  width: 32px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Top Performing Books */
+.fn-book-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+
+.fn-book-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.fn-book-row:last-child {
+  border-bottom: none;
+}
+
+.fn-book-rank {
+  width: 18px;
+  font-size: 0.8rem;
+  color: var(--text-3);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.fn-book-cover {
+  width: 36px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.fn-book-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.fn-book-title {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0 0 2px;
+}
+
+.fn-book-author {
+  font-size: 0.74rem;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.fn-book-price {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.fn-genre-card,
+.fn-topbooks-card {
+  min-width: 0;   /* lets these grid items actually respect the 1fr track */
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .fn-top-grid    { grid-template-columns: 1fr; }
+  .fn-stats-col   { flex-direction: row; flex-wrap: wrap; }
+  .fn-stat-card   { flex: 1 1 calc(50% - 6px); }
+}
+
+@media (max-width: 680px) {
+  .fn-bottom-grid { grid-template-columns: 1fr; }
+  .fn-stat-card   { flex: 1 1 100%; }
+  .fn-genre-lbl   { width: 104px; }
+}

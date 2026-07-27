@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { authFetch, contactHref, formatMoney, REQUEST_STATUS_LABELS } from "./Apihelpers";
-import { ReceiptIcon } from "./icons";
+import { authFetch, contactHref, formatMoney, REQUEST_STATUS_LABELS } from "../../context/Apihelpers";
+import { ReceiptIcon } from "../icons";
 
 export default function OrdersTab() {
   const [orders, setOrders] = useState([]);

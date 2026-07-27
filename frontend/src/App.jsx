@@ -6,8 +6,8 @@ import Home         from "./pages/Home.jsx";
 import BookDetail   from "./pages/BookDetail.jsx";
 import Profile      from "./pages/Profile.jsx";
 import AdminPanel   from "./pages/AdminDashboard.jsx";
-import { CartSidebar } from "./components/Cart.jsx";
-import AddBook      from "./components/AddBook.jsx"; // 2. შემოვიტანეთ AddBook
+import { CartSidebar } from "./components/Home/Cart.jsx";
+import AddBook      from "./components/Profile/AddBook.jsx"; // 2. შემოვიტანეთ AddBook
 
 // Cart route wrapper — sidebar ყოველთვის open
 function CartPage() {

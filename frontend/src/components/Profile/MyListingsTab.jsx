@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { BookPlus, PackageOpen, Trash2, Eye, Pencil, X, Image as ImageIcon, Video as VideoIcon } from "lucide-react";
-import { authFetch, formatMoney } from "./Apihelpers";
+import { authFetch, formatMoney } from "../../context/Apihelpers";
 import OnboardingModal from "./OnboardingModal";
 import AddBook from "./AddBook";
-import { StoreIcon } from "./icons";
+import { StoreIcon } from "../icons";
 import { Upload, Check } from "lucide-react";
 
 /**
