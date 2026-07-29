@@ -8,7 +8,7 @@ import Profile      from "./pages/Profile.jsx";
 import AdminPanel   from "./pages/AdminDashboard.jsx";
 import { CartSidebar } from "./components/Home/Cart.jsx";
 import AddBook      from "./components/Profile/AddBook.jsx"; // 2. შემოვიტანეთ AddBook
-import { UserBookInteractionsProvider } from "./context/UBIContext";
+import { UserBookInteractionsProvider } from "./src/context/UBIContext";
 
 // Cart route wrapper — sidebar ყოველთვის open
 function CartPage() {
