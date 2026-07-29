@@ -558,3 +558,41 @@ async def rate_book(
         background_tasks.add_task(affinity.update_user_affinity, user_id, book_data, action)
 
     return {"message": f"წიგნი შეფასებულია როგორც {action}"}
+
+@router.get("/bookmarks/me")
+async def get_my_bookmarks(current_user: dict = Depends(get_current_user)):
+    """
+    Returns the list of book_ids the current user has bookmarked.
+    Used by the frontend to restore the bookmark icon state after a refresh.
+    """
+    user_email = current_user["email"]
+    res = (
+        supabase.table("book_bookmarks")
+        .select("book_id")
+        .eq("user_email", user_email)
+        .execute()
+    )
+    book_ids = [row["book_id"] for row in res.data] if res.data else []
+    return {"book_ids": book_ids}
+ 
+ 
+@router.get("/ratings/me")
+async def get_my_ratings(current_user: dict = Depends(get_current_user)):
+    """
+    Returns a map of book_id -> "like" | "dislike" for every book the
+    current user has rated. Used by the frontend to restore the
+    heart / thumbs-down state after a refresh.
+    """
+    user_email = current_user["email"]
+    res = (
+        supabase.table("book_ratings")
+        .select("book_id, is_like")
+        .eq("user_email", user_email)
+        .execute()
+    )
+    ratings = {
+        row["book_id"]: ("like" if row["is_like"] else "dislike")
+        for row in (res.data or [])
+    }
+    return {"ratings": ratings}
+ 

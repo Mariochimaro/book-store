@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar/Navbar";
 import BookCarousel from "../components/Home/Bestsellers";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import { useUserBookInteractions } from "../context/UBIContext";
 import BookCard from "../components/Home/BookCard";
 import "../styles/bookdetail.css";
 
@@ -102,6 +103,7 @@ function BookDetail() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { isLoggedIn, user } = useAuth();
+  const { bookmarkedIds, ratings, setBookmark, setRating } = useUserBookInteractions();
 
   const [book, setBook] = useState(null);
   const [relatedBooks, setRelatedBooks] = useState([]);
@@ -109,9 +111,6 @@ function BookDetail() {
   const [activePhoto, setActivePhoto] = useState(0);
   const [added, setAdded] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-
-  const [userRating, setUserRating] = useState(null);
-  const [isBookmarked, setIsBookmarked] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -121,8 +120,6 @@ function BookDetail() {
     ])
     .then(([bookData, relatedData]) => {
       setBook(bookData);
-      setUserRating(bookData.user_rating ?? null);
-      setIsBookmarked(bookData.is_bookmarked ?? false);
       setRelatedBooks(relatedData.related_books || []);
       setActivePhoto(0);
       setLoading(false);
@@ -141,31 +138,33 @@ function BookDetail() {
   async function handleRate(e, actionType) {
     e.preventDefault();
     if (!user) return;
+    const userRating = ratings[book.id] ?? null;
     const newAction = userRating === actionType ? "remove" : actionType;
     const prevRating = userRating;
-    setUserRating(newAction === "remove" ? null : newAction);
+    setRating(book.id, newAction === "remove" ? null : newAction);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/books/${id}/rate`, {
+      const res = await fetch(`${API_URL}/books/${book.id}/rate`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({ action: newAction }),
       });
-      if (!res.ok) setUserRating(prevRating);
-    } catch { setUserRating(prevRating); }
+      if (!res.ok) setRating(book.id, prevRating);
+    } catch { setRating(book.id, prevRating); }
   }
 
   async function handleBookmark(e) {
     e.preventDefault();
     if (!user) return;
+    const isBookmarked = bookmarkedIds.has(book.id);
     const prevBookmark = isBookmarked;
-    setIsBookmarked(!prevBookmark);
+    setBookmark(book.id, !prevBookmark);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/books/${id}/bookmark`, { method: "POST", headers: { "Authorization": `Bearer ${token}` } });
-      if (res.ok) { const data = await res.json(); setIsBookmarked(data.bookmarked); }
-      else setIsBookmarked(prevBookmark);
-    } catch { setIsBookmarked(prevBookmark); }
+      const res = await fetch(`${API_URL}/books/${book.id}/bookmark`, { method: "POST", headers: { "Authorization": `Bearer ${token}` } });
+      if (res.ok) { const data = await res.json(); setBookmark(book.id, data.bookmarked); }
+      else setBookmark(book.id, prevBookmark);
+    } catch { setBookmark(book.id, prevBookmark); }
   }
 
   const photos = book?.photos_urls ?? [];
@@ -196,6 +195,11 @@ function BookDetail() {
       </>
     );
   }
+
+  // Read from the shared context so this stays correct across every
+  // BookCard / BookDetail instance and survives a page refresh.
+  const userRating = ratings[book.id] ?? null;
+  const isBookmarked = bookmarkedIds.has(book.id);
 
   const isOwnBook = isLoggedIn && user?.id != null && book.seller?.id != null && user.id === book.seller.id;
   const conditionObj = CONDITION_INFO[book.condition] || { label: book.condition, bg: "#f3f4f6", color: "#4b5563" };

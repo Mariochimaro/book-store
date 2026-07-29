@@ -96,30 +96,8 @@ const REJECT_PRESETS = [
   'ყდა არ შეესაბამება წიგნის სათაურს.',
   'ფასი ზედმეტად მაღალია.',
   'დუბლირებული განცხადება — ეს წიგნი უკვე დამატებულია.',
-  'ISBN არასწორია ან აკლია — გთხოვთ გადაამოწმოთ.',
-  'აღწერა ზედმეტად მოკლეა ან არ შეიცავს საკმარის ინფორმაციას.',
+  'აღწერა ზედმეტად მოკლეა და არ შეიცავს საკმარის ინფორმაციას.',
   'ფოტოების ხარისხი ძალიან დაბალია.'
-];
-
-const REVENUE_BARS = [
-  { label: "Jan", pct: 44 },
-  { label: "Feb", pct: 55 },
-  { label: "Mar", pct: 60 },
-  { label: "Apr", pct: 66 },
-  { label: "May", pct: 71 },
-  { label: "Jun", pct: 100, highlight: true },
-];
-
-const GENRE_POPULARITY = [
-  { label: "Gothic Horror",    pct: 82 },
-  { label: "Dark Fantasy",     pct: 74 },
-  { label: "Victorian Gothic", pct: 61 },
-  { label: "Mystery",          pct: 55 },
-];
-
-const TOP_BOOKS_FINANCE = [
-  { rank: 1, title: "The Shadow of the Raven",  author: "Eleonora Blackwood",  price: "$24.99", cover: "https://picsum.photos/seed/shadowraven/200/280" },
-  { rank: 2, title: "Whispers in the Dark",      author: "Marcus Nightshade",   price: "$19.99", cover: "https://picsum.photos/seed/whispersdark/200/280" },
 ];
 
 // ─────────────────────────────────────────────────────────────

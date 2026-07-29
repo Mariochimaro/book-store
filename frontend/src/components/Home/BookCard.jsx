@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
+import { useUserBookInteractions } from "../../context/UBIContext";
 import "./Styles/bookcard-carousel.css"
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -47,10 +48,14 @@ const BookmarkIcon = ({ filled }) => (
 function BookCard({ book }) {
   const { addToCart } = useCart();
   const { user } = useAuth(); // მოწმდება იუზერი
+  const { bookmarkedIds, ratings, setBookmark, setRating } = useUserBookInteractions();
   const [added, setAdded] = useState(false);
 
-  const [userRating, setUserRating] = useState(book.user_rating ?? null);
-  const [isBookmarked, setIsBookmarked] = useState(book.is_bookmarked ?? false);
+  // Single source of truth: the shared context (populated from
+  // GET /books/bookmarks/me and GET /books/ratings/me), so this stays
+  // correct across every card and survives a page refresh.
+  const userRating = ratings[book.id] ?? null;
+  const isBookmarked = bookmarkedIds.has(book.id);
 
   const authorLine = book.author ?? book.seller?.username ?? "—";
   const cover      = book.photos_urls?.[0] ?? "/placeholder.jpg";
@@ -72,7 +77,7 @@ function BookCard({ book }) {
 
     const newAction = userRating === actionType ? "remove" : actionType;
     const prevRating = userRating;
-    setUserRating(newAction === "remove" ? null : newAction);
+    setRating(book.id, newAction === "remove" ? null : newAction);
 
     try {
       const token = localStorage.getItem("token"); // ტოკენის წამოღება
@@ -84,9 +89,9 @@ function BookCard({ book }) {
         },
         body: JSON.stringify({ action: newAction }),
       });
-      if (!res.ok) setUserRating(prevRating);
+      if (!res.ok) setRating(book.id, prevRating);
     } catch {
-      setUserRating(prevRating);
+      setRating(book.id, prevRating);
     }
   }
 
@@ -96,7 +101,7 @@ function BookCard({ book }) {
     if (!user) return;
 
     const prevBookmark = isBookmarked;
-    setIsBookmarked(!prevBookmark);
+    setBookmark(book.id, !prevBookmark);
 
     try {
       const token = localStorage.getItem("token");
@@ -108,12 +113,12 @@ function BookCard({ book }) {
       });
       if (res.ok) {
         const data = await res.json();
-        setIsBookmarked(data.bookmarked);
+        setBookmark(book.id, data.bookmarked);
       } else {
-        setIsBookmarked(prevBookmark);
+        setBookmark(book.id, prevBookmark);
       }
     } catch {
-      setIsBookmarked(prevBookmark);
+      setBookmark(book.id, prevBookmark);
     }
   }
 
