@@ -2,13 +2,13 @@ import React, { useState } from "react"; // 1. დავამატეთ useSt
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
+import { UserBookInteractionsProvider } from "./context/UBIcontext";
 import Home         from "./pages/Home.jsx";
 import BookDetail   from "./pages/BookDetail.jsx";
 import Profile      from "./pages/Profile.jsx";
 import AdminPanel   from "./pages/AdminDashboard.jsx";
 import { CartSidebar } from "./components/Home/Cart.jsx";
 import AddBook      from "./components/Profile/AddBook.jsx"; // 2. შემოვიტანეთ AddBook
-import { UserBookInteractionsProvider } from "./src/context/UBIContext";
 
 // Cart route wrapper — sidebar ყოველთვის open
 function CartPage() {
