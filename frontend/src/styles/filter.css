@@ -18,7 +18,6 @@
   background: var(--bg-card);
   border-radius: var(--r);
   padding: 22px 20px 20px;
-  position: sticky;
   top: 72px; /* clears the 60px navbar */
   margin-right: 24px;
 }
@@ -267,8 +266,9 @@
 
   .fp-inner {
     width: 100%;
-    position: static;
+    position: fixed;
     margin-right: 0;
     top: 0;
+    z-index: 4;
   }
 }

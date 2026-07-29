@@ -461,20 +461,28 @@ function HeroSection({ onFilterToggle, searchQuery, onSearchChange, onSearchSubm
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-
-    const particles = Array.from({ length: 120 }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      size: Math.random() * 1.5 + 0.5,
-      speedX: Math.random() * 0.3 - 0.15,
-      speedY: Math.random() * 0.3 - 0.15,
-      opacity: Math.random() * 0.35 + 0.1,
-      color: Math.random() < 0.8 ? '107, 114, 128' : '214, 160, 90', // 80% gray, 20% accent
-    }));
-
+    let particles = [];
     let animId;
+
+    function setup() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+
+      const isMobile = window.innerWidth < 768;
+      const count = isMobile ? 70 : 120;
+      const sizeRange = isMobile ? [0.4, 1.2] : [0.5, 2.0]; // [min, max]
+
+      particles = Array.from({ length: count }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * (sizeRange[1] - sizeRange[0]) + sizeRange[0],
+        speedX: Math.random() * 0.3 - 0.15,
+        speedY: Math.random() * 0.3 - 0.15,
+        opacity: Math.random() * 0.35 + 0.1,
+        color: Math.random() < 0.8 ? '107, 114, 128' : '214, 160, 90', // 80% gray, 20% accent
+      }));
+    }
+
     function animate() {
       if (!canvas || !ctx) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -490,12 +498,14 @@ function HeroSection({ onFilterToggle, searchQuery, onSearchChange, onSearchSubm
       });
       animId = requestAnimationFrame(animate);
     }
+
+    setup();
     animate();
 
     const onResize = () => {
-      if (!canvas) return;
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+      cancelAnimationFrame(animId);
+      setup();
+      animate();
     };
     window.addEventListener('resize', onResize);
 

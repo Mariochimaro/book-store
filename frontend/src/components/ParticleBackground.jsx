@@ -1,4 +1,3 @@
-// components/ParticleBackground.jsx
 import { useEffect, useRef } from "react";
 
 export function ParticleBackground() {
@@ -10,20 +9,28 @@ export function ParticleBackground() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const particles = Array.from({ length: 50 }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      size: Math.random() * 1.5 + 0.5,
-      speedX: Math.random() * 0.3 - 0.15,
-      speedY: Math.random() * 0.3 - 0.15,
-      opacity: Math.random() * 0.35 + 0.1,
-      color: Math.random() < 0.8 ? '107, 114, 128' : '214, 160, 90',
-    }));
-
+    let particles = [];
     let animId;
+
+    function setup() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const isMobile = window.innerWidth < 768;
+      const count = isMobile ? 20 : 50;
+      const sizeRange = isMobile ? [0.4, 1.0] : [0.5, 2.0]; // [min, max]
+
+      particles = Array.from({ length: count }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * (sizeRange[1] - sizeRange[0]) + sizeRange[0],
+        speedX: Math.random() * 0.3 - 0.15,
+        speedY: Math.random() * 0.3 - 0.15,
+        opacity: Math.random() * 0.35 + 0.1,
+        color: Math.random() < 0.8 ? '107, 114, 128' : '214, 160, 90',
+      }));
+    }
+
     function animate() {
       if (!canvas || !ctx) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -39,12 +46,14 @@ export function ParticleBackground() {
       });
       animId = requestAnimationFrame(animate);
     }
+
+    setup();
     animate();
 
     const onResize = () => {
-      if (!canvas) return;
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      cancelAnimationFrame(animId);
+      setup();
+      animate();
     };
     window.addEventListener('resize', onResize);
 
