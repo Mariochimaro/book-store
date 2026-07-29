@@ -120,18 +120,24 @@ a { text-decoration: none; }
   background: var(--background);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  transform: translateY(0);
+  will-change: transform;
 }
 
 .nb-inner {
+  height: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  height: 100%;
   padding: 0 28px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: space-between;
+  gap: 24px;
 }
-
+.nb-hidden {
+  transform: translateY(-100%);
+}
 .nb-left {
   display: flex;
   align-items: center;
@@ -398,7 +404,7 @@ a { text-decoration: none; }
 
 .nb-mobile-dropdown {
   position: absolute;
-  top: 44px;
+  top: 100%;
   right: 0;
   min-width: 190px;
   background: var(--bg-card);

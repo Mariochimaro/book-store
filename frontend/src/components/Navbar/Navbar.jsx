@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LoginModal }    from "./LoginModal";
 import { RegisterModal } from "./RegisterModal";
@@ -7,9 +7,11 @@ import { GenreModal }    from "./GenreModal";
 import { useCart }       from "../../context/CartContext";
 import { useAuth }       from "../../context/AuthContext";
 
+const REVEAL_THRESHOLD = 150; // px of upward scroll needed before nav starts reappearing
+
 function Navbar() {
   const [query, setQuery]         = useState("");
-  const [modal, setModal]         = useState(null); // "login" | "register" | null
+  const [modal, setModal]         = useState(null);
   const [cartOpen, setCart]       = useState(false);
   const [genreOpen, setGenreOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -17,7 +19,45 @@ function Navbar() {
   const { totalItems }            = useCart();
   const { isLoggedIn, user, logout } = useAuth();
 
+  const navRef      = useRef(null);
+  const lastScrollY  = useRef(0);
+  const offset       = useRef(0);
+  const upAccum      = useRef(0);
+
   const isAdmin = !!user?.is_admin;
+
+  useEffect(() => {
+    lastScrollY.current = window.scrollY;
+
+    function handleScroll() {
+      const nav = navRef.current;
+      if (!nav) return;
+
+      const currentY = Math.max(window.scrollY, 0);
+      const delta = currentY - lastScrollY.current;
+      const navHeight = nav.offsetHeight;
+
+      if (currentY <= 0) {
+        offset.current = 0;
+        upAccum.current = 0;
+      } else if (delta > 0) {
+        upAccum.current = 0;
+        offset.current = Math.min(offset.current + delta, navHeight);
+      } else if (delta < 0) {
+        upAccum.current += -delta;
+        if (upAccum.current > REVEAL_THRESHOLD) {
+          const extra = upAccum.current - REVEAL_THRESHOLD;
+          offset.current = Math.max(navHeight - extra, 0);
+        }
+      }
+
+      nav.style.transform = `translateY(-${offset.current}px)`;
+      lastScrollY.current = currentY;
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleLogout = async () => {
     setMobileMenuOpen(false);
@@ -52,7 +92,7 @@ function Navbar() {
 
   return (
     <>
-      <nav className="nb" role="navigation" aria-label="Main navigation">
+      <nav ref={navRef} className="nb" role="navigation" aria-label="Main navigation">
         <div className="nb-inner">
           {/* Left group: logo + page nav links */}
           <div className="nb-left">
