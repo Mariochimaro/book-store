@@ -460,7 +460,6 @@ a { text-decoration: none; }
   .nb-guest-hide-mobile { display: none !important; }
   .nb-inner { padding: 0 14px; gap: 8px; }
   .nb-search { max-width: none; }
-  .nb-mobile-dropdown { position: absolute; z-index: 100 }
 }
 
 /* ============================================================
