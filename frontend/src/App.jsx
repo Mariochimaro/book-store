@@ -2,7 +2,7 @@ import React, { useState } from "react"; // 1. დავამატეთ useSt
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
-import { UserBookInteractionsProvider } from "./context/UBIcontext";
+import { UserBookInteractionsProvider } from "./context/UBIContext.jsx";
 import Home         from "./pages/Home.jsx";
 import BookDetail   from "./pages/BookDetail.jsx";
 import Profile      from "./pages/Profile.jsx";
