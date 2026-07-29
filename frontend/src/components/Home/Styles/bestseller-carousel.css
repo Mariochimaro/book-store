@@ -3,7 +3,7 @@
    ============================================================================================================================================ */
 
 .bs-section {
-  max-width: 1024px;
+  max-width: 800px;
   margin: 32px auto;
   padding: 0 16px;
 }
@@ -20,7 +20,7 @@
 
 .bs-carousel-container {
   position: relative;
-  height: 340px;
+  height: 310px;
   border-radius: 16px; 
   overflow: hidden;
   border: 1px solid #d6a05a90;
@@ -30,13 +30,13 @@
 
 .bs-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 2fr 3fr;
   height: 100%;
 }
 
 @media (min-width: 768px) {
   .bs-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 2fr 3fr;
   }
 }
 
@@ -71,12 +71,12 @@
   position: absolute;
   top: 16px;
   left: 16px;
-  background-color: #2563eb;
+  background-color: var(--primary);
   color: #ffffff;
   font-size: 0.75rem;
   font-weight: 600;
   padding: 4px 12px;
-  border-radius: 9999px;
+  border-radius: 7px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 

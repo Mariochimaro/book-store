@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import Navbar from "../components/Navbar/Navbar";
 import BookCard from "../components/Home/BookCard";
@@ -33,16 +33,16 @@ const LANGUAGES  = ["ინგლისური", "ქართული", "ფ
 // SVG იკონები
 const StarIcon = ({ filled, hollow }) => {
   // Determine background color
-  const fillOption = filled ? "#f59e0b" : "none";
+  const fillOption = filled ? "#B87743" : "none";
   
   // Determine border color based on props, defaulting to gray
-  const strokeOption = filled || hollow ? "#f59e0b" : "#a1a1aa";
+  const strokeOption = filled || hollow ? "#B87743" : "#a1a1aa";
 
   return (
     <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
+      width="21"
+      height="21"
+      viewBox="0 0 24 22"
       fill={fillOption}
       stroke={strokeOption}
       strokeWidth="2"
@@ -67,10 +67,8 @@ const ChevronRight = () => (
 );
 
 const Sparkle = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"/>
-  </svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B87743" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles-icon lucide-sparkles"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/>
+  <path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></svg>
 )
 
 // ─────────────────────────────────────────────────────────────
@@ -100,7 +98,7 @@ export function BestsellerCarousel({ bestClusters = [], onSelectCluster }) {
     <section className="bs-section">
       <h2 className="bs-sec-title">
         <StarIcon hollow />
-        Top Bestseller Clusters
+        Top Bestseller Titles
       </h2>
 
       <div className="bs-carousel-container">
@@ -163,7 +161,7 @@ export function BestsellerCarousel({ bestClusters = [], onSelectCluster }) {
                   }
                   className="bs-action-btn"
                 >
-                  ნახე წიგნები ({cluster.available_copies || 1})
+                  ნახვა ({cluster.available_copies || 1})
                 </button>
               </div>
             </div>
@@ -358,13 +356,13 @@ function FilterPanel({ isOpen, onClose, filters, onFilterChange, availableGenres
               <circle cx="11" cy="8" r="2" fill="var(--bg-card)" stroke="currentColor" strokeWidth="1.5" />
               <circle cx="7" cy="12.5" r="2" fill="var(--bg-card)" stroke="currentColor" strokeWidth="1.5" />
             </svg>
-            Filters
+            ფილტრი
           </span>
-          <button className="fp-reset" onClick={reset}>Reset</button>
+          <button className="fp-reset" onClick={reset}>წაშლა</button>
         </div>
 
         <div className="fp-section">
-          <p className="fp-lbl">Price Range</p>
+          <p className="fp-lbl">ფასი</p>
           <input
             type="range" min={0} max={100} value={priceMax}
             onChange={(e) => onFilterChange((prev) => ({ ...prev, priceMax: +e.target.value }))}
@@ -378,7 +376,7 @@ function FilterPanel({ isOpen, onClose, filters, onFilterChange, availableGenres
         </div>
 
         <div className="fp-section">
-          <p className="fp-lbl">Genre</p>
+          <p className="fp-lbl">ჟანრი</p>
 
           {!genresLoading && availableGenres.length > 0 && (
             <div className="fp-genre-search">
@@ -424,7 +422,7 @@ function FilterPanel({ isOpen, onClose, filters, onFilterChange, availableGenres
         </div>
 
         <div className="fp-section">
-          <p className="fp-lbl">Condition</p>
+          <p className="fp-lbl">მდგომარეობა</p>
           {CONDITIONS.map((c) => (
             <label key={c} className="fp-row">
               <span className={`fp-cb${conditions.has(c) ? " checked" : ""}`} aria-hidden="true">{conditions.has(c) && "✓"}</span>
@@ -435,7 +433,7 @@ function FilterPanel({ isOpen, onClose, filters, onFilterChange, availableGenres
         </div>
 
         <div className="fp-section">
-          <p className="fp-lbl">Language</p>
+          <p className="fp-lbl">ენა</p>
           {LANGUAGES.map((l) => (
             <label key={l} className="fp-row">
               <span className={`fp-cb${languages.has(l) ? " checked" : ""}`} aria-hidden="true">{languages.has(l) && "✓"}</span>
@@ -445,7 +443,7 @@ function FilterPanel({ isOpen, onClose, filters, onFilterChange, availableGenres
           ))}
         </div>
 
-        <button className="fp-close" onClick={onClose}>Close filters</button>
+        <button className="fp-close" onClick={onClose}>დახურვა</button>
       </div>
     </aside>
   );
@@ -455,12 +453,65 @@ function FilterPanel({ isOpen, onClose, filters, onFilterChange, availableGenres
 // HERO
 // ─────────────────────────────────────────────────────────────
 function HeroSection({ onFilterToggle, searchQuery, onSearchChange, onSearchSubmit }) {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    const particles = Array.from({ length: 120 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 1.5 + 0.5,
+      speedX: Math.random() * 0.3 - 0.15,
+      speedY: Math.random() * 0.3 - 0.15,
+      opacity: Math.random() * 0.35 + 0.1,
+      color: Math.random() < 0.8 ? '107, 114, 128' : '214, 160, 90', // 80% gray, 20% accent
+    }));
+
+    let animId;
+    function animate() {
+      if (!canvas || !ctx) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach((p) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${p.color}, ${p.opacity})`;
+        ctx.fill();
+        p.x += p.speedX;
+        p.y += p.speedY;
+        if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
+      });
+      animId = requestAnimationFrame(animate);
+    }
+    animate();
+
+    const onResize = () => {
+      if (!canvas) return;
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', onResize);
+    };
+  }, []);
+
   return (
     <section className="hero" aria-label="Hero">
+      <canvas ref={canvasRef} className="hero-particles" aria-hidden="true" />
       <div className="hero-bg" aria-hidden="true" />
       <div className="hero-overlay" aria-hidden="true" />
       <div className="hero-content">
-        <p className="hero-eyebrow">— Let There Be —</p>
+        <p className="hero-eyebrow">— Welcome To —</p>
         <h1 className="hero-title">
           <span className="hero-title-white">წიგნების</span>
           <span className="hero-title-accent">სამყარო</span>
@@ -469,7 +520,7 @@ function HeroSection({ onFilterToggle, searchQuery, onSearchChange, onSearchSubm
         <form className="hero-search-wrap" onSubmit={onSearchSubmit}>
           <input
             type="text" className="hero-search-input"
-            placeholder="Search books, authors..."
+            placeholder="ძებნა წიგნების, ავტორების, ჟანრების..."
             value={searchQuery} onChange={(e) => onSearchChange(e.target.value)}
             aria-label="Search books"
           />
@@ -761,9 +812,13 @@ function Home() {
                   <>
                     <BookCarousel
                       id="popular-section"
-                      icon="↗"
-                      title="Popular & Bestsellers"
-                      subtitle="Beloved by readers across the archive"
+                      icon={<svg width="35" height="20" viewBox="0 0 25 18" fill="none" stroke="#B87743"
+                              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                              <polyline points="17 6 23 6 23 12"/>
+                            </svg>}
+                      title="პოპულარული წიგნები"
+                      subtitle="მომხმარებლების რჩეულები"
                       books={popularBooks}
                       onOpenDetail={(book) => setSelectedBook(book)}
                     />
@@ -772,8 +827,8 @@ function Home() {
                       <BookCarousel
                         id="recommended-section"
                         icon="★"
-                        title="Recommended for you"
-                        subtitle="Picked based on your reading taste"
+                        title="რეკომენდაციები თქვენთვის"
+                        subtitle="თქვენი გემოვნებიდან გამომდინარე შერჩეული"
                         books={recommendedBooks}
                         onOpenDetail={(book) => setSelectedBook(book)}
                       />
@@ -782,8 +837,8 @@ function Home() {
                     <BookCarousel
                       id="others-section"
                       icon={<Sparkle />}
-                      title="Others"
-                      subtitle="More titles from the archive"
+                      title="სხვები"
+                      subtitle="მეტი წიგნი არქივიდან"
                       books={filteredBooks}
                       onOpenDetail={(book) => setSelectedBook(book)}
                     />

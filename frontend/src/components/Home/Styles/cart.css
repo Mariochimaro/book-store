@@ -22,7 +22,7 @@
   right: 0;
   bottom: 0;
   width: min(520px, 64vw);
-  background: #0d1124;
+  background: var(--background);
   border-left: 1px solid var(--border);
   z-index: 2950;
   display: flex;
@@ -45,7 +45,7 @@
 .cart-title {
   font-size: 22px;
   font-weight: 700;
-  color: var(--text);
+  color: var(--muted-foreground);
 }
 
 .cart-x {

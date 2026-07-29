@@ -135,10 +135,10 @@
   flex-direction: column;
 }
 
-.bd-title { font-size: 2rem; margin: 0 0 8px 0; line-height: 1.2; }
-.bd-author { color: var(--text-3); font-size: 1.1rem; margin-bottom: 24px; }
+.bd-title { font-size: 2rem; margin: 0 0 8px 0; line-height: 1.2; color: var(--foreground) }
+.bd-author { color: var(--muted-foreground); font-size: 1.1rem; margin-bottom: 24px; }
 
-.bd-price-row { display: flex; align-items: center; gap: 24px; margin-bottom: 24px; }
+.bd-price-row { color: var(--primary); display: flex; align-items: center; gap: 24px; margin-bottom: 24px; }
 .bd-price { font-size: 2.2rem; font-weight: bold; color: var(--accent); }
 .bd-divider { width: 1px; height: 30px; background: #e0e0e0; }
 .bd-condition-badge {
@@ -147,6 +147,7 @@
   font-weight: bold;
   font-size: 0.85rem;
   text-transform: uppercase;
+  background-color: var(--foreground);
 }
 
 .bd-tags-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
@@ -201,7 +202,10 @@
   cursor: pointer; font-size: 1.1rem; font-weight: 600;
   display: flex; align-items: center; justify-content: center; gap: 8px;
   transition: background 0.3s;
-  background: var(--accent);
+  background: var(--primary);
+}
+.bd-add-cart-btn:hover{
+  background: var(--accent-h);
 }
 .bd-add-cart-btn.added { background: #10b981; }
 

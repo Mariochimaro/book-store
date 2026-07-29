@@ -11,14 +11,14 @@
 
 /* Individual book card */
 .bc {
-  background: var(--bg-card);
+  background: var(--card);
   border-radius: var(--r);
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
   position: relative;
   display: flex;         /* Added to keep card heights completely uniform */
   flex-direction: column;/* stacked vertically */
-  border: 1px solid oklch(76.9% 0.17337 64.355 / 0.547); /* 1px border შენს ფერში */
+  border: 1px solid oklch(76.9% 0.17337 64.355 / 0.107); /* 1px border შენს ფერში */
   transition: all 0.3s ease;
   height: 100%;
 }
@@ -27,8 +27,9 @@
   transform: translateY(-4px); /* ოდნავ მაღლა იწევა */
   border-width: 1px; 
   /* Shadow შენივე ფერში (გამჭირვალე) და არა შავში */
-  box-shadow: 0 8px 45px oklch(76.9% 0.188 70.08 / 0.25);
+  box-shadow: 0 8px 35px oklch(76.9% 0.188 70.08 / 0.25);
   margin: -1px; /* კომპენსაცია რომ border 2px-ზე ზომა არ "ახტეს" */
+  border: 1px solid oklch(76.9% 0.17337 64.355 / 0.36);
 }
 
 .bc-img-wrap {
@@ -71,16 +72,16 @@
 .bc-ist     { background: var(--green-dark); color: #fff; }
 
 .bc-info { 
-  padding: 12px 14px 14px; 
+  padding: 8px 12px 8px; 
   display: flex;         /* Pushes the price and cart button cleanly to the bottom */
   flex-direction: column;
   flex: 1;
 }
 
 .bc-title {
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--text);
+  color: var(--card-foreground);
   margin-bottom: 3px;
   line-height: 1.35;
   white-space: nowrap;
@@ -89,8 +90,8 @@
 }
 
 .bc-author {
-  font-size: 11px;
-  color: var(--text-3);
+  font-size: 12px;
+  color: var(--muted-foreground);
   margin-bottom: 10px;
   white-space: nowrap;
   overflow: hidden;
@@ -102,6 +103,12 @@
   align-items: center;
   justify-content: space-between;
   margin-top: auto;      /* Keeps footer elements horizontally aligned across cards */
+}
+
+.bc-price {
+  color: var(--primary);
+  font-weight: bold;
+  font-size: large;
 }
 
 .bc-cart {
@@ -212,7 +219,7 @@
 
 /* კალათის ღილაკის მცირე სტილიზაცია (შეგიძლია დატოვო შენიც) */
 .bc-cart-btn {
-  background-color: oklch(76.9% 0.188 70.08);
+  background-color: var(--primary);
   color: #fff;
   border: none;
   border-radius: 6px;

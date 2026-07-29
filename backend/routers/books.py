@@ -10,6 +10,7 @@ import services.recommendations.affinity as affinity
 from services.recommendations.content_related import get_content_based_related_books
 from pydantic import BaseModel
 from typing import Optional, List
+from datetime import datetime, timezone
 
 router = APIRouter(
     prefix="/books",
@@ -462,16 +463,26 @@ def delete_my_book(book_id: int, current_user = Depends(get_current_user)):
     user_id = current_user["id"]
     
     # 1. ვამოწმებთ, ეკუთვნის თუ არა ეს წიგნი ამ იუზერს
-    book = supabase.table("books").select("seller_id").eq("id", book_id).execute()
+    book = supabase.table("books").select("seller_id", "deleted_at").eq("id", book_id).execute()
     if not book.data:
         raise HTTPException(status_code=404, detail="წიგნი ვერ მოიძებნა.")
         
     if book.data[0]["seller_id"] != user_id:
         raise HTTPException(status_code=403, detail="თქვენ არ გაქვთ ამ წიგნის წაშლის უფლება.")
 
+    if book.data[0].get("deleted_at") is not None:
+        raise HTTPException(status_code=400, detail="წიგნი უკვე გადაყვანილია წაშლილებში.")
+
     try:
-        supabase.table("books").delete().eq("id", book_id).execute()
-        return {"status": "success", "message": "წიგნი წაიშალა."}
+        # Soft Delete: ჩავუწეროთ deleted_at და სტატუსი
+        now_str = datetime.now(timezone.utc).isoformat()
+        
+        supabase.table("books").update({
+            "deleted_at": now_str,
+            "status": "deleted"
+        }).eq("id", book_id).execute()
+
+        return {"status": "success", "message": "წიგნი გადავიდა წაშლილებში. ბაზიდან საბოლოოდ წაიშლება 4 დღეში."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
