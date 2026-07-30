@@ -17,7 +17,7 @@ export function ParticleBackground() {
       canvas.height = window.innerHeight;
 
       const isMobile = window.innerWidth < 768;
-      const count = isMobile ? 20 : 50;
+      const count = isMobile ? 35 : 60;
       const sizeRange = isMobile ? [0.4, 1.0] : [0.5, 2.0]; // [min, max]
 
       particles = Array.from({ length: count }, () => ({

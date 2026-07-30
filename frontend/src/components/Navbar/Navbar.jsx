@@ -7,7 +7,7 @@ import { GenreModal }    from "./GenreModal";
 import { useCart }       from "../../context/CartContext";
 import { useAuth }       from "../../context/AuthContext";
 
-const REVEAL_THRESHOLD = 150; // px of upward scroll needed before nav starts reappearing
+const REVEAL_THRESHOLD = 100; // px of upward scroll needed before nav starts reappearing
 
 function Navbar() {
   const [query, setQuery]         = useState("");

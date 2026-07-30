@@ -78,7 +78,7 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--font-sans);
-  background: var(--background);
+  background: var(--bg-pink);
   color: var(--text);
   font-size: 15px;
   line-height: 1.5;
@@ -120,7 +120,6 @@ a { text-decoration: none; }
   background: var(--background);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border);
-  overflow: hidden;
   transform: translateY(0);
   will-change: transform;
 }
