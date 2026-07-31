@@ -38,6 +38,7 @@ app.add_middleware(
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "https://bookarchivegeo.vercel.app",
+        "http://127.0.0.1:8000"
     ],
     allow_credentials=False,
     allow_methods=["*"],

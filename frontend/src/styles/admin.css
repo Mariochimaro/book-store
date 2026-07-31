@@ -806,3 +806,42 @@
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+
+/* Access Denied */
+.ad-access-denied {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 64px 16px;
+  text-align: center;
+}
+.ad-access-denied-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  color: #fc8181;
+  opacity: 0.5;
+}
+.ad-access-denied-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.ad-access-denied-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  background: var(--accent, #3b82f6);
+  color: #fff;
+  transition: opacity 0.15s ease;
+}
+.ad-access-denied-btn:hover {
+  opacity: 0.9;
+}

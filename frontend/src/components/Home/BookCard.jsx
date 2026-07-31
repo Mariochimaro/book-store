@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
 import { useUserBookInteractions } from "../../context/UBIContext";
-import "./Styles/bookcard-carousel.css"
+import "./Styles/bookcard.css"
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -61,10 +61,12 @@ function BookCard({ book }) {
   const cover      = book.photos_urls?.[0] ?? "/placeholder.jpg";
   const badge      = CONDITION_BADGE[book.condition];
   const isReserved = book.status === "reserved";
+  const isSold     = book.status === "sold";
 
   function handleAdd(e) {
     e.preventDefault();
     e.stopPropagation();
+    if (isSold) return; // defense-in-depth; the button is hidden anyway
     addToCart(book);
     setAdded(true);
     setTimeout(() => setAdded(false), 1100);
@@ -73,7 +75,7 @@ function BookCard({ book }) {
   async function handleRate(e, actionType) {
     e.preventDefault();
     e.stopPropagation();
-    if (!user) return; // არალოგინებულები ვერ დააკლიკებენ
+    if (!user || isSold) return; // არალოგინებულები/გაყიდულ წიგნებზე ვერ დააკლიკებენ
 
     const newAction = userRating === actionType ? "remove" : actionType;
     const prevRating = userRating;
@@ -98,7 +100,7 @@ function BookCard({ book }) {
   async function handleBookmark(e) {
     e.preventDefault();
     e.stopPropagation();
-    if (!user) return;
+    if (!user || isSold) return;
 
     const prevBookmark = isBookmarked;
     setBookmark(book.id, !prevBookmark);
@@ -123,18 +125,25 @@ function BookCard({ book }) {
   }
 
   return (
-    <article className="bc">
+    <article className={`bc ${isSold ? "bc-sold" : ""}`}>
       <Link to={`/book/${book.id}`} className="bc-img-wrap">
         <img src={cover} alt={book.title} className="bc-img" loading="lazy" />
         <div className="bc-img-overlay"></div>
+
+        {/* Sold (მთელ სურათზე გადაფარვა + შტამპი) */}
+        {isSold && (
+          <div className="bc-sold-overlay">
+            <span className="bc-sold-stamp">გაყიდულია</span>
+          </div>
+        )}
 
         {/* Reserved (ზედა მარჯვენა) */}
         {isReserved && (
           <span className="bc-reserved-badge">დაჯავშნილი</span>
         )}
 
-        {/* Bookmark (ზედა მარცხენა) - ჩანს მხოლოდ დალოგინებულისთვის */}
-        {user && (
+        {/* Bookmark (ზედა მარცხენა) - ჩანს მხოლოდ დალოგინებულისთვის, არა გაყიდულზე */}
+        {user && !isSold && (
           <button 
             className={`bc-bookmark-btn ${isBookmarked ? "active" : ""}`} 
             onClick={handleBookmark}
@@ -157,11 +166,11 @@ function BookCard({ book }) {
         <p className="bc-author">{authorLine}</p>
         
         <div className="bc-foot">
-          <span className="bc-price">{book.price} ₾</span>
+          <span className={`bc-price ${isSold ? "bc-price-sold" : ""}`}>{book.price} ₾</span>
           
           <div className="bc-actions">
-            {/* Like/Dislike (მხოლოდ დალოგინებულისთვის) */}
-            {user && (
+            {/* Like/Dislike (მხოლოდ დალოგინებულისთვის, არა გაყიდულზე) */}
+            {user && !isSold && (
               <>
                 <button
                   onClick={(e) => handleRate(e, "like")}
@@ -181,13 +190,15 @@ function BookCard({ book }) {
               </>
             )}
 
-            <button
-              className={`bc-cart-btn ${added ? "bc-cart-ok" : ""}`}
-              onClick={handleAdd}
-              aria-label={`${book.title} კალათაში დამატება`}
-            >
-              {added ? "✓" : <CartIcon />}
-            </button>
+            {!isSold && (
+              <button
+                className={`bc-cart-btn ${added ? "bc-cart-ok" : ""}`}
+                onClick={handleAdd}
+                aria-label={`${book.title} კალათაში დამატება`}
+              >
+                {added ? "✓" : <CartIcon />}
+              </button>
+            )}
           </div>
         </div>
       </div>

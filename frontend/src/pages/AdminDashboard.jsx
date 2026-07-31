@@ -3,7 +3,7 @@ import Navbar from "../components/Navbar/Navbar";
 import AdminBookDetailModal from "../components/Admin/BookReview";
 import FinancePanel from "../components/Admin/FinancePanel";
 import LogsPanel from "../components/Admin/LogsPanel";
-import { authHeaders } from "../context/AuthContext";
+import { authHeaders, useAuth } from "../context/AuthContext";
 import "../styles/admin.css"
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -92,6 +92,15 @@ const NfSaleIcon = () => (
   </svg>
 );
 
+// Access-denied shield icon (matches the Figma design)
+const ShieldIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+    className={className} aria-hidden="true">
+    <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+  </svg>
+);
+
 const REJECT_PRESETS = [
   'ყდა არ შეესაბამება წიგნის სათაურს.',
   'ფასი ზედმეტად მაღალია.',
@@ -99,6 +108,25 @@ const REJECT_PRESETS = [
   'აღწერა ზედმეტად მოკლეა და არ შეიცავს საკმარის ინფორმაციას.',
   'ფოტოების ხარისხი ძალიან დაბალია.'
 ];
+
+// ─────────────────────────────────────────────────────────────
+// ACCESS DENIED SCREEN — shown when a non-admin hits /admin directly
+// ─────────────────────────────────────────────────────────────
+function AccessDenied() {
+  return (
+    <div className="ad-access-denied">
+      <ShieldIcon className="ad-access-denied-icon" />
+      <h2 className="ad-access-denied-title">Access Denied</h2>
+      <button
+        type="button"
+        className="ad-access-denied-btn"
+        onClick={() => { window.location.href = "/"; }}
+      >
+        Go Home
+      </button>
+    </div>
+  );
+}
 
 // ─────────────────────────────────────────────────────────────
 // BOOK REVIEW CARD
@@ -320,6 +348,14 @@ function TabEmpty({ icon, title, sub }) {
 // ADMIN DASHBOARD PAGE
 // ─────────────────────────────────────────────────────────────
 function AdminDashboard() {
+  // ── Admin gate ────────────────────────────────────────────
+  // ASSUMPTION: your AuthContext exposes the current user somehow.
+  // Swap this one line to match your real AuthContext shape, e.g.:
+  //   const { user } = useAuth();
+  //   const isAdmin = user?.role === "admin";   // or: user?.is_admin
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+
   const [activeTab, setActiveTab] = useState("pending");
   const [logsFilterQuery, setLogsFilterQuery] = useState(""); // ლოგების ფილტრის state
 
@@ -381,10 +417,13 @@ function AdminDashboard() {
   }
 
   useEffect(() => {
+    // Don't fire admin-only requests if the user isn't an admin —
+    // they'd just get 401/403s back from the server anyway.
+    if (!isAdmin) return;
     fetchPendingBooks();
     fetchAllBooks();
     fetchSuspiciousUsers();
-  }, []);
+  }, [isAdmin]);
 
   // ── Book approve / reject ─────────────────────────────────
 
@@ -523,6 +562,17 @@ function AdminDashboard() {
   ];
 
   // ── Render ────────────────────────────────────────────────
+
+  // Non-admins who type /admin by hand get stopped here, before any
+  // admin-only data is shown or fetched.
+  if (!isAdmin) {
+    return (
+      <>
+        <Navbar />
+        <AccessDenied />
+      </>
+    );
+  }
 
   return (
     <>

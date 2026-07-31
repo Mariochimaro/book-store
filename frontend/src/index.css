@@ -132,7 +132,7 @@ a { text-decoration: none; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 18px;
 }
 .nb-hidden {
   transform: translateY(-100%);
@@ -193,7 +193,7 @@ a { text-decoration: none; }
 .nb-actions {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
   flex-shrink: 0;
 }
 

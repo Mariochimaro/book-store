@@ -32,6 +32,7 @@
   display: grid;
   grid-template-columns: 2fr 3fr;
   height: 100%;
+  touch-action: pan-y; /* let vertical scroll pass through, capture horizontal for the swipe */
 }
 
 @media (min-width: 768px) {
