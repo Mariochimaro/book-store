@@ -90,20 +90,9 @@ export function BestsellerCarousel({ bestClusters = [], onSelectCluster }) {
 
   const cluster = bestClusters[idx];
   const coverImage = cluster.cover_image || '/placeholder-book.jpg';
+  
+  // 1. პრიორიტეტი ქართულს (geo_title), ხოლო თუ არ არსებობს -> canonical_title
   const displayTitle = cluster.geo_title || cluster.canonical_title;
-
-  // Swipe thresholds: a decent drag distance OR a quick flick, either counts
-  const SWIPE_DISTANCE = 50;   // px
-  const SWIPE_VELOCITY = 500;  // px/s
-
-  const handleDragEnd = (_, info) => {
-    const { offset, velocity } = info;
-    if (offset.x < -SWIPE_DISTANCE || velocity.x < -SWIPE_VELOCITY) {
-      setIdx((i) => (i + 1) % bestClusters.length); // swiped left -> next
-    } else if (offset.x > SWIPE_DISTANCE || velocity.x > SWIPE_VELOCITY) {
-      setIdx((i) => (i - 1 + bestClusters.length) % bestClusters.length); // swiped right -> prev
-    }
-  };
 
   return (
     <section className="bs-section">
@@ -121,10 +110,6 @@ export function BestsellerCarousel({ bestClusters = [], onSelectCluster }) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
             className="bs-grid"
-            drag={bestClusters.length > 1 ? "x" : false}
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.2}
-            onDragEnd={handleDragEnd}
           >
             {/* ქავერის სექცია */}
             <div className="bs-cover-wrap">

@@ -251,4 +251,7 @@
 @media (max-width: 540px) {
   .bdm-card { grid-template-columns: 1fr; max-height: 96vh; }
   .bdm-gallery { max-height: 240px; }
+  .bdm-btn-text {
+    display: none;
+  }
 }

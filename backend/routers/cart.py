@@ -26,17 +26,29 @@ class BulkBuyRequest(BaseModel):
 def get_cart(current_user=Depends(get_current_user)):
     cart_items = supabase.table("cart").select("*, books(*)").eq("user_id", current_user["id"]).execute()
 
-    # წინასწარ ვკრეფთ ყველა საჭირო seller_id-ს, რომ ერთბაშად წამოვიღოთ username-ები
-    seller_ids = {item["books"]["seller_id"] for item in cart_items.data if item["books"]}
+    # წინასწარ ვკრეფთ ყველა საჭირო seller_id-ს და book_id-ს, რომ ერთბაშად წამოვიღოთ მონაცემები
+    seller_ids = {item["books"]["seller_id"] for item in cart_items.data if item.get("books")}
+    book_ids = {item["books"]["id"] for item in cart_items.data if item.get("books")}
 
     sellers_map = {}
     if seller_ids:
         sellers_res = supabase.table("users").select("id, username").in_("id", list(seller_ids)).execute()
         sellers_map = {s["id"]: s["username"] for s in sellers_res.data}
 
+    # ვამოწმებთ, რომელ წიგნებზე აქვს მიმდინარე მომხმარებელს გაგზავნილი მოთხოვნა (book_requests)
+    requests_res = (
+    supabase.table("book_requests")
+    .select("book_id")
+    .eq("buyer_id", current_user["id"])
+    .in_("status", ["active_timer", "checking_payment"])   # <-- only count active/pending requests
+    .in_("book_id", list(book_ids))
+    .execute()
+)
+    my_reserved_book_ids = {r["book_id"] for r in requests_res.data}
+
     processed_cart = []
     for item in cart_items.data:
-        book = item["books"]
+        book = item.get("books")
 
         if not book:
             supabase.table("cart").delete().eq("id", item["id"]).execute()
@@ -44,6 +56,7 @@ def get_cart(current_user=Depends(get_current_user)):
 
         book_status = book.get("status")
         seller_id = book["seller_id"]
+        is_reserved_by_me = book["id"] in my_reserved_book_ids and book_status == "reserved"
 
         display_item = {
             "cart_item_id": item["id"],
@@ -52,11 +65,14 @@ def get_cart(current_user=Depends(get_current_user)):
             "price": book["price"],
             "status": book_status,
             "can_purchase": book_status == "active",
+            "is_reserved_by_me": is_reserved_by_me,  # <-- ფრონტენდისთვის საჭირო ველი
             "message": None,
             "seller_id": seller_id,
             "seller_username": sellers_map.get(seller_id, "უცნობი გამყიდველი"),
             "photos_urls": book.get("photos_urls", []),
             "author": book.get("author"),
+            "listing_type": book.get("listing_type"),
+            "quantity": item.get("quantity", 1),      
         }
 
         if book_status == "seller_deleted":
@@ -64,7 +80,9 @@ def get_cart(current_user=Depends(get_current_user)):
         elif book_status == "sold":
             display_item["message"] = "წიგნი უკვე გაყიდულია"
         elif book_status == "reserved":
-            display_item["message"] = "წიგნი რეზერვირებულია"
+            display_item["message"] = (
+                "თქვენი მოთხოვნილია" if is_reserved_by_me else "წიგნი რეზერვირებულია"
+            )
 
         processed_cart.append(display_item)
 
@@ -314,3 +332,25 @@ def buy_books_bulk(
             "unavailable_books": unavailable_books                      # რაც უკვე გაყიდული დახვდა
         }
     }
+
+class QuantityUpdate(BaseModel):
+    quantity: int
+
+@router.patch("/quantity/{cart_item_id}")
+def update_quantity(cart_item_id: int, payload: QuantityUpdate, current_user=Depends(get_current_user)):
+    if payload.quantity < 1:
+        raise HTTPException(status_code=400, detail="რაოდენობა უნდა იყოს მინიმუმ 1")
+
+    item_check = supabase.table("cart").select("user_id, book_id").eq("id", cart_item_id).execute()
+    if not item_check.data:
+        raise HTTPException(status_code=404, detail="ჩანაწერი კალათაში ვერ მოიძებნა.")
+    if item_check.data[0]["user_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="თქვენ არ გაქვთ ამ ჩანაწერის შეცვლის უფლება.")
+
+    book_id = item_check.data[0]["book_id"]
+    book = supabase.table("books").select("listing_type").eq("id", book_id).single().execute()
+    if not book.data or book.data.get("listing_type") != "first-hand":
+        raise HTTPException(status_code=400, detail="რაოდენობის შეცვლა შესაძლებელია მხოლოდ ახალი წიგნებისთვის.")
+
+    supabase.table("cart").update({"quantity": payload.quantity}).eq("id", cart_item_id).execute()
+    return {"status": "success", "quantity": payload.quantity}

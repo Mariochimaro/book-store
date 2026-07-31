@@ -349,12 +349,8 @@ function TabEmpty({ icon, title, sub }) {
 // ─────────────────────────────────────────────────────────────
 function AdminDashboard() {
   // ── Admin gate ────────────────────────────────────────────
-  // ASSUMPTION: your AuthContext exposes the current user somehow.
-  // Swap this one line to match your real AuthContext shape, e.g.:
-  //   const { user } = useAuth();
-  //   const isAdmin = user?.role === "admin";   // or: user?.is_admin
   const { user } = useAuth();
-  const isAdmin = user?.role === "admin";
+  const isAdmin = !!user?.is_admin;
 
   const [activeTab, setActiveTab] = useState("pending");
   const [logsFilterQuery, setLogsFilterQuery] = useState(""); // ლოგების ფილტრის state

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import authHeaders from "../../pages/AdminDashboard"
-import "./Styles/book-detail.css"
+import authHeaders from "../../pages/AdminDashboard";
+import "./Styles/book-detail.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -10,6 +10,7 @@ const CheckIcon = ({ size = 13 }) => (
     <polyline points="20 6 9 17 4 12"/>
   </svg>
 );
+
 const XIcon = ({ size = 13 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
     strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -60,7 +61,7 @@ function AdminBookDetailModal({ book, onClose, onApprove, onReject }) {
           <XIcon size={16} />
         </button>
 
-        {/* 1. MEDIA GALLERY AREA — now smaller & centered on top */}
+        {/* 1. MEDIA GALLERY AREA */}
         <div style={{ width: "180px", margin: "0 auto" }}>
           <div style={{
             width: "100%", aspectRatio: "3/4", backgroundColor: "#f3f4f6",
@@ -130,7 +131,7 @@ function AdminBookDetailModal({ book, onClose, onApprove, onReject }) {
           )}
         </div>
 
-        {/* 2. DETAILS AREA — full width below media */}
+        {/* 2. DETAILS AREA */}
         <div className="bdm-details" style={{ flex: "1", minWidth: 0, padding: 0 }}>
           <div>
             <label className="text-xs" style={{ color: "var(--text-3, #718096)" }}>Title (Editable)</label>
@@ -193,10 +194,11 @@ function AdminBookDetailModal({ book, onClose, onApprove, onReject }) {
             <p className="bdm-desc-text">{book.description ?? "No description available yet."}</p>
           </div>
 
-          {/* Approve / Reject — already side by side */}
+          {/* Approve / Reject Actions */}
           <div className="bdm-actions mt-4 flex gap-2">
             <button
               className="bdm-add-cart"
+              aria-label="შენახვა და დასტური"
               style={{ backgroundColor: "#10b981", color: "#fff", flex: 1, display: "flex", justifyContent: "center", alignItems: "center", gap: "6px" }}
               onClick={() => onApprove(book.id, {
                 title: editTitle,
@@ -204,14 +206,17 @@ function AdminBookDetailModal({ book, onClose, onApprove, onReject }) {
                 genres: editGenres.split(",").map(g => g.trim()).filter(Boolean)
               })}
             >
-              <CheckIcon size={14} /> Approve & Save
+              <CheckIcon size={14} />
+              <span className="bdm-btn-text">შენახვა და დასტური</span>
             </button>
             <button
               className="bdm-wishlist-action"
+              aria-label="უარყოფა"
               style={{ backgroundColor: "#ef4444", color: "#fff", flex: 1, borderRadius: "8px", padding: "10px", fontWeight: 600, display: "flex", justifyContent: "center", alignItems: "center", gap: "6px" }}
               onClick={() => onReject(book)}
             >
-              <XIcon size={14} /> Reject
+              <XIcon size={14} />
+              <span className="bdm-btn-text">უარყოფა</span>
             </button>
           </div>
         </div>
