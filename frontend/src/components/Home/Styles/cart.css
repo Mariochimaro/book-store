@@ -436,7 +436,7 @@
 }
 .unavailable-item-reserved {
   opacity: 1;
-  background: var(--card-foreground);
+  background: var(--background);
 }
 .unavailable-item-img {
   width: 40px;
@@ -479,7 +479,7 @@
 .unavailable-reserved-msg {
   margin-top: 4px;
   font-size: 0.72rem;
-  color: #b45309;
+  color: var(--primary);
 }
 .unavailable-item-remove {
   align-self: flex-start;

@@ -74,6 +74,8 @@ const CONDITION_INFO = {
 };
 
 // ── Fullscreen lightbox ──
+// Intentionally renders the raw image only — no sold stamp/overlay here,
+// so zooming in always shows the photo without the watermark.
 function ImageLightbox({ photos, activeIndex, onClose, onNavigate }) {
   useEffect(() => {
     function onKey(e) {
@@ -213,6 +215,7 @@ function BookDetail() {
   // BookCard / BookDetail instance and survives a page refresh.
   const userRating = ratings[book.id] ?? null;
   const isBookmarked = bookmarkedIds.has(book.id);
+  const isSold = book.status === "sold";
 
   const isOwnBook = isLoggedIn && user?.id != null && book.seller?.id != null && user.id === book.seller.id;
   const conditionObj = CONDITION_INFO[book.condition] || { label: book.condition, bg: "#f3f4f6", color: "#4b5563" };
@@ -249,6 +252,14 @@ function BookDetail() {
               ) : (
                 <img src={photos[activePhoto] ?? "/placeholder.jpg"} alt={book.title} className="bd-main-media" />
               )}
+
+              {/* Sold overlay — only on the inline preview. The lightbox (zoom)
+                  renders the raw image with no stamp, on purpose. */}
+              {isSold && !isViewingVideo && (
+                <div className="bd-sold-overlay">
+                  <span className="bd-sold-stamp">გაყიდულია</span>
+                </div>
+              )}
             </div>
 
             {(photos.length > 1 || hasVideo) && (
@@ -278,7 +289,7 @@ function BookDetail() {
             {book.author && <p className="bd-author">{book.author}</p>}
 
             <div className="bd-price-row">
-              <span className="bd-price">{book.price} ₾</span>
+              <span className={`bd-price${isSold ? " bd-price-sold" : ""}`}>{book.price} ₾</span>
               <div className="bd-divider" />
               <div className="bd-condition-badge" style={{ backgroundColor: conditionObj.bg, color: conditionObj.color }}>
                 {conditionObj.label}
@@ -328,7 +339,7 @@ function BookDetail() {
             )}
 
             {isOwnBook ? (
-              <div className="bd-own-book-alert">ეს თქვენი განცხადებაა</div>
+              <div className="bd-unavailable">ეს თქვენი განცხადებაა</div>
             ) : (
               <div className="bd-actions-row">
                 {user && (
@@ -342,9 +353,13 @@ function BookDetail() {
                   </>
                 )}
 
-                <button onClick={handleAdd} disabled={added} className={`bd-add-cart-btn${added ? " added" : ""}`}>
-                  {added ? <><CheckIcon /> კალათაში დამატდა</> : <><CartIcon /> კალათაში დამატება</>}
-                </button>
+                {isSold ? (
+                  <div className="bd-unavailable">წიგნი გაყიდულია</div>
+                ) : (
+                  <button onClick={handleAdd} disabled={added} className={`bd-add-cart-btn${added ? " added" : ""}`}>
+                    {added ? <><CheckIcon /> კალათაში დამატდა</> : <><CartIcon /> კალათაში დამატება</>}
+                  </button>
+                )}
               </div>
             )}
           </div>

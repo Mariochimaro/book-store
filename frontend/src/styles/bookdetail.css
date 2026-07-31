@@ -179,7 +179,7 @@
 .bd-info-label { font-size: 0.75rem; color: #6b7280; display: block; margin-bottom: 2px; }
 .bd-selling-method-val { color: #10b981; display: block; }
 
-.bd-own-book-alert {
+.bd-unavailable {
   padding: 16px; border-radius: 12px;
   background: rgba(184,119,67,0.1); border: 1px solid rgba(184,119,67,0.3);
   color: var(--accent); text-align: center; font-weight: 600; margin-top: auto;
@@ -306,4 +306,27 @@
 
 @media (max-width: 380px) {
   .bd-gallery-col { max-width: 190px; }
+}
+
+
+.bd-sold-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.586);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.bd-sold-stamp {
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 4px;
+  transform: rotate(-12deg);
 }

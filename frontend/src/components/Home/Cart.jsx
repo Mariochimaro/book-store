@@ -286,30 +286,30 @@ export function CartSidebar({ isOpen, onClose }) {
                               {item.title}
                             </p>
                             <p className="ci-author">{item.author ?? "—"}</p>
-                          </div>
-
-                          <div className="ci-meta-group">
-                            <p className="ci-price">{item.price} ₾</p>
-                            {item.listing_type === "first-hand" && (
-                              <div className="qty-stepper">
-                                <button
-                                  className="qty-btn"
-                                  onClick={() => updateQuantity?.(item.cart_item_id, Math.max(1, (item.quantity ?? 1) - 1))}
-                                  disabled={(item.quantity ?? 1) <= 1}
-                                  aria-label="რაოდენობის შემცირება"
-                                >
-                                  −
-                                </button>
-                                <span className="qty-value">{item.quantity ?? 1}</span>
-                                <button
-                                  className="qty-btn"
-                                  onClick={() => updateQuantity?.(item.cart_item_id, (item.quantity ?? 1) + 1)}
-                                  aria-label="რაოდენობის გაზრდა"
-                                >
-                                  +
-                                </button>
-                              </div>
-                            )}
+                          
+                            <div className="ci-meta-group">
+                              <p className="ci-price">{item.price} ₾</p>
+                              {item.listing_type === "first-hand" && (
+                                <div className="qty-stepper">
+                                  <button
+                                    className="qty-btn"
+                                    onClick={() => updateQuantity?.(item.cart_item_id, Math.max(1, (item.quantity ?? 1) - 1))}
+                                    disabled={(item.quantity ?? 1) <= 1}
+                                    aria-label="რაოდენობის შემცირება"
+                                  >
+                                    −
+                                  </button>
+                                  <span className="qty-value">{item.quantity ?? 1}</span>
+                                  <button
+                                    className="qty-btn"
+                                    onClick={() => updateQuantity?.(item.cart_item_id, (item.quantity ?? 1) + 1)}
+                                    aria-label="რაოდენობის გაზრდა"
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                              )}
+                            </div>
                           </div>
 
                           <div className="ci-right">
