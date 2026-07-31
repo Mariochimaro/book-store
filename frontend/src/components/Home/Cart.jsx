@@ -41,7 +41,6 @@ function CollapsibleBookSection({
 }) {
   const [open, setOpen] = useState(false);
 
-  // თუ სექციაში 0 ელემენტია, სრულიად ქრება
   if (!items || items.length === 0) return null;
 
   return (
@@ -163,9 +162,18 @@ export function CartSidebar({ isOpen, onClose }) {
     checkoutState,
     loading,
     updateQuantity,
+    refreshCart, // 👈 1. Added refreshCart here
   } = useCart();
+
   const navigate = useNavigate();
   const [confirmGroup, setConfirmGroup] = useState(null);
+
+  // 👈 2. Load latest cart data whenever the sidebar opens
+  useEffect(() => {
+    if (isOpen) {
+      refreshCart();
+    }
+  }, [isOpen, refreshCart]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -181,7 +189,6 @@ export function CartSidebar({ isOpen, onClose }) {
     return () => document.removeEventListener("keydown", onKey);
   }, [isOpen, onClose]);
 
-  // დამხმარე ფუნქცია: ამოწმებს, არის თუ არა წიგნი მიმდინარე მომხმარებლის მიერ მოთხოვნილი
   const isMyReservedItem = (item) => item.is_reserved_by_me === true;
 
   // 1. ხელმისაწვდომი წიგნები
@@ -206,7 +213,7 @@ export function CartSidebar({ isOpen, onClose }) {
     try {
       await checkoutSeller(sellerId);
     } catch {
-      // შეცდომა უკვე console-შია
+      // Error handled in console
     }
   }
 
@@ -364,7 +371,7 @@ export function CartSidebar({ isOpen, onClose }) {
                 );
               })}
 
-              {/* 2. ჩემი მოთხოვნილი წიგნების სექცია (ხელმისაწვდომების ქვემოთ, მიუწვდომლების ზემოთ) */}
+              {/* 2. ჩემი მოთხოვნილი წიგნების სექცია */}
               <CollapsibleBookSection
                 title="⏳ მოთხოვნილი წიგნები"
                 items={requestedItems}
