@@ -302,48 +302,75 @@ async def get_user_orders(current_user: dict = Depends(get_current_user)):
         
     return {"orders": orders}
 
-@router.get("/seller-stats")
-async def get_seller_stats(current_user: dict = Depends(get_current_user)):
+@router.get("/finances")
+def get_user_finances(current_user = Depends(get_current_user)):
     user_id = current_user["id"]
-
-    # სელექტში დავამატეთ "views"
-    response = supabase.table("books") \
-        .select("status, price, views") \
-        .eq("seller_id", user_id) \
-        .is_("deleted_at", "null") \
-        .execute()
-        
-    books = response.data
-
-    total_earned = 0
-    total_sold = 0
-    active_listings = 0
-    pending_sales = 0
-    total_views = 0  # შევქმნათ ცვლადი ჯამისთვის
-
-    for book in books:
-        # მიმდინარე წიგნის ნახვებს ვუმატებთ საერთო ჯამს
-        total_views += book.get("views") or 0
-        
-        # სტატუსების ლოგიკა
-        if book["status"] == "sold":
-            total_sold += 1
-            if book["price"]:
-                total_earned += book["price"]
-        elif book["status"] == "active":
-            active_listings += 1
-        elif book["status"] in ["pending", "reserved"]:
-            pending_sales += 1
-
-    return {
-        "stats": {
-            "total_earned": total_earned,
-            "total_sold_books": total_sold,
-            "active_listings": active_listings,
-            "pending_sales": pending_sales,
-            "total_views": total_views  # აქ უკვე რეალური ჯამი ბრუნდება
+    
+    try:
+        # 1. Fetch finances from the new table
+        finance_response = supabase.table("user_finances") \
+            .select("*") \
+            .eq("user_id", user_id) \
+            .execute()
+            
+        finances = finance_response.data[0] if finance_response.data else {
+            "total_earnings": 0,
+            "books_sold_count": 0,
+            "monthly_totals": [],
+            "sales_by_genre": {}
         }
-    }
+        
+        # 2. Count Active Listings efficiently (no need to download all data)
+        active_books_resp = supabase.table("books") \
+            .select("id", count="exact") \
+            .eq("seller_id", user_id) \
+            .eq("status", "active") \
+            .execute()
+            
+        active_listings_count = active_books_resp.count if active_books_resp.count else 0
+        
+        # 3. Calculate Average Price
+        total = float(finances.get("total_earnings", 0))
+        sold_count = int(finances.get("books_sold_count", 0))
+        average_price = round(total / sold_count, 2) if sold_count > 0 else 0
+        
+        # 4. Turn genres into percentages
+        genre_sales = finances.get("sales_by_genre", {})
+        total_genres_sold = sum(genre_sales.values())
+        genre_percentages = {}
+        
+        if total_genres_sold > 0:
+            for genre, count in genre_sales.items():
+                genre_percentages[genre] = round((count / total_genres_sold) * 100, 1)
+
+        # 5. Return structured response for React
+        return {
+            "total_earnings": total,
+            "books_sold_count": sold_count,
+            "average_price": average_price,
+            "active_listings_count": active_listings_count,
+            "monthly_totals": finances.get("monthly_totals", []),
+            "sales_by_genre_percentages": genre_percentages,
+            "sales_by_genre_raw": genre_sales # Helpful to keep for tooltips on your charts
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/transactions")
+def get_user_transactions(current_user = Depends(get_current_user)):
+    user_id = current_user["id"]
+    
+    try:
+        response = supabase.table("transactions") \
+            .select("*") \
+            .eq("seller_id", user_id) \
+            .order("datetime", desc=True) \
+            .execute()
+            
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/bookmarks")
 async def get_user_bookmarks(current_user: dict = Depends(get_current_user)):
