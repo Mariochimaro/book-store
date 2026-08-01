@@ -71,6 +71,7 @@ function CollapsibleBookSection({
                   key={item.cart_item_id}
                   className={`unavailable-item${isReserved ? " unavailable-item-reserved" : ""}`}
                 >
+                  {/* 1. Picture */}
                   <img
                     src={item.photos_urls?.[0] ?? "/placeholder.jpg"}
                     alt={item.title}
@@ -79,7 +80,8 @@ function CollapsibleBookSection({
                     style={{ cursor: "pointer" }}
                   />
 
-                  <div className="unavailable-item-info">
+                  {/* 2. Title & Author */}
+                  <div className="unavailable-item-text">
                     <p
                       className={`unavailable-item-title${isReserved ? "" : " strike"}`}
                       onClick={() => onViewBook(targetBookId)}
@@ -88,44 +90,43 @@ function CollapsibleBookSection({
                       {item.title}
                     </p>
                     <p className="unavailable-item-author">{item.author ?? "—"}</p>
-                    {isReserved ? (
-                      <p className="unavailable-reserved-msg">{RESERVED_MESSAGE}</p>
-                    ) : (
-                      <span className="unavailable-badge">{item.message}</span>
-                    )}
                   </div>
 
-                  <div className="ci-right">
-                    <button
-                      className="ci-remove"
-                      disabled={isRequestedSection}
-                      onClick={() => !isRequestedSection && removeFromCart(item.cart_item_id)}
-                      title={
-                        isRequestedSection
-                          ? "ეს წიგნი თქვენი მოთხოვნილია, დაელოდეთ გამყიდველის დასტურს"
-                          : "წაშლა"
-                      }
-                      aria-label={
-                        isRequestedSection
-                          ? "ეს წიგნი თქვენი მოთხოვნილია, დაელოდეთ გამყიდველის დასტურს"
-                          : `${item.title}-ის წაშლა`
-                      }
-                      style={
-                        isRequestedSection
-                          ? { opacity: 0.4, cursor: "not-allowed" }
-                          : {}
-                      }
-                    >
-                      ✕
-                    </button>
+                  {/* 3. Remove Button (x) */}
+                  <button
+                    className="ci-remove"
+                    disabled={isRequestedSection}
+                    onClick={() => !isRequestedSection && removeFromCart(item.cart_item_id)}
+                    title={
+                      isRequestedSection
+                        ? "ეს წიგნი თქვენი მოთხოვნილია, დაელოდეთ გამყიდველის დასტურს"
+                        : "წაშლა"
+                    }
+                    aria-label={`${item.title}-ის წაშლა`}
+                    style={isRequestedSection ? { opacity: 0.4, cursor: "not-allowed" } : {}}
+                  >
+                    ✕
+                  </button>
 
-                    <button
-                      className="ci-view-btn"
-                      onClick={() => onViewBook(targetBookId)}
-                    >
-                      ნახვა <ArrowRightIcon />
-                    </button>
+                  {/* 4. Message / Badge (Spreads through all 3 columns) */}
+                  {isReserved ? (
+                    <p className="unavailable-reserved-msg">{RESERVED_MESSAGE}</p>
+                  ) : (
+                    <span className="unavailable-badge">{item.message}</span>
+                  )}
+
+                  {/* 5. Price */}
+                  <div className="unavailable-item-price">
+                    {item.price ? `₾${Number(item.price).toFixed(2)}` : ""}
                   </div>
+
+                  {/* 6. View Button (ნახვა) - Spans columns 2 and 3 */}
+                  <button
+                    className="ci-view-btn"
+                    onClick={() => onViewBook(targetBookId)}
+                  >
+                    ნახვა <ArrowRightIcon />
+                  </button>
                 </div>
               );
             })}
@@ -275,6 +276,7 @@ export function CartSidebar({ isOpen, onClose }) {
                     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
                       {group.items.map((item) => (
                         <div key={item.cart_item_id} className="ci">
+                          {/* 1. სურათი (Col 1, Row 1) */}
                           <img
                             src={item.photos_urls?.[0] ?? "/placeholder.jpg"}
                             alt={item.title}
@@ -284,6 +286,7 @@ export function CartSidebar({ isOpen, onClose }) {
                             style={{ cursor: "pointer" }}
                           />
 
+                          {/* 2. სათაური და ავტორი (Col 2, Row 1) */}
                           <div className="ci-info">
                             <p
                               className="ci-title"
@@ -293,46 +296,45 @@ export function CartSidebar({ isOpen, onClose }) {
                               {item.title}
                             </p>
                             <p className="ci-author">{item.author ?? "—"}</p>
-                          
-                            <div className="ci-meta-group">
-                              <p className="ci-price">{item.price} ₾</p>
-                              {item.listing_type === "first-hand" && (
-                                <div className="qty-stepper">
-                                  <button
-                                    className="qty-btn"
-                                    onClick={() => updateQuantity?.(item.cart_item_id, Math.max(1, (item.quantity ?? 1) - 1))}
-                                    disabled={(item.quantity ?? 1) <= 1}
-                                    aria-label="რაოდენობის შემცირება"
-                                  >
-                                    −
-                                  </button>
-                                  <span className="qty-value">{item.quantity ?? 1}</span>
-                                  <button
-                                    className="qty-btn"
-                                    onClick={() => updateQuantity?.(item.cart_item_id, (item.quantity ?? 1) + 1)}
-                                    aria-label="რაოდენობის გაზრდა"
-                                  >
-                                    +
-                                  </button>
-                                </div>
-                              )}
-                            </div>
                           </div>
 
-                          <div className="ci-right">
-                            <button
-                              className="ci-remove"
-                              onClick={() => removeFromCart(item.cart_item_id)}
-                              title="წაშლა"
-                              aria-label={`${item.title}-ის წაშლა`}
-                            >
-                              ✕
-                            </button>
+                          {/* 3. წაშლის ღილაკი (Col 3, Row 1) */}
+                          <button
+                            className="ci-remove"
+                            onClick={() => removeFromCart(item.cart_item_id)}
+                            title="წაშლა"
+                            aria-label={`${item.title}-ის წაშლა`}
+                          >
+                            ✕
+                          </button>
 
-                            <button className="ci-view-btn" onClick={() => handleViewBook(item.id)}>
-                              ნახვა <ArrowRightIcon />
-                            </button>
+                          {/* 4. ფასი / რაოდენობა (Col 1, Row 2) */}
+                          <div className="ci-meta-group">
+                            <p className="ci-price">{item.price} ₾</p>
+                            {item.listing_type === "first-hand" && (
+                              <div className="ci-qty">
+                                <button
+                                  onClick={() => updateQuantity?.(item.cart_item_id, Math.max(1, (item.quantity ?? 1) - 1))}
+                                  disabled={(item.quantity ?? 1) <= 1}
+                                  aria-label="რაოდენობის შემცირება"
+                                >
+                                  −
+                                </button>
+                                <span>{item.quantity ?? 1}</span>
+                                <button
+                                  onClick={() => updateQuantity?.(item.cart_item_id, (item.quantity ?? 1) + 1)}
+                                  aria-label="რაოდენობის გაზრდა"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            )}
                           </div>
+
+                          {/* 5. ნახვა ღილაკი (Spreads across Col 2 & 3, Row 2) */}
+                          <button className="ci-view-btn" onClick={() => handleViewBook(item.id)}>
+                            ნახვა <ArrowRightIcon />
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -361,7 +363,7 @@ export function CartSidebar({ isOpen, onClose }) {
                     >
                       {checkoutState[group.sellerId] === "loading"
                         ? "იგზავნება..."
-                        : `${group.sellerUsername}-ისგან ${group.items.length} წიგნის ყიდვა`}
+                        : `ყიდვა`}
                     </button>
 
                     {checkoutState[group.sellerId] === "error" && (

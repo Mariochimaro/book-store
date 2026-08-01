@@ -146,6 +146,23 @@ export default function MyListingsTab({ onOpenAddBook }) {
   // ── გამყიდველია — წიგნების ჩამონათვალი (Wishlist-ის სტილში) ──
   return (
     <>
+      <style>{`
+        .book-row-actions {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-left: auto;
+        }
+
+        @media (max-width: 540px) {
+          .book-row-actions {
+            flex-basis: 100%;
+            justify-content: flex-end;
+            margin-left: 0;
+          }
+        }
+      `}
+      </style>
       <div className="pf-listings-header">
         <p className="pf-card-title" style={{ margin: 0 }}>
           <StoreIcon size={15} /> ჩემი წიგნები
@@ -181,7 +198,8 @@ export default function MyListingsTab({ onOpenAddBook }) {
             const cover = book.photos_urls?.[0] ||
               "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=600&fit=crop";
             return (
-              <div key={book.id} style={{ display: "flex", gap: "14px", alignItems: "center",
+              <div key={book.id} className="book-row" style={{
+                display: "flex", gap: "14px", alignItems: "center", flexWrap: "wrap",
                 background: "var(--bg-card)", borderRadius: "8px", padding: "12px" }}>
                 <img src={cover} alt={book.title}
                   style={{ width: "50px", height: "68px", objectFit: "cover", borderRadius: "4px", flexShrink: 0 }} />
@@ -208,25 +226,27 @@ export default function MyListingsTab({ onOpenAddBook }) {
                   )}
                 </div>
 
-                <button onClick={() => handleEditClick(book)}
-                  style={{ background: "none", border: "none", color: "var(--accent)", cursor: "pointer", fontSize: "0.8rem",
-                    display: "flex", alignItems: "center", gap: "4px", whiteSpace: "nowrap" }}
-                  title="რედაქტირება">
-                  <Pencil size={13} /> რედაქტირება
-                </button>
+                <div className="book-row-actions">
+                  <button onClick={() => handleEditClick(book)}
+                    style={{ background: "none", border: "none", color: "var(--accent)", cursor: "pointer", fontSize: "0.8rem",
+                      display: "flex", alignItems: "center", gap: "4px", whiteSpace: "nowrap" }}
+                    title="რედაქტირება">
+                    <Pencil size={13} /> რედაქტირება
+                  </button>
 
-                <button
-                  onClick={() => handlePreviewClick(book)}
-                  style={{ background: "none", border: "none", color: "var(--accent)", cursor: "pointer", fontSize: "0.8rem", whiteSpace: "nowrap" }}
-                >
-                  ნახვა
-                </button>
+                  <button
+                    onClick={() => handlePreviewClick(book)}
+                    style={{ background: "none", border: "none", color: "var(--accent)", cursor: "pointer", fontSize: "0.8rem", whiteSpace: "nowrap" }}
+                  >
+                    ნახვა
+                  </button>
 
-                <button onClick={() => handleDelete(book.id, book.title)} disabled={deletingId === book.id}
-                  style={{ background: "none", border: "none", color: "#fc8181", cursor: "pointer", fontSize: "0.8rem" }}
-                  title="წაშლა">
-                  {deletingId === book.id ? "..." : <Trash2 size={13} />}
-                </button>
+                  <button onClick={() => handleDelete(book.id, book.title)} disabled={deletingId === book.id}
+                    style={{ background: "none", border: "none", color: "#fc8181", cursor: "pointer", fontSize: "0.8rem" }}
+                    title="წაშლა">
+                    {deletingId === book.id ? "..." : <Trash2 size={13} />}
+                  </button>
+                </div>
               </div>
             );
           })}

@@ -108,16 +108,20 @@
 .cart-items::-webkit-scrollbar-track  { background: transparent; }
 .cart-items::-webkit-scrollbar-thumb  { background: var(--border); border-radius: 2px; }
 
-/* Single cart item */
 .ci {
-  display: flex;
-  gap: 14px;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: 62px 1fr auto;
+  grid-template-areas:
+    "img info remove"
+    "price view view";
+  gap: 8px 14px;
+  align-items: start;
   position: relative;
   width: 100%;
 }
 
 .ci-img {
+  grid-area: img;
   width: 62px;
   height: 84px;
   object-fit: cover;
@@ -127,9 +131,9 @@
 }
 
 .ci-info {
+  grid-area: info;
   display: flex;
   flex-direction: column;
-  flex: 1;
   min-width: 0;
   padding-top: 2px;
 }
@@ -147,18 +151,20 @@
 .ci-author {
   font-size: 12px;
   color: var(--text-3);
-  margin-bottom: 17px;
+  margin-bottom: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* On Desktop, meta group sits inline and behaves like an absolute bottom block */
+/* Price & Quantity stepper sit under the picture in column 1 */
 .ci-meta-group {
+  grid-area: price;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  margin-right: auto; 
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin-top: 4px;
 }
 
 .ci-price {
@@ -173,17 +179,15 @@
   margin: 0 0 4px 0;
 }
 
+/* Unlocks container so buttons fall directly into grid areas */
 .ci-right {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-end;
-  flex-shrink: 0;
-  padding-top: 2px;
-  margin-left: 12px;
+  display: contents;
 }
 
 .ci-remove {
+  grid-area: remove;
+  justify-self: end;
+  align-self: start;
   background: none;
   border: none;
   color: var(--text-3);
@@ -191,10 +195,15 @@
   line-height: 1;
   transition: color 0.15s;
   cursor: pointer;
+  padding-top: 2px;
 }
 .ci-remove:hover { color: #ef4444; }
 
 .ci-view-btn {
+  grid-area: view;
+  justify-self: stretch; /* Spreads across columns 2 and 3 */
+  display: flex;
+  align-items: center;
   background: none;
   border: none;
   color: var(--accent, #b87743);
@@ -202,58 +211,8 @@
   font-size: 0.9rem;
   font-weight: 600;
   padding: 0;
-  display: flex;
-  align-items: center;
+  margin-top: 4px;
   white-space: nowrap;
-}
-
-/* =========================================================
-   MOBILE SCREEN GRID ALIGNMENT (Below 600px width)
-   ========================================================= */
-@media (max-width: 600px) {
-  .ci {
-    display: grid;
-    /* Col 1 matches book image width (62px). Col 2 takes remaining space. Col 3 fits buttons. */
-    grid-template-columns: 62px 1fr auto;
-    gap: 8px 14px; /* 8px row gap, 14px column gap */
-    align-items: start;
-  }
-
-  .ci-img {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .ci-info {
-    grid-column: 2;
-    grid-row: 1;
-    /* Removes forced truncate clipping so text flows naturally over full middle area */
-    white-space: normal;
-    overflow: visible;
-  }
-  
-  .ci-title, 
-  .ci-author {
-    white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
-  }
-
-  /* Moves price block directly under the book image column, keeping its 62px width tracking */
-  .ci-meta-group {
-    grid-column: 1;
-    grid-row: 2;
-    margin-top: 2px;
-    align-items: flex-start;
-    text-align: left;
-  }
-
-  .ci-right {
-    grid-column: 3;
-    grid-row: 1 / span 2; /* Spans full card height to keep remove button top and view button bottom */
-    align-self: stretch;
-    margin-left: 0;
-  }
 }
 
 /* Quantity stepper */
@@ -263,6 +222,7 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   overflow: hidden;
+  margin-top: 4px;
 }
 
 .ci-qty button {
@@ -427,31 +387,44 @@
   display: flex;
   flex-direction: column;
 }
+/* Mobile layout (<= 540px): Message spreads all 3, View button stretches across columns 2 & 3 */
 .unavailable-item {
-  display: flex;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  grid-template-areas:
+    "img info remove"
+    "msg msg msg"
+    "price view view";
+  gap: 8px 12px;
+  align-items: center;
   padding: 12px 14px;
   border-top: 1px solid var(--text-3);
   opacity: 0.55;
 }
+
 .unavailable-item-reserved {
   opacity: 1;
   background: var(--background);
 }
+
 .unavailable-item-img {
+  grid-area: img;
   width: 40px;
   height: 56px;
   object-fit: cover;
   border-radius: 6px;
   flex-shrink: 0;
 }
+
 .unavailable-item-img.grayscale {
   filter: grayscale(100%);
 }
-.unavailable-item-info {
-  flex: 1;
+
+.unavailable-item-text {
+  grid-area: info;
   min-width: 0;
 }
+
 .unavailable-item-title {
   font-size: 0.85rem;
   font-weight: 500;
@@ -459,27 +432,69 @@
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--text-3);
+  margin: 0;
 }
+
 .unavailable-item-title.strike {
   text-decoration: line-through;
 }
+
 .unavailable-item-author {
   font-size: 0.75rem;
   color: #6b7280;
+  margin: 0;
 }
+
+.ci-remove {
+  grid-area: remove;
+  justify-self: end;
+  align-self: start;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+}
+
+.unavailable-badge,
+.unavailable-reserved-msg {
+  grid-area: msg;
+  margin: 0;
+}
+
 .unavailable-badge {
   display: inline-block;
-  margin-top: 4px;
   font-size: 0.7rem;
   padding: 2px 8px;
   border-radius: 999px;
-  background: rgba(0,0,0,0.08);
+  background: rgba(0, 0, 0, 0.08);
   color: #6b7280;
+  width: fit-content;
 }
+
 .unavailable-reserved-msg {
-  margin-top: 4px;
   font-size: 0.72rem;
   color: var(--primary);
+}
+
+.unavailable-item-price {
+  grid-area: price;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-3);
+}
+
+/* Desktop layout ( > 540px): View button moves to the 3rd column only */
+@media (min-width: 541px) {
+  .unavailable-item {
+    grid-template-areas:
+      "img info remove"
+      "msg msg msg"
+      "price . view";
+  }
+
+  .ci-view-btn {
+    justify-self: end;
+  }
 }
 .unavailable-item-remove {
   align-self: flex-start;
