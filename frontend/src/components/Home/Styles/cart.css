@@ -21,7 +21,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: min(520px, 64vw);
+  width: min(520px, 74vw);
   background: var(--background);
   border-left: 1px solid var(--border);
   z-index: 2050;

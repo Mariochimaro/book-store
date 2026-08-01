@@ -7,7 +7,7 @@ import { GenreModal }    from "./GenreModal";
 import { useCart }       from "../../context/CartContext";
 import { useAuth }       from "../../context/AuthContext";
 
-const REVEAL_THRESHOLD = 100; // px of upward scroll needed before nav starts reappearing
+const REVEAL_THRESHOLD = 80; // px of upward scroll needed before nav starts reappearing
 
 function Navbar() {
   const [query, setQuery]         = useState("");
@@ -90,6 +90,24 @@ function Navbar() {
     navigate(`/?${searchParams.toString()}`);
   }
 
+  const scrollToSection = (id) => {
+    const tryScroll = (attemptsLeft = 20) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      } else if (attemptsLeft > 0) {
+        setTimeout(() => tryScroll(attemptsLeft - 1), 100);
+      }
+    };
+
+    if (window.location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => tryScroll(), 150);
+    } else {
+      tryScroll();
+    }
+  };
+
   return (
     <>
       <nav ref={navRef} className="nb" role="navigation" aria-label="Main navigation">
@@ -119,7 +137,7 @@ function Navbar() {
             <div className="nb-page-links" role="navigation" aria-label="Page sections">
               <button
                 className="nb-page-link"
-                onClick={() => document.getElementById("popular-section")?.scrollIntoView({ behavior: "smooth" })}
+                onClick={() => scrollToSection("popular-section")}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -131,7 +149,7 @@ function Navbar() {
 
               <button
                 className="nb-page-link"
-                onClick={() => document.getElementById("others-section")?.scrollIntoView({ behavior: "smooth" })}
+                onClick={() => scrollToSection("others-section")}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 24 18" fill="none" stroke="currentColor" 
                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles-icon lucide-sparkles">
@@ -268,17 +286,28 @@ function Navbar() {
               {mobileMenuOpen && (
                 <div className="nb-mobile-dropdown" role="menu">
                   <button
-                    className="nb-mobile-item"
-                    onClick={() => { document.getElementById("popular-section")?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); }}
+                    className="nb-page-link"
+                    onClick={() => { setMobileMenuOpen(false); scrollToSection("popular-section"); }}
                   >
-                    Popular Books
-                  </button>
-                  <button
-                    className="nb-mobile-item"
-                    onClick={() => { document.getElementById("others-section")?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); }}
-                  >
-                    All Books
-                  </button>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                        <polyline points="17 6 23 6 23 12"/>
+                      </svg>
+                      პოპულარული
+                    </button>
+
+                    <button
+                      className="nb-page-link"
+                      onClick={() => { setMobileMenuOpen(false); scrollToSection("others-section"); }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 24 18" fill="none" stroke="currentColor" 
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles-icon lucide-sparkles">
+                        <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/>
+                        <path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/>
+                      </svg>
+                      ყველა წიგნი
+                    </button>
 
                   {isLoggedIn ? (
                     isAdmin ? (

@@ -269,6 +269,6 @@
     position: fixed;
     margin-right: 0;
     top: 0;
-    z-index: 4;
+    z-index: 1004;
   }
 }
