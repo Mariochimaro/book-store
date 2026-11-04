@@ -111,7 +111,6 @@ def get_or_create_cluster(title: str) -> int:
             new_slug_entry = {
                 "cluster_id": cluster_id,
                 "language": lang,
-                "title": title,
                 "slug": loc_slug
             }
             supabase.table("book_cluster_slugs").insert(new_slug_entry).execute()

@@ -443,7 +443,7 @@ async def edit_book_video(
 
     # 2. წიგნის განახლება ბაზაში და სტატუსის ჩამოყრა (რადგან მედია ფაილია, სჭირდება ადმინის რევიუ)
     update_data = {
-        "photos_urls": new_photos_urls,
+        "book_video_url": uploaded_video_url,
         "status": "pending",
         "is_approved": False,
         "rejection_reason": None
