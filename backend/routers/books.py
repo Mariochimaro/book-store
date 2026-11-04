@@ -4,10 +4,11 @@ from typing import Optional
 from database import supabase
 from routers.auth import get_current_user, require_admin, ensure_profile_complete
 from dependencies import get_optional_current_user
-from utils import search_match, sort_books_by_genres, text_similarity, get_or_create_cluster
+from utils import search_match, sort_books_by_genres, text_similarity
 from services.recommendations.manager import get_best_recommendations
 import services.recommendations.affinity as affinity
 from services.recommendations.content_related import get_content_based_related_books
+from services.recommendations.clustering import get_or_create_cluster
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime, timezone
@@ -189,13 +190,11 @@ async def upload_book(
             unique_name = f"{uuid.uuid4()}.{file_ext}"
             file_bytes = await photo.read()
             
-            # ვტვირთავთ book-images ბაკეტში
             supabase.storage.from_("book-images").upload(
                 path=unique_name,
                 file=file_bytes,
                 file_options={"content-type": photo.content_type}
             )
-            # ვიღებთ ლინკს
             public_url = supabase.storage.from_("book-images").get_public_url(unique_name)
             uploaded_photos_urls.append(public_url)
         except Exception as e:
@@ -209,7 +208,6 @@ async def upload_book(
             unique_name = f"{uuid.uuid4()}.{file_ext}"
             file_bytes = await video.read()
             
-            # ვტვირთავთ book-videos ბაკეტში
             supabase.storage.from_("book-videos").upload(
                 path=unique_name,
                 file=file_bytes,
@@ -222,8 +220,7 @@ async def upload_book(
     # --- ჟანრების სტრინგის მასივად ქცევა ---
     genres_list = [g.strip() for g in genres.split(",")]
 
-    # --- კლასტერის განსაზღვრა/შექმნა ---
-    # ამას ვაკეთებთ ატვირთვის მომენტში
+    # --- კლასტერის განსაზღვრა/შექმნა (აქ გამოიძახება ჩვენი ფუნქცია პრინტებით) ---
     cluster_id = get_or_create_cluster(title)
 
     # --- მონაცემების მომზადება ბაზისთვის ---

@@ -19,7 +19,7 @@ def create_english_slug(text: str) -> str:
     clean = text.lower().strip()
     slug = re.sub(r'[^a-z0-9]+', '-', clean).strip('-')
     final_slug = slug or "unknown-book"
-    print(f"🔤 [create_english_slug] წყარო: '{text}' | ინგლისური სლაგი: '{final_slug}'")
+    print(f"🔤 [create_english_slug] წყარო: '{text}' | ინგლისური სლაგი: '{final_slug}'", flush=True)
     return final_slug
 
 def create_localized_slug(text: str) -> str:
@@ -28,7 +28,7 @@ def create_localized_slug(text: str) -> str:
     slug = re.sub(r'[^\w\s-]+', '', clean)
     slug = re.sub(r'[\s_]+', '-', slug).strip('-')
     final_slug = slug or "book"
-    print(f"🌐 [create_localized_slug] წყარო: '{text}' | ენობრივი სლაგი: '{final_slug}'")
+    print(f"🌐 [create_localized_slug] წყარო: '{text}' | ენობრივი სლაგი: '{final_slug}'", flush=True)
     return final_slug
 
 def get_or_create_cluster(title: str) -> int:
@@ -53,7 +53,7 @@ def get_or_create_cluster(title: str) -> int:
         
         if existing_loc.data:
             cluster_id = existing_loc.data[0]["cluster_id"]
-            print(f"✅ [DB] ნაპოვნია არსებული ენობრივი სლაგი ('{loc_slug}'). კლასტერის ID: {cluster_id}")
+            print(f"✅ [DB] ნაპოვნია არსებული ენობრივი სლაგი ('{loc_slug}'). კლასტერის ID: {cluster_id}", flush=True)
             return cluster_id
     except Exception as e:
         print(f"⚠️ book_cluster_slugs-ში ძებნის შეცდომა: {e}")
@@ -68,9 +68,9 @@ def get_or_create_cluster(title: str) -> int:
             translated_title = GoogleTranslator(source='auto', target='en').translate(title)
             if not translated_title:
                 translated_title = title
-            print(f"🌍 [Translate] ნათარგმნი სათაური: '{translated_title}'")
+            print(f"🌍 [Translate] ნათარგმნი სათაური: '{translated_title}'", flush=True)
         except Exception as e:
-            print(f"⚠️ თარგმანის შეცდომა ({e}), ვიყენებთ ორიგინალს.")
+            print(f"⚠️ თარგმანის შეცდომა ({e}), ვიყენებთ ორიგინალს.", flush=True)
             translated_title = title
 
     en_slug = create_english_slug(translated_title)
@@ -89,9 +89,8 @@ def get_or_create_cluster(title: str) -> int:
 
         if existing_cluster.data:
             cluster_id = existing_cluster.data[0]["id"]
-            print(f"✅ [DB] მთავარი ინგლისური კლასტერი უკვე არსებობს. ID: {cluster_id} (სლაგი: '{en_slug}')")
+            print(f"✅ [DB] მთავარი ინგლისური კლასტერი უკვე არსებობს. ID: {cluster_id} (სლაგი: '{en_slug}')", flush=True)
         else:
-            # თუ ინგლისური კლასტერი არ არსებობს, შევქმნათ
             new_cluster = {
                 "canonical_title": canonical_title,
                 "slug": en_slug
@@ -99,15 +98,14 @@ def get_or_create_cluster(title: str) -> int:
             inserted = supabase.table("book_clusters").insert(new_cluster).execute()
             if inserted.data:
                 cluster_id = inserted.data[0]["id"]
-                print(f"✨ [DB] შევქმენი ახალი მთავარი კლასერი! ID: {cluster_id} | სათაური: '{canonical_title}' | სლაგი: '{en_slug}'")
+                print(f"✨ [DB] შევქმენი ახალი მთავარი კლასტერი! ID: {cluster_id} | სათაური: '{canonical_title}' | სლაგი: '{en_slug}'", flush=True)
 
     except Exception as db_err:
-        print(f"⚠️ book_clusters-ის შეცდომა: {db_err}")
-        # თუ პარალელური მოთხოვნისას შეცდომა მოხდა, თავიდან გადავამოწმოთ
+        print(f"⚠️ book_clusters-ის შეცდომა: {db_err}", flush=True)
         fallback = supabase.table("book_clusters").select("id").eq("slug", en_slug).execute()
         if fallback.data:
             cluster_id = fallback.data[0]["id"]
-            print(f"🔄 [DB Fallback] კლასტერი მოიძებნა ფოლბექით. ID: {cluster_id}")
+            print(f"🔄 [DB Fallback] კლასტერი მოიძებნა ფოლბექით. ID: {cluster_id}", flush=True)
 
     if not cluster_id:
         raise Exception("კლასტერის ID-ს გენერირება ვერ მოხერხდა.")
@@ -116,7 +114,6 @@ def get_or_create_cluster(title: str) -> int:
     # 4. ვამატებთ ენობრივ ჩანაწერს book_cluster_slugs-ში
     # -------------------------------------------------------------
     try:
-        # შევამოწმოთ ხომ არ არსებობს უკვე (cluster_id, language) წყვილი
         existing_entry = supabase.table("book_cluster_slugs") \
             .select("id") \
             .eq("cluster_id", cluster_id) \
@@ -130,9 +127,9 @@ def get_or_create_cluster(title: str) -> int:
                 "slug": loc_slug
             }
             supabase.table("book_cluster_slugs").insert(new_slug_entry).execute()
-            print(f"➕ [DB] დავამატე ახალი ენობრივი სლაგი book_cluster_slugs-ში (ენა: {lang}, სლაგი: '{loc_slug}')")
+            print(f"➕ [DB] დავამატე ახალი ენობრივი სლაგი book_cluster_slugs-ში (ენა: {lang}, სლაგი: '{loc_slug}')", flush=True)
         else:
-            print(f"ℹ️ [DB] ენობრივი სლაგი ამ ენისთვის ('{lang}') უკვე არსებობს ბაზაში.")
+            print(f"ℹ️ [DB] ენობრივი სლაგი ამ ენისთვის ('{lang}') უკვე არსებობს ბაზაში.", flush=True)
             
     except Exception as loc_err:
         print(f"⚠️ book_cluster_slugs-ში ჩაწერის შეცდომა: {loc_err}")

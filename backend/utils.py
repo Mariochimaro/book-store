@@ -98,7 +98,7 @@ def text_similarity(str1: str, str2: str) -> float:
         return 0.0
     return difflib.SequenceMatcher(None, str1, str2).ratio()
 
-def get_or_create_cluster(title: str) -> int:
+def title_cluster(title: str) -> int:
     # 1. ვიღებთ ყველა არსებულ კლასტერს
     response = supabase.table("book_clusters").select("*").execute()
     clusters = response.data
