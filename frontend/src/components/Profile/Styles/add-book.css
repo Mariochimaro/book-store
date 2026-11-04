@@ -45,6 +45,7 @@
   font-size: 14px;
   font-weight: 500;
   transition: background 0.15s, color 0.15s;
+  margin-bottom: 20px;
 }
 
 .modal-btn-ghost:hover {
@@ -57,6 +58,7 @@
   flex: 1;
   padding: 13px;
 }
+
 
 /* ── Modal error message ── */
 .modal-error {
@@ -215,3 +217,101 @@ select.modal-inp { cursor: pointer; }
 
 .ab-spin { animation: ab-spin 0.8s linear infinite; }
 @keyframes ab-spin { to { transform: rotate(360deg); } }
+
+
+/* ============================================================================================================================================
+   Add Book Modal: responsive (paste at the END of the stylesheet so it overrides the base rules)
+   ============================================================================================================================================ */
+
+/* ── Tablets and small laptops ── */
+@media (max-width: 760px) {
+  .ab-card {
+    width: 94vw;
+    max-height: 92vh;
+    max-height: 92dvh;          /* accounts for mobile browser toolbars */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain; /* stops the page behind from scrolling */
+  }
+}
+
+/* ── Phones ── */
+@media (max-width: 520px) {
+  /* Card becomes a near-full-width sheet */
+  .ab-card {
+    width: 100%;
+    max-width: 100%;
+    max-height: 94vh;
+    max-height: 94dvh;
+    padding: 20px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+    border-radius: 16px;
+  }
+
+  /* Two-column form grid collapses to one column */
+  .ab-grid2 {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .ab-span2 { grid-column: auto; }
+
+  /* Inputs at 16px prevent iOS Safari from zooming on focus */
+  .modal-inp,
+  .modal-textarea,
+  select.modal-inp,
+  .ab-search-input {
+    font-size: 16px;
+  }
+  .modal-textarea { min-height: 96px; }
+
+  /* Photos: 3 per row */
+  .ab-photo-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .ab-photo-remove {
+    width: 28px;
+    height: 28px;
+    top: 4px;
+    right: 4px;
+  }
+  .ab-add-tile { font-size: 11px; }
+
+  /* Video row: bigger tap area, allow wrapping */
+  .ab-video-box { padding: 16px 12px; }
+  .ab-video-set {
+    flex-wrap: wrap;
+    padding: 12px;
+  }
+  .ab-video-name { max-width: 100%; }
+  .ab-video-remove { padding: 6px 4px; }
+
+  /* Genres: taller scroll area and easier-to-tap chips */
+  .ab-genre-box { max-height: 160px; }
+  .ab-genre-chip {
+    padding: 6px 12px;
+    font-size: 12.5px;
+  }
+  .ab-genre-chip button { padding: 4px; margin: -4px -4px -4px 0; }
+
+  /* Buttons: stacked full width, primary action on top */
+  .modal-btn-row {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+  .modal-btn-ghost,
+  .modal-btn-grow {
+    flex: none;
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+  }
+  .modal-btn-ghost { margin-bottom: 0; }
+
+  .modal-error { font-size: 13px; }
+}
+
+/* ── Touch devices: no sticky hover states ── */
+@media (hover: none) {
+  .ab-add-tile:hover { border-color: var(--border); color: var(--text-3); }
+  .ab-video-box:hover { border-color: var(--border); color: var(--text-3); }
+  .modal-btn-ghost:hover { background: transparent; color: var(--text-2); }
+}
